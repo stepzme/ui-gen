@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Cell } from "@/components/ui/cell";
-import { Badge } from "@/components/ui/badge";
-import { Text } from "@/components/ui/text";
+import { Button } from "@/components/button";
+import { Input } from "@/components/input";
+import { Cell } from "@/components/cell";
+import { Badge } from "@/components/badge";
+import { Text } from "@/components/text";
 import { componentDefinitions, getCategoryIcon, getCategoryColor } from "@/lib/component-definitions";
 
 interface ComponentsPanelProps {

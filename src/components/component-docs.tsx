@@ -1,10 +1,10 @@
 "use client"
 
 import { ComponentDocumentation } from "@/lib/component-docs/types"
-import { Text } from "@/components/ui/text"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Text } from "@/components/text"
+import { Badge } from "@/components/badge"
+import { Separator } from "@/components/separator"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/collapsible"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { useState } from "react"
 

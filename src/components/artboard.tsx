@@ -3,9 +3,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { Monitor, Smartphone, Settings, Trash2, Move, ChevronUp, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Text } from "@/components/ui/text";
+import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
+import { Text } from "@/components/text";
 import { Artboard, SelectedElement } from "@/types/page-builder";
 import { ComponentRenderer } from "./component-renderer";
 import { componentDefinitions } from "@/lib/component-definitions";

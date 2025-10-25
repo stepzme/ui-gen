@@ -1,15 +1,15 @@
 "use client";
 
 import { Settings, Monitor, Smartphone } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Text } from "@/components/ui/text";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/label";
+import { Input } from "@/components/input";
+import { Textarea } from "@/components/textarea";
+import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
+import { Separator } from "@/components/separator";
+import { Text } from "@/components/text";
+import { Switch } from "@/components/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/select";
 import { ComponentDocs } from "@/components/component-docs";
 import { componentDocsConfig } from "@/lib/component-docs/config";
 import { SelectedElement, ComponentNode, Artboard } from "@/types/page-builder";

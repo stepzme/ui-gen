@@ -1,14 +1,14 @@
 import { ComponentDefinition } from "@/types/page-builder";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Text } from "@/components/ui/text";
-import { Cell } from "@/components/ui/cell";
-import { Image } from "@/components/ui/image";
+import { Button } from "@/components/button";
+import { Input } from "@/components/input";
+import { Label } from "@/components/label";
+import { Textarea } from "@/components/textarea";
+import { Badge } from "@/components/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { Separator } from "@/components/separator";
+import { Text } from "@/components/text";
+import { Cell } from "@/components/cell";
+import { Image } from "@/components/image";
 import { 
   MousePointer2, 
   Layout, 

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Text } from "@/components/ui/text";
+import { Text } from "@/components/text";
 import { componentDefinitions } from "@/lib/component-definitions";
 import { generateComponentSandbox, type SandboxSection } from "@/lib/component-sandbox-config";
 

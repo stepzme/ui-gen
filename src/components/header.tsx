@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
+import { Button } from "@/components/button";
+import { Text } from "@/components/text";
 
 interface HeaderProps {
   activeTab: 'builder' | 'sandbox';

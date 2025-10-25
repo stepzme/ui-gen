@@ -1,0 +1,20 @@
+import type { SandboxSection } from "@/lib/component-sandbox-config";
+
+export const switchSandboxConfig = {
+  generateVariants: (component: any): SandboxSection[] => {
+    // TODO: Implement sandbox variants for switch
+    return [
+      {
+        title: 'Basic Variants',
+        variants: [
+          {
+            label: 'Default',
+            props: {
+              ...component.defaultProps
+            }
+          }
+        ]
+      }
+    ];
+  }
+};
