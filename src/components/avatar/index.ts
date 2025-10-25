@@ -1,2 +1,2 @@
-export { Avatar } from "./avatar";
+export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 export { avatarSandboxConfig } from "./sandbox.config";
