@@ -5,8 +5,8 @@ import { Button } from "@/components/button";
 import { Text } from "@/components/text";
 
 interface HeaderProps {
-  activeTab: 'builder' | 'sandbox';
-  onTabChange: (tab: 'builder' | 'sandbox') => void;
+  activeTab: 'builder' | 'sandbox' | 'flow';
+  onTabChange: (tab: 'builder' | 'sandbox' | 'flow') => void;
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
