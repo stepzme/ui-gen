@@ -13,11 +13,14 @@ import ReactFlow, {
   NodeProps,
   ReactFlowProvider,
   useReactFlow,
+  Handle,
+  Position,
+  EdgeProps,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import { Artboard } from '@/types/page-builder';
-import { Monitor, Smartphone } from 'lucide-react';
+import { Monitor, Smartphone, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/components/button';
 import { ArtboardComponent } from './artboard';
 
@@ -52,6 +55,17 @@ function ArtboardNode({ data, selected }: NodeProps) {
       }}
       onClick={(e) => e.stopPropagation()}
     >
+      {/* Handle для исходящих связей */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
+          background: '#555',
+          width: '12px',
+          height: '12px',
+        }}
+      />
+      
       <ArtboardComponent
         artboard={artboard}
         canvasTransform={{ x: 0, y: 0, scale: 1 }}
@@ -66,6 +80,17 @@ function ArtboardNode({ data, selected }: NodeProps) {
         onStartEditing={handlers?.onStartEditing}
         onSaveEditing={handlers?.onSaveEditing}
         onCancelEditing={handlers?.onCancelEditing}
+      />
+      
+      {/* Handle для входящих связей */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{
+          background: '#555',
+          width: '12px',
+          height: '12px',
+        }}
       />
     </div>
   );
@@ -165,8 +190,32 @@ function FlowCanvasInner({
     [artboards, onSelectElement]
   );
 
+  // Zoom handlers
+  const handleZoomIn = () => reactFlowInstance.zoomIn();
+  const handleZoomOut = () => reactFlowInstance.zoomOut();
+
   return (
     <div className="w-full h-full">
+      {/* Controls */}
+      <div className="absolute top-4 left-4 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
+        <Button
+          onClick={handleZoomOut}
+          variant="secondary"
+          semantic="default"
+          size="sm"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        <Button
+          onClick={handleZoomIn}
+          variant="secondary"
+          semantic="default"
+          size="sm"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+      </div>
+
       {/* Add Artboard Buttons */}
       {onAddArtboard && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
@@ -207,7 +256,9 @@ function FlowCanvasInner({
         minZoom={0.1}
         maxZoom={2}
         nodesDraggable={true}
-        nodesConnectable={false}
+        nodesConnectable={true}
+        // Настройки для соединения
+        connectionLineStyle={{ stroke: '#888', strokeWidth: 2 }}
       >
         <Background color="#aaa" gap={20} />
         <MiniMap />
