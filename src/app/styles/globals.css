@@ -7,7 +7,7 @@
 /* Определение шрифта OmegaUI */
 @font-face {
   font-family: 'omegaUI';
-  src: url('../assets/fonts/OmegaUI-Regular.woff2') format('woff2');
+  src: url('../../assets/fonts/OmegaUI-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -15,7 +15,7 @@
 
 @font-face {
   font-family: 'omegaUI';
-  src: url('../assets/fonts/OmegaUI-Medium.woff2') format('woff2');
+  src: url('../../assets/fonts/OmegaUI-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -23,7 +23,7 @@
 
 @font-face {
   font-family: 'omegaUI';
-  src: url('../assets/fonts/OmegaUI-DemiBold.woff2') format('woff2');
+  src: url('../../assets/fonts/OmegaUI-DemiBold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -31,7 +31,7 @@
 
 @font-face {
   font-family: 'omegaUI';
-  src: url('../assets/fonts/OmegaUI-Bold.woff2') format('woff2');
+  src: url('../../assets/fonts/OmegaUI-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -440,7 +440,7 @@
 
 @layer base {
   * {
-    @apply border-border-primary outline-ring-primary/50;
+    @apply border-border-info ring-ring-info;
   }
   body {
     @apply bg-background-primary text-foreground-primary;

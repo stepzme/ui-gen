@@ -8,7 +8,7 @@ import { Badge } from "@/components/badge";
 import { Text } from "@/components/text";
 import { Artboard, SelectedElement } from "@/types/page-builder";
 import { ArtboardComponent } from "./artboard";
-import { componentDefinitions } from "@/lib/component-definitions";
+// import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 
 interface CanvasProps {
   artboards: Artboard[];
@@ -31,6 +31,7 @@ interface CanvasProps {
 }
 
 export function Canvas({ artboards, onAddArtboard, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, onDeselectElement, editingElement, onStartEditing, onSaveEditing, onCancelEditing }: CanvasProps) {
+  // const { componentDefinitions } = useComponentDefinitions();
   const [canvasTransform, setCanvasTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -248,7 +249,7 @@ export function Canvas({ artboards, onAddArtboard, onSelectElement, selectedElem
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-100 flex items-center gap-2">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
 
           {/* Add Artboard Buttons */}
           <div className="flex gap-2 rounded-lg">
@@ -280,11 +281,12 @@ export function Canvas({ artboards, onAddArtboard, onSelectElement, selectedElem
             transformOrigin: '0 0',
           }}
         >
-            <div className="space-y-6">
+            <div>
               {artboards.map(artboard => (
                 <ArtboardComponent
                   key={artboard.id}
                   artboard={artboard}
+                  canvasTransform={canvasTransform}
                   onSelectElement={onSelectElement}
                   selectedElement={selectedElement}
                   onDeleteElement={onDeleteElement}

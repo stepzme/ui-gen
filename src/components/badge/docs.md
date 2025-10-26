@@ -1,6 +1,7 @@
 # Badge Component
+**Category:** Базовые
 
-A versatile badge component for displaying status, labels, and interactive elements.
+Бейдж — это компактный элемент интерфейса, используемый для отображения статусов, меток и категорий. Компонент поддерживает семантические цвета и интерактивные состояния, что делает его универсальным инструментом для визуальной индикации информации и интерактивного выбора.
 
 ## Features
 
@@ -37,28 +38,55 @@ import { Badge } from "@/components/badge/badge"
 | `onActiveChange` | `(active: boolean) => void` | - | Callback when active state changes |
 | `asChild` | `boolean` | `false` | Render as child component |
 | `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Badge content |
 
-## Examples
+## Semantic Colors
 
-### Semantic Variants
-
+### Default
 ```tsx
 <Badge semantic="default">Default</Badge>
+```
+
+### Accent
+```tsx
 <Badge semantic="accent">Accent</Badge>
+```
+
+### Success
+```tsx
 <Badge semantic="success">Success</Badge>
+```
+
+### Warning
+```tsx
 <Badge semantic="warning">Warning</Badge>
+```
+
+### Info
+```tsx
 <Badge semantic="info">Info</Badge>
+```
+
+### Critical
+```tsx
 <Badge semantic="critical">Critical</Badge>
 ```
 
-### Active States
+## States
 
+### Active
 ```tsx
 <Badge active={true}>Active</Badge>
+```
+
+### Inactive
+```tsx
 <Badge active={false}>Inactive</Badge>
 ```
 
-### Interactive Badges
+### Interactive
+
+Interactive badges can be clicked to toggle their active state.
 
 ```tsx
 <Badge 
@@ -69,12 +97,27 @@ import { Badge } from "@/components/badge/badge"
 </Badge>
 ```
 
-### With Icons
+## Examples
 
+### With Icons
 ```tsx
 <Badge semantic="success">
   <CheckIcon className="w-3 h-3" />
   Verified
+</Badge>
+```
+
+### As Filter Tag
+```tsx
+<Badge interactive semantic="accent" active={false}>
+  Design
+</Badge>
+```
+
+### As Status Indicator
+```tsx
+<Badge semantic="success" active={true}>
+  Published
 </Badge>
 ```
 
@@ -84,6 +127,7 @@ import { Badge } from "@/components/badge/badge"
 - Proper ARIA roles and attributes
 - Focus management for screen readers
 - Color contrast meets WCAG guidelines
+- Screen reader announcements for state changes
 
 ## Styling
 
@@ -96,7 +140,9 @@ The badge uses CSS custom properties for theming and supports all semantic color
 ## Best Practices
 
 1. Use semantic variants to convey meaning
-2. Keep badge text concise
-3. Use interactive badges sparingly
-4. Ensure sufficient color contrast
-5. Test with screen readers
+2. Keep badge text concise (1-2 words)
+3. Use interactive badges for filters and selections
+4. Ensure sufficient color contrast for readability
+5. Test with keyboard navigation
+6. Use active states to indicate selected items
+7. Combine with icons for better visual communication

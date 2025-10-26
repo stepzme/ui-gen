@@ -1,4 +1,4 @@
-import PageBuilder from "@/components/page-builder";
+import PageBuilder from "@/ui/page-builder";
 
 export default function Home() {
   return <PageBuilder />;

@@ -50,6 +50,7 @@ export interface TextProps
   as?: React.ElementType
   bPadding?: number
   tPadding?: number
+  content?: string
 }
 
 const Text = React.forwardRef<HTMLElement, TextProps>(
@@ -62,6 +63,8 @@ const Text = React.forwardRef<HTMLElement, TextProps>(
     bPadding, 
     tPadding, 
     style,
+    content = "Sample text",
+    children,
     ...props 
   }, ref) => {
     const Component = as || (size?.startsWith('h') ? size : 'p') as React.ElementType
@@ -78,7 +81,9 @@ const Text = React.forwardRef<HTMLElement, TextProps>(
         className={cn(textVariants({ size, weight, textColor, className }))}
         style={customStyle}
         {...props}
-      />
+      >
+        {children || content}
+      </Component>
     )
   }
 )

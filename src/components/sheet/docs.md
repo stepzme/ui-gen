@@ -1,34 +1,99 @@
 # Sheet Component
+**Category:** Наложения
 
-A sheet component for the design system.
+Sheet — это боковая панель, которая выезжает с любой стороны экрана. Похож на диалог, но занимает меньше места и лучше подходит для мобильных устройств. Идеально подходит для меню, фильтров и дополнительного контента.
+
+## Features
+
+- **Side panel**: Slides in from any side
+- **Multiple sides**: Top, right, bottom, left
+- **Focus management**: Traps focus within sheet
+- **Accessibility**: Full keyboard and screen reader support
+- **Mobile-friendly**: Optimized for touch devices
 
 ## Usage
 
 ```tsx
-import { Sheet } from "@/components/sheet/sheet"
+import { 
+  Sheet, 
+  SheetTrigger, 
+  SheetContent,
+  SheetHeader,
+  SheetTitle 
+} from "@/components/sheet/sheet"
 
 <Sheet>
-  Content
+  <SheetTrigger>Open Sidebar</SheetTrigger>
+  <SheetContent>
+    <SheetHeader>
+      <SheetTitle>Sidebar Title</SheetTitle>
+    </SheetHeader>
+    <p>Content</p>
+  </SheetContent>
 </Sheet>
 ```
 
-## Props
+## Components
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `className` | `string` | - | Additional CSS classes |
+### Sheet
+Root component that manages the sheet state.
+
+### SheetTrigger
+Button that opens the sheet.
+
+### SheetContent
+Main content container.
+
+### SheetHeader
+Header section.
+
+### SheetTitle
+Title of the sheet.
+
+### SheetDescription
+Description text.
+
+### SheetFooter
+Footer section for actions.
 
 ## Examples
 
-### Basic Usage
+### Right Side
 ```tsx
 <Sheet>
-  Basic sheet
+  <SheetTrigger>Menu</SheetTrigger>
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>Navigation</SheetTitle>
+    </SheetHeader>
+    <nav>Menu items</nav>
+  </SheetContent>
+</Sheet>
+```
+
+### Left Side
+```tsx
+<Sheet>
+  <SheetTrigger>Filters</SheetTrigger>
+  <SheetContent side="left">
+    Filter options
+  </SheetContent>
 </Sheet>
 ```
 
 ## Accessibility
 
+- Focus trap within sheet
+- ESC key closes sheet
+- Screen reader announcements
 - Proper ARIA attributes
 - Keyboard navigation support
-- Screen reader compatibility
+
+## Best Practices
+
+1. Choose appropriate side based on content
+2. Provide clear title and structure
+3. Include close button
+4. Consider mobile interactions
+5. Test with keyboard navigation
+6. Keep content organized and scannable

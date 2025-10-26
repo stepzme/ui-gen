@@ -1,20 +1,29 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { Label } from "@/components/label/label"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+interface InputProps extends React.ComponentProps<"input"> {
+  placeholder?: string
+  label?: string
+}
+
+function Input({ className, type, placeholder = "Enter text...", label, ...props }: InputProps) {
   return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "file:text-foreground-primary placeholder:text-foreground-secondary selection:bg-background-secondary selection:text-primary-foreground dark:bg-input/20 h-9 w-full min-w-0 rounded-md bg-background-secondary px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-foreground",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
-      )}
-      {...props}
-    />
+    <div>
+      {label && <Label htmlFor={props.id}>{label}</Label>}
+      <input
+        type={type}
+        data-slot="input"
+        placeholder={placeholder}
+        className={cn(
+          "file:text-foreground-primary placeholder:text-foreground-secondary selection:bg-background-secondary selection:text-foreground-primary h-9 w-full rounded-md bg-background-secondary/50 px-3 py-1 text-base transition-[color] file:inline-flex file:h-9 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-foreground-primary",
+          "aria-invalid:ring-ring-error dark:aria-invalid:ring-ring-error aria-invalid:border-border-error",
+          className
+        )}
+        {...props}
+      />
+    </div>
   )
 }
 

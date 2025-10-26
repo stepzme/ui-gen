@@ -8,10 +8,11 @@ import { Badge } from "@/components/badge";
 import { Text } from "@/components/text";
 import { Artboard, SelectedElement } from "@/types/page-builder";
 import { ComponentRenderer } from "./component-renderer";
-import { componentDefinitions } from "@/lib/component-definitions";
+import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 
 interface ArtboardComponentProps {
   artboard: Artboard;
+  canvasTransform?: { x: number; y: number; scale: number };
   onSelectElement: (element: SelectedElement) => void;
   selectedElement: SelectedElement | null;
   onDeleteElement?: (elementId: string) => void;
@@ -28,15 +29,18 @@ interface ArtboardComponentProps {
   onCancelEditing?: () => void;
 }
 
-export function ArtboardComponent({ artboard, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing }: ArtboardComponentProps) {
+export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing }: ArtboardComponentProps) {
+  const { componentDefinitions } = useComponentDefinitions();
   const { isOver, setNodeRef } = useDroppable({
     id: `artboard-${artboard.id}`,
   });
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const artboardRef = useRef<HTMLDivElement>(null);
+  
+  // Используем позицию из артборда или значения по умолчанию
+  const position = artboard.position || { x: 300, y: 300 };
 
   const isSelected = selectedElement?.type === 'artboard' && selectedElement.id === artboard.id;
 
@@ -46,7 +50,11 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
       type: 'artboard',
       id: artboard.id,
       name: artboard.name,
-      status: artboard.status
+      status: artboard.status,
+      artboardType: artboard.type,
+      width: artboard.width,
+      height: artboard.height,
+      autoHeight: artboard.autoHeight
     });
   };
 
@@ -57,9 +65,15 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+      // Calculate the actual screen position of the artboard accounting for canvas transform
+      const screenArtboardX = canvasTransform.x + position.x * canvasTransform.scale;
+      const screenArtboardY = canvasTransform.y + position.y * canvasTransform.scale;
+      // Calculate offset from mouse to artboard origin in canvas space
+      const offsetX = (e.clientX - screenArtboardX) / canvasTransform.scale;
+      const offsetY = (e.clientY - screenArtboardY) / canvasTransform.scale;
+      setDragStart({ x: offsetX, y: offsetY });
     }
-  }, [position]);
+  }, [position.x, position.y, canvasTransform.x, canvasTransform.y, canvasTransform.scale]);
 
 
   const handleMouseUp = useCallback(() => {
@@ -71,11 +85,14 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (isDragging && onMoveArtboard) {
         e.preventDefault();
+        // Convert mouse screen position to canvas position accounting for canvas transform
+        const canvasMouseX = (e.clientX - canvasTransform.x) / canvasTransform.scale;
+        const canvasMouseY = (e.clientY - canvasTransform.y) / canvasTransform.scale;
+        // Calculate new position in canvas space
         const newPosition = {
-          x: e.clientX - dragStart.x,
-          y: e.clientY - dragStart.y
+          x: canvasMouseX - dragStart.x,
+          y: canvasMouseY - dragStart.y
         };
-        setPosition(newPosition);
         onMoveArtboard(artboard.id, newPosition.x, newPosition.y);
       }
     };
@@ -93,7 +110,7 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDragging, dragStart, artboard.id, onMoveArtboard]);
+  }, [isDragging, dragStart, artboard.id, onMoveArtboard, canvasTransform.x, canvasTransform.y, canvasTransform.scale]);
 
   return (
     <div 
@@ -107,25 +124,25 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
       {/* Artboard Header */}
       <div 
         data-artboard-header
-        className={`flex items-center gap-1 mb-1 px-3 py-1 border-1 rounded-lg hover:bg-background-primary transition-colors cursor-pointer ${
-          isSelected ? 'border-1 border-border-brand bg-background-primary' : 'border-transparent'
+        className={`flex items-center gap-1 mb-1 px-3 py-2 border-1 rounded-lg hover:bg-background-primary transition-colors cursor-pointer ${
+          isSelected ? 'border-1 border-border-info bg-background-primary' : 'border-transparent'
         }`}
         style={{ width: artboard.width }}
         onClick={handleArtboardClick}
       >
-        <Text size="h6" weight="medium" className="w-full">{artboard.name}</Text>
+        <Text size="footnote" weight="medium" className="w-full">{artboard.name}</Text>
         <Badge 
-          variant={artboard.status === 'published' ? 'primary' : 
+          semantic={artboard.status === 'published' ? 'accent' : 
                   artboard.status === 'approved' ? 'success' : 
-                  artboard.status === 'review' ? 'warning' : 'secondary'}
-          accent={false}
+                  artboard.status === 'review' ? 'warning' : 'default'}
+          active={false}
           className="text-xs"
         >
           {artboard.status}
         </Badge>
         {onDeleteElement && (
           <Button
-            variant="ghost"
+            variant="text"
             semantic="critical"
             size="sm"
             onClick={(e) => {
@@ -144,14 +161,14 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
         ref={setNodeRef}
         className={`
           relative border border-dashed border-border-primary rounded-lg transition-colors
-          ${isOver ? 'border-border-critical' : 'border-border-brand'}
-          ${isSelected ? 'border-border-critical' : 'border-border-brand'}
+          ${isOver ? 'border-border-critical' : 'border-border-info'}
+          ${isSelected ? 'border-border-critical' : 'border-border-info'}
         `}
         style={{
           width: artboard.width,
-          height: artboard.height,
+          height: artboard.autoHeight ? 'auto' : artboard.height,
           minWidth: artboard.width,
-          minHeight: artboard.height,
+          minHeight: artboard.autoHeight ? undefined : artboard.height,
         }}
         onClick={handleArtboardClick}
       >
@@ -272,7 +289,7 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
                   
                   {/* Selection indicator - simplified */}
                   {isChildSelected && (
-                    <div className="absolute -m-2 inset-0 border-2 border-blue-500 rounded-xl pointer-events-none" />
+                    <div className="absolute -m-2 inset-0 border-2 border-border-info rounded-xl pointer-events-none" />
                   )}
                 </div>
               );
@@ -282,7 +299,7 @@ export function ArtboardComponent({ artboard, onSelectElement, selectedElement, 
 
         {/* Drop indicator */}
         {isOver && (
-          <div className="absolute inset-0 bg-primary/10 border border-blue-500 border-dashed rounded-lg flex items-center justify-center">
+          <div className="absolute inset-0 bg-primary/10 border border-border-info border-dashed rounded-lg flex items-center justify-center">
             <Text size="body" textColor="primary" weight="medium">Drop component here</Text>
           </div>
         )}

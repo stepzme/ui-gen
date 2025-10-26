@@ -1,5 +1,5 @@
 import type { ComponentDefinition } from "@/types/page-builder";
-import { componentDefinitions } from "./component-definitions";
+// import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 
 export interface SandboxVariant {
   label: string;
@@ -78,10 +78,10 @@ const componentSandboxConfigs: Record<string, SandboxConfig> = {
         title: 'Sizes',
         variants: sizes.map(size => ({
           label: size === 'default' ? 'Default' : size.toUpperCase(),
-          props: {
-            ...component.defaultProps,
-            size
-          }
+            props: {
+              ...component.defaultProps,
+              size
+            }
         }))
       });
 
@@ -100,11 +100,11 @@ const componentSandboxConfigs: Record<string, SandboxConfig> = {
         title: 'Semantic Variants (Active)',
         variants: semantics.map(semantic => ({
           label: semantic.charAt(0).toUpperCase() + semantic.slice(1),
-          props: {
-            ...component.defaultProps,
-            semantic,
-            active: true
-          }
+            props: {
+              ...component.defaultProps,
+              semantic,
+              active: true
+            }
         }))
       });
 
@@ -113,11 +113,11 @@ const componentSandboxConfigs: Record<string, SandboxConfig> = {
         title: 'Semantic Variants (Inactive)',
         variants: semantics.map(semantic => ({
           label: semantic.charAt(0).toUpperCase() + semantic.slice(1),
-          props: {
-            ...component.defaultProps,
-            semantic,
-            active: false
-          }
+            props: {
+              ...component.defaultProps,
+              semantic,
+              active: false
+            }
         }))
       });
 
@@ -292,7 +292,7 @@ export function getSandboxConfig(componentId: string): SandboxConfig | null {
   return componentSandboxConfigs[componentId] || null;
 }
 
-export function generateComponentSandbox(componentId: string): SandboxSection[] | null {
+export function generateComponentSandbox(componentId: string, componentDefinitions: ComponentDefinition[]): SandboxSection[] | null {
   const componentDef = componentDefinitions.find(comp => comp.id === componentId);
   
   if (!componentDef) return null;

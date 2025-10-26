@@ -19,7 +19,6 @@ const componentsToMigrate: ComponentMigration[] = [
   { name: 'select', sourcePath: 'src/components/ui/select.tsx', targetPath: 'src/components/select' },
   { name: 'separator', sourcePath: 'src/components/ui/separator.tsx', targetPath: 'src/components/separator' },
   { name: 'sheet', sourcePath: 'src/components/ui/sheet.tsx', targetPath: 'src/components/sheet' },
-  { name: 'sidebar', sourcePath: 'src/components/ui/sidebar.tsx', targetPath: 'src/components/sidebar' },
   { name: 'skeleton', sourcePath: 'src/components/ui/skeleton.tsx', targetPath: 'src/components/skeleton' },
   { name: 'switch', sourcePath: 'src/components/ui/switch.tsx', targetPath: 'src/components/switch' },
   { name: 'text', sourcePath: 'src/components/ui/text.tsx', targetPath: 'src/components/text' },

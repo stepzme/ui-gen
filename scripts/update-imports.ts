@@ -21,7 +21,6 @@ const importUpdates: ImportUpdate[] = [
   { oldPath: '@/components/ui/select', newPath: '@/components/select', componentName: 'Select' },
   { oldPath: '@/components/ui/separator', newPath: '@/components/separator', componentName: 'Separator' },
   { oldPath: '@/components/ui/sheet', newPath: '@/components/sheet', componentName: 'Sheet' },
-  { oldPath: '@/components/ui/sidebar', newPath: '@/components/sidebar', componentName: 'Sidebar' },
   { oldPath: '@/components/ui/skeleton', newPath: '@/components/skeleton', componentName: 'Skeleton' },
   { oldPath: '@/components/ui/switch', newPath: '@/components/switch', componentName: 'Switch' },
   { oldPath: '@/components/ui/text', newPath: '@/components/text', componentName: 'Text' },

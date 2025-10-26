@@ -290,6 +290,7 @@ interface ButtonProps extends
   Omit<HTMLMotionProps<"button">, "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart" | "onAnimationEnd">,
   VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  label?: string
 }
 
 function Button({
@@ -298,6 +299,8 @@ function Button({
   semantic,
   size,
   asChild = false,
+  label = "Button",
+  children,
   ...props
 }: ButtonProps) {
   if (asChild) {
@@ -329,7 +332,9 @@ function Button({
         ease: "easeInOut"
       }}
       {...props}
-    />
+    >
+      {children || label}
+    </motion.button>
   )
 }
 

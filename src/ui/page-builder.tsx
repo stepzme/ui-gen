@@ -6,9 +6,10 @@ import { Artboard, ComponentDefinition, SelectedElement, ComponentNode } from "@
 import { ComponentsPanel } from "./components-panel";
 import { Canvas } from "./canvas";
 import { PropertiesPanel } from "./properties-panel";
-import { SandboxShowcase } from "./sandbox-showcase";
 import { Header } from "./header";
-import { componentDefinitions } from "@/lib/component-definitions";
+import { useComponentDefinitions } from "@/hooks/use-component-definitions";
+import { Diamond, DiamondPlus } from "lucide-react";
+import { Text } from "@/components/text";
 
 export default function PageBuilder() {
   const [artboards, setArtboards] = useState<Artboard[]>([]);
@@ -16,6 +17,7 @@ export default function PageBuilder() {
   const [activeComponent, setActiveComponent] = useState<ComponentDefinition | null>(null);
   const [mode, setMode] = useState<'builder' | 'sandbox'>('builder');
   const [selectedSandboxComponent, setSelectedSandboxComponent] = useState<string | null>(null);
+  const { componentDefinitions } = useComponentDefinitions();
   const [editingElement, setEditingElement] = useState<{
     id: string;
     prop: string;
@@ -49,7 +51,8 @@ export default function PageBuilder() {
           id: `${component.id}-${Date.now()}`,
           type: component.id,
           props: { ...component.defaultProps },
-          children: []
+          children: [],
+          fullWidth: true
         };
 
         setArtboards(prev => prev.map(ab => 
@@ -62,15 +65,27 @@ export default function PageBuilder() {
   };
 
   const handleAddArtboard = (type: 'desktop' | 'mobile') => {
+    // Вычисляем центр канваса
+    const canvasWidth = window.innerWidth;
+    const canvasHeight = window.innerHeight;
+    const artboardWidth = type === 'desktop' ? 1440 : 375;
+    const artboardHeight = type === 'desktop' ? 900 : 800;
+    
+    // Центрируем артборд на канвасе
+    const centerX = (canvasWidth - artboardWidth) / 2;
+    const centerY = (canvasHeight - artboardHeight) / 2;
+    
     const newArtboard: Artboard = {
       id: `artboard-${Date.now()}`,
-      name: `${type === 'desktop' ? 'Desktop' : 'Mobile'} Artboard ${artboards.length + 1}`,
-      width: type === 'desktop' ? 1440 : 375,
-      height: type === 'desktop' ? 900 : 812,
+      name: 'Untitled',
+      width: artboardWidth,
+      height: artboardHeight,
       type,
       gap: 16,
       status: 'draft',
-      children: []
+      children: [],
+      position: { x: centerX, y: centerY },
+      autoHeight: false
     };
 
     setArtboards(prev => [...prev, newArtboard]);
@@ -98,6 +113,13 @@ export default function PageBuilder() {
   };
 
   const handleUpdateArtboard = (artboardId: string, updates: Partial<Artboard>) => {
+    // Если меняется тип артборда, обновляем его размеры
+    if (updates.type) {
+      const isMobile = updates.type === 'mobile';
+      updates.width = isMobile ? 375 : 1440;
+      updates.height = isMobile ? 800 : 900;
+    }
+    
     setArtboards(prev => prev.map(artboard => 
       artboard.id === artboardId ? { ...artboard, ...updates } : artboard
     ));
@@ -107,7 +129,11 @@ export default function PageBuilder() {
       setSelectedElement(prev => prev ? { 
         ...prev, 
         name: updates.name ?? prev.name,
-        status: updates.status ?? prev.status
+        status: updates.status ?? prev.status,
+        artboardType: updates.type ?? prev.artboardType,
+        width: updates.width ?? prev.width,
+        height: updates.height ?? prev.height,
+        autoHeight: updates.autoHeight ?? prev.autoHeight
       } : null);
     }
   };
@@ -127,6 +153,10 @@ export default function PageBuilder() {
       );
       if (confirmed) {
         setArtboards(prev => prev.filter(ab => ab.id !== elementId));
+        // Clear selection if deleted element was selected
+        if (selectedElement?.id === elementId) {
+          setSelectedElement(null);
+        }
       }
     } else {
       console.log('Deleting component from artboards');
@@ -135,11 +165,11 @@ export default function PageBuilder() {
         ...artboard,
         children: artboard.children.filter(child => child.id !== elementId)
       })));
-    }
-    
-    // Clear selection if deleted element was selected
-    if (selectedElement?.id === elementId) {
-      setSelectedElement(null);
+      
+      // Clear selection if deleted element was selected
+      if (selectedElement?.id === elementId) {
+        setSelectedElement(null);
+      }
     }
   };
 
@@ -174,9 +204,11 @@ export default function PageBuilder() {
   };
 
   const handleMoveArtboard = (artboardId: string, x: number, y: number) => {
-    // This is handled by the artboard component's local state
-    // We could store positions in the artboard data if needed
-    console.log(`Moving artboard ${artboardId} to position (${x}, ${y})`);
+    setArtboards(prev => prev.map(artboard => 
+      artboard.id === artboardId 
+        ? { ...artboard, position: { x, y } }
+        : artboard
+    ));
   };
 
   const handleDeselectElement = () => {
@@ -227,14 +259,6 @@ export default function PageBuilder() {
       <Header activeTab={mode} onTabChange={handleModeChange} />
       
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {/* Sandbox Showcase - показывается только в sandbox режиме */}
-        {mode === 'sandbox' && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-3/5 z-30">
-            <SandboxShowcase 
-              selectedComponent={selectedSandboxComponent}
-            />
-          </div>
-        )}
 
         {/* Canvas as background layer */}
         <Canvas
@@ -263,20 +287,25 @@ export default function PageBuilder() {
         </div>
 
         {/* Right Sidebar - Properties Panel */}
-        <div className="absolute right-4 top-20 bottom-4 z-20">
-          <PropertiesPanel
-            selectedElement={selectedElement}
-            onUpdateElement={handleUpdateElement}
-            onUpdateArtboard={handleUpdateArtboard}
-            mode={mode}
-            selectedSandboxComponent={selectedSandboxComponent}
-          />
-        </div>
+        {(selectedElement || mode === 'sandbox') && (
+          <div className="absolute right-4 top-20 bottom-4 z-20">
+            <PropertiesPanel
+              selectedElement={selectedElement}
+              onUpdateElement={handleUpdateElement}
+              onUpdateArtboard={handleUpdateArtboard}
+              mode={mode}
+              selectedSandboxComponent={selectedSandboxComponent}
+            />
+          </div>
+        )}
 
         <DragOverlay>
           {activeComponent ? (
-            <div className="p-2 bg-primary text-primary-foreground rounded-md shadow-lg">
-              {activeComponent.name}
+            <div className="flex items-center gap-2 p-2 h-auto bg-background-secondary/50 text-foreground-primary rounded-lg">
+              <DiamondPlus className="h-4 w-4 text-foreground-info" />
+              <Text size="caption" weight="medium" className="text-foreground-primary">
+                {activeComponent.name}
+              </Text>
             </div>
           ) : null}
         </DragOverlay>

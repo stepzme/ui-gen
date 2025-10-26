@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { ComponentNode } from "@/types/page-builder";
-import { componentDefinitions } from "@/lib/component-definitions";
+import { ComponentNode, ComponentDefinition } from "@/types/page-builder";
+// import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 import { InlineEditor } from "./inline-editor";
 
 interface ComponentRendererProps {
-  component: typeof componentDefinitions[0];
+  component: ComponentDefinition;
   props: any;
   children?: ComponentNode[];
   componentId?: string;
@@ -31,6 +31,16 @@ export function ComponentRenderer({
   onCancelEditing
 }: ComponentRendererProps) {
   const Component = component.component;
+
+  // Проверяем, что компонент существует
+  if (!Component) {
+    console.error(`Component not found for id: ${component.id}`);
+    return (
+      <div className="p-4 border border-red-500 bg-red-50 text-red-700 rounded">
+        <p>Component "{component.id}" not found</p>
+      </div>
+    );
+  }
 
   // Определяем, какой проп редактируется
   const isEditing = editingElement?.id === componentId;

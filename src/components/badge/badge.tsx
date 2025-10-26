@@ -255,6 +255,7 @@ interface BadgeProps extends React.ComponentProps<"span">, VariantProps<typeof b
   asChild?: boolean
   interactive?: boolean
   onActiveChange?: (active: boolean) => void
+  label?: string
 }
 
 function Badge({
@@ -265,6 +266,8 @@ function Badge({
   asChild = false,
   onActiveChange,
   onClick,
+  label = "Badge",
+  children,
   ...props
 }: BadgeProps) {
   const [internalActive, setInternalActive] = React.useState(active)
@@ -300,7 +303,9 @@ function Badge({
         }
       } : undefined}
       {...props}
-    />
+    >
+      {children || label}
+    </Comp>
   )
 }
 

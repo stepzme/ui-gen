@@ -19,6 +19,8 @@ export interface Artboard {
   gap: number;
   status: 'draft' | 'review' | 'approved' | 'published';
   children: ComponentNode[];
+  position?: { x: number; y: number };
+  autoHeight?: boolean;
 }
 
 export interface ComponentDefinition {
@@ -35,4 +37,8 @@ export interface SelectedElement {
   node?: ComponentNode;
   name?: string;
   status?: 'draft' | 'review' | 'approved' | 'published';
+  artboardType?: 'desktop' | 'mobile';
+  width?: number;
+  height?: number;
+  autoHeight?: boolean;
 }
