@@ -10,7 +10,7 @@ import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 import { ComponentDefinition } from "@/types/page-builder";
 
 interface ComponentsPanelProps {
-  mode: 'builder' | 'sandbox' | 'flow';
+  mode: 'builder' | 'sandbox';
   selectedSandboxComponent?: string | null;
   onSelectSandboxComponent?: (componentId: string) => void;
 }
@@ -22,7 +22,7 @@ interface DraggableComponentProps {
 interface AccordionCategoryProps {
   category: string;
   components: ComponentDefinition[];
-  mode: 'builder' | 'sandbox' | 'flow';
+  mode: 'builder' | 'sandbox';
   selectedSandboxComponent?: string | null;
   onSelectSandboxComponent?: (componentId: string) => void;
   isExpanded: boolean;

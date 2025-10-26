@@ -19,7 +19,7 @@ interface PropertiesPanelProps {
   selectedElement: SelectedElement | null;
   onUpdateElement: (elementId: string, updates: Partial<ComponentNode>) => void;
   onUpdateArtboard: (artboardId: string, updates: Partial<Artboard>) => void;
-  mode: 'builder' | 'sandbox' | 'flow';
+  mode: 'builder' | 'sandbox';
   selectedSandboxComponent?: string | null;
 }
 

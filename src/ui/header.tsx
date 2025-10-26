@@ -5,8 +5,8 @@ import { Button } from "@/components/button";
 import { Text } from "@/components/text";
 
 interface HeaderProps {
-  activeTab: 'builder' | 'sandbox' | 'flow';
-  onTabChange: (tab: 'builder' | 'sandbox' | 'flow') => void;
+  activeTab: 'builder' | 'sandbox';
+  onTabChange: (tab: 'builder' | 'sandbox') => void;
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
@@ -52,14 +52,6 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               onClick={() => onTabChange('sandbox')}
             >
               Дизайн-система
-            </Button>
-            <Button
-              variant={activeTab === 'flow' ? 'primary' : 'secondary'}
-              semantic="default"
-              size="sm"
-              onClick={() => onTabChange('flow')}
-            >
-              User Flows
             </Button>
           </nav>
         </div>

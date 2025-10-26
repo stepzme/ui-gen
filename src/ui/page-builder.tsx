@@ -4,7 +4,6 @@ import { useState } from "react";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core";
 import { Artboard, ComponentDefinition, SelectedElement, ComponentNode } from "@/types/page-builder";
 import { ComponentsPanel } from "./components-panel";
-import { Canvas } from "./canvas";
 import { FlowCanvas } from "./flow-canvas";
 import { PropertiesPanel } from "./properties-panel";
 import { Header } from "./header";
@@ -16,7 +15,7 @@ export default function PageBuilder() {
   const [artboards, setArtboards] = useState<Artboard[]>([]);
   const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
   const [activeComponent, setActiveComponent] = useState<ComponentDefinition | null>(null);
-  const [mode, setMode] = useState<'builder' | 'sandbox' | 'flow'>('builder');
+  const [mode, setMode] = useState<'builder' | 'sandbox'>('builder');
   const [selectedSandboxComponent, setSelectedSandboxComponent] = useState<string | null>(null);
   const { componentDefinitions } = useComponentDefinitions();
   const [editingElement, setEditingElement] = useState<{
@@ -216,7 +215,7 @@ export default function PageBuilder() {
     setSelectedElement(null);
   };
 
-  const handleModeChange = (newMode: 'builder' | 'sandbox' | 'flow') => {
+  const handleModeChange = (newMode: 'builder' | 'sandbox') => {
     setMode(newMode);
     // При переключении в sandbox, сбрасываем выбранный элемент
     if (newMode === 'sandbox') {
@@ -262,37 +261,21 @@ export default function PageBuilder() {
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
 
         {/* Canvas as background layer */}
-        {mode === 'flow' ? (
-          <FlowCanvas
-            artboards={artboards}
-            onSelectElement={handleSelectElement}
-            selectedElement={selectedElement}
-            onDeleteElement={handleDeleteElement}
-            onMoveArtboard={handleMoveArtboard}
-            onMoveComponentUp={handleMoveComponentUp}
-            onMoveComponentDown={handleMoveComponentDown}
-            editingElement={editingElement}
-            onStartEditing={handleStartEditing}
-            onSaveEditing={handleSaveEditing}
-            onCancelEditing={handleCancelEditing}
-          />
-        ) : (
-          <Canvas
-            artboards={artboards}
-            onAddArtboard={handleAddArtboard}
-            onSelectElement={handleSelectElement}
-            selectedElement={selectedElement}
-            onDeleteElement={handleDeleteElement}
-            onMoveArtboard={handleMoveArtboard}
-            onMoveComponentUp={handleMoveComponentUp}
-            onMoveComponentDown={handleMoveComponentDown}
-            onDeselectElement={handleDeselectElement}
-            editingElement={editingElement}
-            onStartEditing={handleStartEditing}
-            onSaveEditing={handleSaveEditing}
-            onCancelEditing={handleCancelEditing}
-          />
-        )}
+        <FlowCanvas
+          artboards={artboards}
+          onAddArtboard={handleAddArtboard}
+          onSelectElement={handleSelectElement}
+          selectedElement={selectedElement}
+          onDeleteElement={handleDeleteElement}
+          onMoveArtboard={handleMoveArtboard}
+          onMoveComponentUp={handleMoveComponentUp}
+          onMoveComponentDown={handleMoveComponentDown}
+          onDeselectElement={handleDeselectElement}
+          editingElement={editingElement}
+          onStartEditing={handleStartEditing}
+          onSaveEditing={handleSaveEditing}
+          onCancelEditing={handleCancelEditing}
+        />
 
         {/* Left Sidebar - Components */}
         <div className="absolute left-4 top-20 bottom-4 z-20">

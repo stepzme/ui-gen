@@ -17,7 +17,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { Artboard } from '@/types/page-builder';
-import { ArtboardComponent } from './artboard';
+import { Monitor, Smartphone } from 'lucide-react';
+import { Button } from '@/components/button';
 
 interface FlowCanvasProps {
   artboards: Artboard[];
@@ -69,12 +70,14 @@ const nodeTypes = {
 
 export function FlowCanvas({
   artboards,
+  onAddArtboard,
   onSelectElement,
   selectedElement,
   onDeleteElement,
   onMoveArtboard,
   onMoveComponentUp,
   onMoveComponentDown,
+  onDeselectElement,
   editingElement,
   onStartEditing,
   onSaveEditing,
@@ -140,7 +143,33 @@ export function FlowCanvas({
   );
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
+      {/* Add Artboard Buttons */}
+      {onAddArtboard && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
+          <Button
+            onClick={() => onAddArtboard('desktop')}
+            variant="secondary"
+            semantic="default"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Monitor className="h-4 w-4" />
+            Add Desktop
+          </Button>
+          <Button
+            onClick={() => onAddArtboard('mobile')}
+            variant="secondary"
+            semantic="default"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Smartphone className="h-4 w-4" />
+            Add Mobile
+          </Button>
+        </div>
+      )}
+      
       <ReactFlow
         nodes={nodes}
         edges={edges}
