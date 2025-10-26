@@ -13,6 +13,8 @@ import ReactFlow, {
   Connection,
   EdgeProps,
   NodeProps,
+  Handle,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -38,7 +40,7 @@ interface FlowCanvasProps {
 }
 
 // Custom Node type для артбордов
-function ArtboardNode({ data }: NodeProps) {
+function ArtboardNode({ data, selected }: NodeProps) {
   const artboard = data.artboard;
   const handlers = data.handlers;
 
@@ -50,9 +52,11 @@ function ArtboardNode({ data }: NodeProps) {
         maxWidth: artboard.width,
         minHeight: artboard.height,
         maxHeight: artboard.height,
+        border: selected ? '2px solid #3b82f6' : 'none',
+        borderRadius: '8px',
+        background: 'transparent',
+        padding: '2px',
       }}
-      onPointerDown={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
     >
       <ArtboardComponent
         artboard={artboard}
@@ -136,6 +140,7 @@ export function FlowCanvas({
     [setEdges]
   );
 
+
   // Обработчик изменения позиции узла
   const onNodeDragStop = useCallback(
     (event: React.MouseEvent, node: Node) => {
@@ -212,6 +217,9 @@ export function FlowCanvas({
         selectNodesOnDrag={false}
         nodesDraggable={true}
         nodesConnectable={false}
+        // Позволяем dnd-kit работать внутри нод
+        onNodeContextMenu={(e) => e.preventDefault()}
+        preventScrolling={false}
       >
         <Background color="#aaa" gap={20} />
         <Controls />
