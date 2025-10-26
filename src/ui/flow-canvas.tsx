@@ -173,10 +173,16 @@ export function FlowCanvas({
     [artboards, onSelectElement]
   );
 
+  // Обработчик wheel для зума
+  const onWheel = useCallback((event: React.WheelEvent) => {
+    // Не блокируем wheel события - позволяем React Flow обрабатывать их
+  }, []);
+
   return (
     <div 
       className="w-full h-full relative"
       style={{ touchAction: 'none' }}
+      onWheel={onWheel}
     >
       {/* Add Artboard Buttons */}
       {onAddArtboard && (
@@ -215,6 +221,7 @@ export function FlowCanvas({
         nodeTypes={nodeTypes}
         snapToGrid={true}
         snapGrid={[20, 20]}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         minZoom={0.1}
         maxZoom={2}
         selectNodesOnDrag={false}
@@ -227,6 +234,8 @@ export function FlowCanvas({
         zoomOnScroll={true}
         zoomOnPinch={true}
         zoomOnDoubleClick={false}
+        // Явно включаем зум
+        fitView={false}
       >
         <Background color="#aaa" gap={20} />
         <Controls />
