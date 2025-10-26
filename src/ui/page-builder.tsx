@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor } from "@dnd-kit/core";
 import { Artboard, ComponentDefinition, SelectedElement, ComponentNode } from "@/types/page-builder";
 import { ComponentsPanel } from "./components-panel";
 import { FlowCanvas } from "./flow-canvas";
@@ -12,6 +12,13 @@ import { Diamond, DiamondPlus } from "lucide-react";
 import { Text } from "@/components/text";
 
 export default function PageBuilder() {
+  // Настройка сенсора для dnd-kit - не блокируем wheel события
+  const sensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+    },
+  });
+  
   const [artboards, setArtboards] = useState<Artboard[]>([]);
   const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
   const [activeComponent, setActiveComponent] = useState<ComponentDefinition | null>(null);
@@ -258,9 +265,8 @@ export default function PageBuilder() {
       {/* Header */}
       <Header activeTab={mode} onTabChange={handleModeChange} />
       
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-
-        {/* Canvas as background layer */}
+      {/* Canvas as background layer */}
+      <DndContext sensors={[sensor]} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <FlowCanvas
           artboards={artboards}
           onAddArtboard={handleAddArtboard}
