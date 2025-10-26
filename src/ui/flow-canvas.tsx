@@ -178,10 +178,24 @@ function FlowCanvasInner({
     [artboards, onSelectElement]
   );
 
+  const reactFlowInstance = useReactFlow();
+
   // Обработчик wheel для зума
   const onWheel = useCallback((event: React.WheelEvent) => {
-    // Не блокируем wheel события - позволяем React Flow обрабатывать их
-  }, []);
+    // Явно обрабатываем wheel события для зума
+    event.preventDefault();
+    const zoom = reactFlowInstance.getZoom();
+    const delta = event.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(0.1, Math.min(2, zoom * delta));
+    
+    // Устанавливаем новый зум с учетом позиции мыши
+    const rect = event.currentTarget.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    
+    // Используем setCenter для зума вокруг точки мыши
+    reactFlowInstance.setCenter(mouseX, mouseY, { zoom: newZoom });
+  }, [reactFlowInstance]);
 
   return (
     <div 
