@@ -99,8 +99,6 @@ function FlowCanvasInner({
   onSaveEditing,
   onCancelEditing,
 }: FlowCanvasProps) {
-  // Используем хук для управления React Flow
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
   // Конвертируем артборды в nodes
   const nodeData = useMemo(() => {
     return artboards.map((artboard) => ({
@@ -208,7 +206,7 @@ function FlowCanvasInner({
         {/* Zoom controls */}
         <div className="flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
           <Button
-            onClick={() => zoomOut()}
+            onClick={() => reactFlowInstance.zoomOut()}
             variant="secondary"
             semantic="default"
             size="sm"
@@ -217,7 +215,7 @@ function FlowCanvasInner({
             <ZoomOut className="h-4 w-4" />
           </Button>
           <Button
-            onClick={() => zoomIn()}
+            onClick={() => reactFlowInstance.zoomIn()}
             variant="secondary"
             semantic="default"
             size="sm"
