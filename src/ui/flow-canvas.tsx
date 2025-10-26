@@ -5,23 +5,19 @@ import ReactFlow, {
   Node,
   Edge,
   Background,
-  Controls,
   MiniMap,
   useNodesState,
   useEdgesState,
   addEdge,
   Connection,
-  EdgeProps,
   NodeProps,
-  Handle,
-  Position,
   ReactFlowProvider,
   useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import { Artboard } from '@/types/page-builder';
-import { Monitor, Smartphone, ZoomIn, ZoomOut } from 'lucide-react';
+import { Monitor, Smartphone } from 'lucide-react';
 import { Button } from '@/components/button';
 import { ArtboardComponent } from './artboard';
 
@@ -48,17 +44,13 @@ function ArtboardNode({ data, selected }: NodeProps) {
 
   return (
     <div 
-      className="artboard-flow-node"
       style={{
-        minWidth: artboard.width,
-        maxWidth: artboard.width,
-        minHeight: artboard.height,
-        maxHeight: artboard.height,
+        width: artboard.width,
+        height: 'auto',
         border: selected ? '2px solid #3b82f6' : 'none',
         borderRadius: '8px',
-        background: 'transparent',
-        padding: '2px',
       }}
+      onClick={(e) => e.stopPropagation()}
     >
       <ArtboardComponent
         artboard={artboard}
@@ -67,7 +59,7 @@ function ArtboardNode({ data, selected }: NodeProps) {
         onSelectElement={handlers?.onSelectElement}
         selectedElement={handlers?.selectedElement}
         onDeleteElement={handlers?.onDeleteElement}
-        onMoveArtboard={undefined} // Отключаем перетаскивание артборда, так как React Flow сам управляет
+        onMoveArtboard={undefined}
         onMoveComponentUp={handlers?.onMoveComponentUp}
         onMoveComponentDown={handlers?.onMoveComponentDown}
         editingElement={handlers?.editingElement}
@@ -83,7 +75,7 @@ const nodeTypes = {
   artboard: ArtboardNode,
 };
 
-// Внутренний компонент с хуком
+// Внутренний компонент
 function FlowCanvasInner({
   artboards,
   onAddArtboard,
@@ -99,6 +91,8 @@ function FlowCanvasInner({
   onSaveEditing,
   onCancelEditing,
 }: FlowCanvasProps) {
+  const reactFlowInstance = useReactFlow();
+
   // Конвертируем артборды в nodes
   const nodeData = useMemo(() => {
     return artboards.map((artboard) => ({
@@ -121,14 +115,12 @@ function FlowCanvasInner({
         }
       },
       selected: selectedElement?.id === artboard.id,
-      // Используем размеры артборда для ноды
       width: artboard.width,
       height: artboard.height,
     }));
   }, [artboards, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
   const initialEdges: Edge[] = [];
-
   const [nodes, setNodes, onNodesChange] = useNodesState(nodeData);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
@@ -137,16 +129,14 @@ function FlowCanvasInner({
     setNodes(nodeData);
   }, [nodeData, setNodes]);
 
-  // Обработчик создания связи
+  // Обработчики
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
 
-
-  // Обработчик изменения позиции узла
   const onNodeDragStop = useCallback(
-    (event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: Node) => {
       if (onMoveArtboard) {
         onMoveArtboard(node.id, node.position.x, node.position.y);
       }
@@ -154,7 +144,6 @@ function FlowCanvasInner({
     [onMoveArtboard]
   );
 
-  // Обработчик выбора узла
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: Node) => {
       if (onSelectElement) {
@@ -176,82 +165,34 @@ function FlowCanvasInner({
     [artboards, onSelectElement]
   );
 
-  const reactFlowInstance = useReactFlow();
-
-  // Обработчик wheel для зума
-  const onWheel = useCallback((event: React.WheelEvent) => {
-    // Явно обрабатываем wheel события для зума
-    event.preventDefault();
-    const zoom = reactFlowInstance.getZoom();
-    const delta = event.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.1, Math.min(2, zoom * delta));
-    
-    // Устанавливаем новый зум с учетом позиции мыши
-    const rect = event.currentTarget.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    
-    // Используем setCenter для зума вокруг точки мыши
-    reactFlowInstance.setCenter(mouseX, mouseY, { zoom: newZoom });
-  }, [reactFlowInstance]);
-
   return (
-    <div 
-      className="w-full h-full relative"
-      style={{ touchAction: 'none' }}
-      onWheel={onWheel}
-    >
-      {/* Controls and Add Artboard Buttons */}
-      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center z-10">
-        {/* Zoom controls */}
-        <div className="flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
+    <div className="w-full h-full">
+      {/* Add Artboard Buttons */}
+      {onAddArtboard && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
           <Button
-            onClick={() => reactFlowInstance.zoomOut()}
+            onClick={() => onAddArtboard('desktop')}
             variant="secondary"
             semantic="default"
             size="sm"
             className="flex items-center gap-2"
           >
-            <ZoomOut className="h-4 w-4" />
+            <Monitor className="h-4 w-4" />
+            Add Desktop
           </Button>
           <Button
-            onClick={() => reactFlowInstance.zoomIn()}
+            onClick={() => onAddArtboard('mobile')}
             variant="secondary"
             semantic="default"
             size="sm"
             className="flex items-center gap-2"
           >
-            <ZoomIn className="h-4 w-4" />
+            <Smartphone className="h-4 w-4" />
+            Add Mobile
           </Button>
         </div>
+      )}
 
-        {/* Add Artboard Buttons */}
-        {onAddArtboard && (
-          <div className="flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
-            <Button
-              onClick={() => onAddArtboard('desktop')}
-              variant="secondary"
-              semantic="default"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Monitor className="h-4 w-4" />
-              Add Desktop
-            </Button>
-            <Button
-              onClick={() => onAddArtboard('mobile')}
-              variant="secondary"
-              semantic="default"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Smartphone className="h-4 w-4" />
-              Add Mobile
-            </Button>
-          </div>
-        )}
-      </div>
-      
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -263,21 +204,10 @@ function FlowCanvasInner({
         nodeTypes={nodeTypes}
         snapToGrid={true}
         snapGrid={[20, 20]}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         minZoom={0.1}
         maxZoom={2}
-        selectNodesOnDrag={false}
         nodesDraggable={true}
         nodesConnectable={false}
-        // Позволяем dnd-kit работать внутри нод
-        onNodeContextMenu={(e) => e.preventDefault()}
-        preventScrolling={false}
-        // Включаем зум через колесико
-        zoomOnScroll={true}
-        zoomOnPinch={true}
-        zoomOnDoubleClick={false}
-        // Явно включаем зум
-        fitView={false}
       >
         <Background color="#aaa" gap={20} />
         <MiniMap />
@@ -294,4 +224,3 @@ export function FlowCanvas(props: FlowCanvasProps) {
     </ReactFlowProvider>
   );
 }
-
