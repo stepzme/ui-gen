@@ -15,11 +15,13 @@ import ReactFlow, {
   NodeProps,
   Handle,
   Position,
+  ReactFlowProvider,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import { Artboard } from '@/types/page-builder';
-import { Monitor, Smartphone } from 'lucide-react';
+import { Monitor, Smartphone, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/components/button';
 import { ArtboardComponent } from './artboard';
 
@@ -81,7 +83,8 @@ const nodeTypes = {
   artboard: ArtboardNode,
 };
 
-export function FlowCanvas({
+// Внутренний компонент с хуком
+function FlowCanvasInner({
   artboards,
   onAddArtboard,
   onSelectElement,
@@ -96,6 +99,8 @@ export function FlowCanvas({
   onSaveEditing,
   onCancelEditing,
 }: FlowCanvasProps) {
+  // Используем хук для управления React Flow
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
   // Конвертируем артборды в nodes
   const nodeData = useMemo(() => {
     return artboards.map((artboard) => ({
@@ -184,31 +189,56 @@ export function FlowCanvas({
       style={{ touchAction: 'none' }}
       onWheel={onWheel}
     >
-      {/* Add Artboard Buttons */}
-      {onAddArtboard && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
+      {/* Controls and Add Artboard Buttons */}
+      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center z-10">
+        {/* Zoom controls */}
+        <div className="flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
           <Button
-            onClick={() => onAddArtboard('desktop')}
+            onClick={() => zoomOut()}
             variant="secondary"
             semantic="default"
             size="sm"
             className="flex items-center gap-2"
           >
-            <Monitor className="h-4 w-4" />
-            Add Desktop
+            <ZoomOut className="h-4 w-4" />
           </Button>
           <Button
-            onClick={() => onAddArtboard('mobile')}
+            onClick={() => zoomIn()}
             variant="secondary"
             semantic="default"
             size="sm"
             className="flex items-center gap-2"
           >
-            <Smartphone className="h-4 w-4" />
-            Add Mobile
+            <ZoomIn className="h-4 w-4" />
           </Button>
         </div>
-      )}
+
+        {/* Add Artboard Buttons */}
+        {onAddArtboard && (
+          <div className="flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
+            <Button
+              onClick={() => onAddArtboard('desktop')}
+              variant="secondary"
+              semantic="default"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Monitor className="h-4 w-4" />
+              Add Desktop
+            </Button>
+            <Button
+              onClick={() => onAddArtboard('mobile')}
+              variant="secondary"
+              semantic="default"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Smartphone className="h-4 w-4" />
+              Add Mobile
+            </Button>
+          </div>
+        )}
+      </div>
       
       <ReactFlow
         nodes={nodes}
@@ -238,10 +268,18 @@ export function FlowCanvas({
         fitView={false}
       >
         <Background color="#aaa" gap={20} />
-        <Controls />
         <MiniMap />
       </ReactFlow>
     </div>
+  );
+}
+
+// Экспортируемая обертка с провайдером
+export function FlowCanvas(props: FlowCanvasProps) {
+  return (
+    <ReactFlowProvider>
+      <FlowCanvasInner {...props} />
+    </ReactFlowProvider>
   );
 }
 
