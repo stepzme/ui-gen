@@ -16,7 +16,7 @@ export default function PageBuilder() {
   const [artboards, setArtboards] = useState<Artboard[]>([]);
   const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
   const [activeComponent, setActiveComponent] = useState<ComponentDefinition | null>(null);
-  const [mode, setMode] = useState<'builder' | 'sandbox' | 'flow'>('flow'); // Временно для тестирования
+  const [mode, setMode] = useState<'builder' | 'sandbox' | 'flow'>('builder');
   const [selectedSandboxComponent, setSelectedSandboxComponent] = useState<string | null>(null);
   const { componentDefinitions } = useComponentDefinitions();
   const [editingElement, setEditingElement] = useState<{

@@ -53,6 +53,14 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
             >
               Дизайн-система
             </Button>
+            <Button
+              variant={activeTab === 'flow' ? 'primary' : 'secondary'}
+              semantic="default"
+              size="sm"
+              onClick={() => onTabChange('flow')}
+            >
+              User Flows
+            </Button>
           </nav>
         </div>
 
