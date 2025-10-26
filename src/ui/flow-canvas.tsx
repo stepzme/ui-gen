@@ -46,8 +46,10 @@ function ArtboardNode({ data }: NodeProps) {
     <div 
       className="artboard-flow-node"
       style={{
-        width: '100%',
-        height: '100%',
+        minWidth: artboard.width,
+        maxWidth: artboard.width,
+        minHeight: artboard.height,
+        maxHeight: artboard.height,
       }}
       onPointerDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
