@@ -200,6 +200,9 @@ export function FlowCanvas({
         snapGrid={[20, 20]}
         minZoom={0.1}
         maxZoom={2}
+        selectNodesOnDrag={false}
+        nodesDraggable={true}
+        nodesConnectable={false}
       >
         <Background color="#aaa" gap={20} />
         <Controls />
