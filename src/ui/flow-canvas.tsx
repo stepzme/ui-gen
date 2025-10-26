@@ -154,9 +154,40 @@ function FlowCanvasInner({
     setNodes(nodeData);
   }, [nodeData, setNodes]);
 
-  // Обработчики
+  // Обработчик создания соединения с label
   const onConnect = useCallback(
-    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => {
+      if (!params.source || !params.target) return;
+      
+      const newEdge: Edge = {
+        id: `edge-${params.source}-${params.target}-${Date.now()}`,
+        source: params.source,
+        target: params.target,
+        label: '',
+        sourceHandle: params.sourceHandle ?? null,
+        targetHandle: params.targetHandle ?? null,
+      };
+      setEdges((eds) => addEdge(newEdge, eds));
+    },
+    [setEdges]
+  );
+
+  // Обработчик клика на edge
+  const onEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      event.stopPropagation();
+      const label = prompt('Enter label text:', edge.label?.toString() || '');
+      if (label !== null) {
+        setEdges((eds) =>
+          eds.map((e) => {
+            if (e.id === edge.id) {
+              return { ...e, label } as Edge;
+            }
+            return e;
+          })
+        );
+      }
+    },
     [setEdges]
   );
 
@@ -248,6 +279,7 @@ function FlowCanvasInner({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onEdgeClick={onEdgeClick}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
@@ -259,6 +291,17 @@ function FlowCanvasInner({
         nodesConnectable={true}
         // Настройки для соединения
         connectionLineStyle={{ stroke: '#888', strokeWidth: 2 }}
+        defaultEdgeOptions={{
+          labelStyle: { 
+            fill: '#333', 
+            fontWeight: 600,
+            fontSize: 12,
+          },
+          labelBgStyle: { 
+            fill: 'white', 
+            fillOpacity: 0.9,
+          },
+        }}
       >
         <Background color="#aaa" gap={20} />
         <MiniMap />
