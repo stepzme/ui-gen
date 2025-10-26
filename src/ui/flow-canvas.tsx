@@ -174,7 +174,10 @@ export function FlowCanvas({
   );
 
   return (
-    <div className="w-full h-full relative">
+    <div 
+      className="w-full h-full relative"
+      style={{ touchAction: 'none' }}
+    >
       {/* Add Artboard Buttons */}
       {onAddArtboard && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
@@ -220,6 +223,10 @@ export function FlowCanvas({
         // Позволяем dnd-kit работать внутри нод
         onNodeContextMenu={(e) => e.preventDefault()}
         preventScrolling={false}
+        // Включаем зум через колесико
+        zoomOnScroll={true}
+        zoomOnPinch={true}
+        zoomOnDoubleClick={false}
       >
         <Background color="#aaa" gap={20} />
         <Controls />
