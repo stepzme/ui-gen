@@ -19,6 +19,7 @@ import 'reactflow/dist/style.css';
 import { Artboard } from '@/types/page-builder';
 import { Monitor, Smartphone } from 'lucide-react';
 import { Button } from '@/components/button';
+import { ArtboardComponent } from './artboard';
 
 interface FlowCanvasProps {
   artboards: Artboard[];
@@ -37,29 +38,31 @@ interface FlowCanvasProps {
 }
 
 // Custom Node type для артбордов
-function ArtboardNode({ data, selected }: NodeProps) {
+function ArtboardNode({ data }: NodeProps) {
   const artboard = data.artboard;
+  const handlers = data.handlers;
 
   return (
-    <div className="artboard-flow-node">
-      {/* Минималистичная версия артборда для flow view */}
-      <div 
-        className={`border-2 rounded-lg overflow-hidden ${
-          selected ? 'border-blue-500' : 'border-gray-300'
-        }`}
-        style={{
-          width: Math.min(artboard.width, 400),
-          height: Math.min(artboard.height, 300)
-        }}
-      >
-        {/* Здесь будет мини превью артборда */}
-        <div className="bg-gray-100 h-full flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm font-medium">{artboard.name}</p>
-            <p className="text-xs text-gray-500">{artboard.width}x{artboard.height}</p>
-          </div>
-        </div>
-      </div>
+    <div 
+      className="artboard-flow-node"
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <ArtboardComponent
+        artboard={artboard}
+        canvasTransform={{ x: 0, y: 0, scale: 1 }}
+        disablePositioning={true}
+        onSelectElement={handlers?.onSelectElement}
+        selectedElement={handlers?.selectedElement}
+        onDeleteElement={handlers?.onDeleteElement}
+        onMoveArtboard={undefined} // Отключаем перетаскивание артборда, так как React Flow сам управляет
+        onMoveComponentUp={handlers?.onMoveComponentUp}
+        onMoveComponentDown={handlers?.onMoveComponentDown}
+        editingElement={handlers?.editingElement}
+        onStartEditing={handlers?.onStartEditing}
+        onSaveEditing={handlers?.onSaveEditing}
+        onCancelEditing={handlers?.onCancelEditing}
+      />
     </div>
   );
 }
@@ -89,10 +92,24 @@ export function FlowCanvas({
       id: artboard.id,
       type: 'artboard',
       position: artboard.position || { x: 100, y: 100 },
-      data: { artboard },
+      data: { 
+        artboard,
+        handlers: {
+          onSelectElement,
+          selectedElement,
+          onDeleteElement,
+          onMoveArtboard,
+          onMoveComponentUp,
+          onMoveComponentDown,
+          editingElement,
+          onStartEditing,
+          onSaveEditing,
+          onCancelEditing,
+        }
+      },
       selected: selectedElement?.id === artboard.id,
     }));
-  }, [artboards, selectedElement]);
+  }, [artboards, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
   const initialEdges: Edge[] = [];
 

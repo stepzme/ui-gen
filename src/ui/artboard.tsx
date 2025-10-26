@@ -13,6 +13,7 @@ import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 interface ArtboardComponentProps {
   artboard: Artboard;
   canvasTransform?: { x: number; y: number; scale: number };
+  disablePositioning?: boolean; // Отключить transform позиционирование (для React Flow)
   onSelectElement: (element: SelectedElement) => void;
   selectedElement: SelectedElement | null;
   onDeleteElement?: (elementId: string) => void;
@@ -29,7 +30,7 @@ interface ArtboardComponentProps {
   onCancelEditing?: () => void;
 }
 
-export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing }: ArtboardComponentProps) {
+export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing }: ArtboardComponentProps) {
   const { componentDefinitions } = useComponentDefinitions();
   const { isOver, setNodeRef } = useDroppable({
     id: `artboard-${artboard.id}`,
@@ -116,10 +117,10 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
     <div 
       className="flex flex-col items-start"
       style={{ 
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        cursor: isDragging ? 'grabbing' : 'grab'
+        ...(disablePositioning ? {} : { transform: `translate(${position.x}px, ${position.y}px)` }),
+        ...(onMoveArtboard && !disablePositioning ? { cursor: isDragging ? 'grabbing' : 'grab' } : {})
       }}
-      onMouseDown={handleMouseDown}
+      onMouseDown={disablePositioning ? undefined : handleMouseDown}
     >
       {/* Artboard Header */}
       <div 
