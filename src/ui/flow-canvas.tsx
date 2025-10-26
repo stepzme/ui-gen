@@ -45,6 +45,10 @@ function ArtboardNode({ data }: NodeProps) {
   return (
     <div 
       className="artboard-flow-node"
+      style={{
+        width: '100%',
+        height: '100%',
+      }}
       onPointerDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -108,6 +112,9 @@ export function FlowCanvas({
         }
       },
       selected: selectedElement?.id === artboard.id,
+      // Используем размеры артборда для ноды
+      width: artboard.width,
+      height: artboard.height,
     }));
   }, [artboards, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
