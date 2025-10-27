@@ -6,6 +6,7 @@ import ReactFlow, {
   Edge,
   Background,
   MiniMap,
+  Controls,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -20,7 +21,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { Artboard } from '@/types/page-builder';
-import { Monitor, Smartphone, ZoomIn, ZoomOut } from 'lucide-react';
+import { Monitor, Smartphone } from 'lucide-react';
 import { Button } from '@/components/button';
 import { ArtboardComponent } from './artboard';
 
@@ -221,31 +222,8 @@ function FlowCanvasInner({
     [artboards, onSelectElement]
   );
 
-  // Zoom handlers
-  const handleZoomIn = () => reactFlowInstance.zoomIn();
-  const handleZoomOut = () => reactFlowInstance.zoomOut();
-
   return (
     <div className="w-full h-full">
-      {/* Controls */}
-      <div className="absolute top-4 left-4 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
-        <Button
-          onClick={handleZoomOut}
-          variant="secondary"
-          semantic="default"
-          size="sm"
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        <Button
-          onClick={handleZoomIn}
-          variant="secondary"
-          semantic="default"
-          size="sm"
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-      </div>
 
       {/* Add Artboard Buttons */}
       {onAddArtboard && (
@@ -304,6 +282,7 @@ function FlowCanvasInner({
         }}
       >
         <Background color="#aaa" gap={20} />
+        <Controls />
         <MiniMap />
       </ReactFlow>
     </div>
