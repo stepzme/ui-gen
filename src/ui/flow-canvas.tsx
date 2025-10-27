@@ -281,7 +281,7 @@ function FlowCanvasInner({
           },
         }}
       >
-        <Background color="#aaa" gap={20} />
+        <Background color="#aaa" gap={20} pattern="dots" />
         <Controls />
         <MiniMap />
       </ReactFlow>
