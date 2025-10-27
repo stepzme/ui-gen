@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/button";
 import { Text } from "@/components/text";
+import { Sun, Moon } from "lucide-react";
 
 interface HeaderProps {
   activeTab: 'builder' | 'sandbox';
@@ -10,6 +11,25 @@ interface HeaderProps {
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
+  const [isDark, setIsDark] = useState<boolean>(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldBeDark = stored ? stored === 'dark' : prefersDark;
+    if (shouldBeDark) root.classList.add('dark'); else root.classList.remove('dark');
+    setIsDark(root.classList.contains('dark'));
+  }, []);
+
+  const handleToggleTheme = () => {
+    const root = document.documentElement;
+    const nextDark = !root.classList.contains('dark');
+    root.classList.toggle('dark', nextDark);
+    localStorage.setItem('theme', nextDark ? 'dark' : 'light');
+    setIsDark(nextDark);
+  };
+
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
       <div className="flex items-center justify-between h-16 px-4">
@@ -56,8 +76,18 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           </nav>
         </div>
 
-        {/* Right side - empty for now */}
-        <div className="w-8 h-8" />
+        {/* Right side - Theme Toggle */}
+        <Button
+          onClick={handleToggleTheme}
+          variant="secondary"
+          semantic="default"
+          size="sm"
+          className="flex items-center gap-2"
+          aria-label="Toggle theme"
+          title="Toggle theme"
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
       </div>
     </header>
   );
