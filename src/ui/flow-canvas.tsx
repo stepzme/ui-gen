@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -118,6 +118,27 @@ function FlowCanvasInner({
   onCancelEditing,
 }: FlowCanvasProps) {
   const reactFlowInstance = useReactFlow();
+  const [isDark, setIsDark] = useState(false);
+  
+  // Отслеживаем изменение темы
+  useEffect(() => {
+    const root = document.documentElement;
+    setIsDark(root.classList.contains('dark'));
+    
+    // Слушаем изменения в DOM
+    const observer = new MutationObserver(() => {
+      setIsDark(root.classList.contains('dark'));
+    });
+    
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Определяем цвет фона в зависимости от темы
+  const backgroundColor = useMemo(() => {
+    return isDark ? '#1f1f1f' : '#f5f5f5';
+  }, [isDark]);
 
   // Конвертируем артборды в nodes
   const nodeData = useMemo(() => {
@@ -281,7 +302,7 @@ function FlowCanvasInner({
           },
         }}
       >
-        <Background color="#aaa" gap={20} pattern="dots" />
+        <Background color={backgroundColor} gap={20} />
         <Controls />
         <MiniMap />
       </ReactFlow>
