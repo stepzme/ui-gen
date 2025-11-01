@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Search, ChevronDown, ChevronRight, Diamond, Code } from "lucide-react";
 import { Button } from "@/components/button";
@@ -131,6 +131,40 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
     }
   }, [componentDefinitions, hasInitialized]);
 
+  // Мемоизация должна быть до условных возвратов (правила хуков React)
+  const categories = useMemo(() => {
+    if (!componentDefinitions || componentDefinitions.length === 0) {
+      return [];
+    }
+    return Array.from(new Set(componentDefinitions.map(comp => comp.category)));
+  }, [componentDefinitions]);
+
+  const filteredComponents = useMemo(() => {
+    if (!componentDefinitions || componentDefinitions.length === 0) {
+      return [];
+    }
+    return componentDefinitions.filter(component => {
+      const matchesSearch = component.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           component.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !selectedCategory || component.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [componentDefinitions, searchQuery, selectedCategory]);
+
+  // Группируем компоненты по категориям для аккордеона
+  const componentsByCategory = useMemo(() => {
+    if (!filteredComponents || filteredComponents.length === 0) {
+      return {} as Record<string, ComponentDefinition[]>;
+    }
+    return filteredComponents.reduce((acc, component) => {
+      if (!acc[component.category]) {
+        acc[component.category] = [];
+      }
+      acc[component.category].push(component);
+      return acc;
+    }, {} as Record<string, ComponentDefinition[]>);
+  }, [filteredComponents]);
+
   if (loading) {
     return (
       <div className="w-80 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg p-4">
@@ -146,24 +180,6 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
       </div>
     );
   }
-
-  const categories = Array.from(new Set(componentDefinitions.map(comp => comp.category)));
-
-  const filteredComponents = componentDefinitions.filter(component => {
-    const matchesSearch = component.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         component.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || component.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  // Группируем компоненты по категориям для аккордеона
-  const componentsByCategory = filteredComponents.reduce((acc, component) => {
-    if (!acc[component.category]) {
-      acc[component.category] = [];
-    }
-    acc[component.category].push(component);
-    return acc;
-  }, {} as Record<string, ComponentDefinition[]>);
 
   // Функции для управления аккордеонами
   const toggleCategory = (category: string) => {

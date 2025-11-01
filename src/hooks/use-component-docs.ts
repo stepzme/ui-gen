@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useComponentData } from './use-component-data';
 import { ComponentDocsConfig } from '@/lib/component-docs/types';
 
 interface UseComponentDocsReturn {
@@ -11,37 +11,10 @@ interface UseComponentDocsReturn {
 
 /**
  * Хук для работы с документацией компонентов
- * Генерирует документацию из docs.md файлов
+ * Использует общий кэш данных компонентов
  */
 export function useComponentDocs(): UseComponentDocsReturn {
-  const [docsConfig, setDocsConfig] = useState<ComponentDocsConfig>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-         async function loadComponentDocs() {
-           try {
-             setLoading(true);
-             setError(null);
-
-             // Загружаем документацию через объединенный API
-             const response = await fetch('/api/components');
-             if (!response.ok) {
-               throw new Error('Failed to fetch component data');
-             }
-
-             const { docsConfig } = await response.json();
-             setDocsConfig(docsConfig);
-      } catch (err) {
-        console.error('Error loading component docs:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load component documentation');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadComponentDocs();
-  }, []);
+  const { docsConfig, loading, error } = useComponentData();
 
   return {
     docsConfig,
@@ -49,4 +22,3 @@ export function useComponentDocs(): UseComponentDocsReturn {
     error
   };
 }
-

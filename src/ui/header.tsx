@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/button";
 import { Text } from "@/components/text";
 import { Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 
 interface HeaderProps {
   activeTab: 'builder' | 'sandbox';
@@ -11,24 +11,7 @@ interface HeaderProps {
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
-  const [isDark, setIsDark] = useState<boolean>(false);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const stored = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = stored ? stored === 'dark' : prefersDark;
-    if (shouldBeDark) root.classList.add('dark'); else root.classList.remove('dark');
-    setIsDark(root.classList.contains('dark'));
-  }, []);
-
-  const handleToggleTheme = () => {
-    const root = document.documentElement;
-    const nextDark = !root.classList.contains('dark');
-    root.classList.toggle('dark', nextDark);
-    localStorage.setItem('theme', nextDark ? 'dark' : 'light');
-    setIsDark(nextDark);
-  };
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
@@ -78,7 +61,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
         {/* Right side - Theme Toggle */}
         <Button
-          onClick={handleToggleTheme}
+          onClick={toggleTheme}
           variant="secondary"
           semantic="default"
           size="sm"

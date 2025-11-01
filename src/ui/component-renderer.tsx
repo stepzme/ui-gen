@@ -2,7 +2,6 @@
 
 import React from "react";
 import { ComponentNode, ComponentDefinition } from "@/types/page-builder";
-// import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 import { InlineEditor } from "./inline-editor";
 
 interface ComponentRendererProps {

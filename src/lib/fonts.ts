@@ -27,7 +27,3 @@ export const omegaUI = localFont({
   variable: "--font-omega-ui",
   display: "swap",
 });
-
-// Используем OmegaUI как основной шрифт
-export const customSans = omegaUI;
-export const customMono = omegaUI;

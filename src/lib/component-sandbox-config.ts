@@ -1,5 +1,4 @@
 import type { ComponentDefinition } from "@/types/page-builder";
-// import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 
 export interface SandboxVariant {
   label: string;

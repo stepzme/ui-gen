@@ -8,7 +8,7 @@ import { FlowCanvas } from "./flow-canvas";
 import { PropertiesPanel } from "./properties-panel";
 import { Header } from "./header";
 import { useComponentDefinitions } from "@/hooks/use-component-definitions";
-import { Diamond, DiamondPlus } from "lucide-react";
+import { DiamondPlus } from "lucide-react";
 import { Text } from "@/components/text";
 export default function PageBuilder() {
   // Настройка сенсора для dnd-kit - не блокируем wheel события
