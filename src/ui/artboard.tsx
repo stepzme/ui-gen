@@ -195,6 +195,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
               return (
                   <div
                     key={child.id}
+                    data-component-id={child.id}
                     className={`
                       relative group
                       ${isChildSelected ? '' : ''}
@@ -217,13 +218,11 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                         variant="secondary"
                         semantic="default"
                         size="sm"
-                        className={`absolute top-1/2 -left-23 w-8 z-10 transition-opacity -translate-y-1/2 ${
+                        className={`absolute top-1/2 -left-23 w-8 z-[100] transition-opacity -translate-y-1/2 ${
                           isChildSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                         }`}
-                        onMouseDown={(e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          e.preventDefault();
-                          console.log('Moving component up:', child.id);
                           onMoveComponentUp(child.id);
                         }}
                       >
@@ -237,13 +236,11 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                         variant="secondary"
                         semantic="default"
                         size="sm"
-                        className={`absolute top-1/2 -left-14 w-8 z-10 transition-opacity -translate-y-1/2 ${
+                        className={`absolute top-1/2 -left-14 w-8 z-[100] transition-opacity -translate-y-1/2 ${
                           isChildSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                         }`}
-                        onMouseDown={(e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          e.preventDefault();
-                          console.log('Moving component down:', child.id);
                           onMoveComponentDown(child.id);
                         }}
                       >
@@ -257,13 +254,11 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                         variant="secondary"
                         semantic="default"
                         size="sm"
-                        className={`absolute top-1/2 -right-14 w-8 z-10 transition-opacity -translate-y-1/2 ${
+                        className={`absolute top-1/2 -right-14 w-8 z-[100] transition-opacity -translate-y-1/2 ${
                           isChildSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                         }`}
-                        onMouseDown={(e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          e.preventDefault();
-                          console.log('Deleting component:', child.id);
                           onDeleteElement(child.id);
                         }}
                       >

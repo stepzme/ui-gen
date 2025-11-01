@@ -1,27 +1,18 @@
 "use client";
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useLayoutEffect } from 'react';
 import ReactFlow, {
   Node,
-  Edge,
   Background,
-  MiniMap,
-  Controls,
   useNodesState,
-  useEdgesState,
-  addEdge,
-  Connection,
   NodeProps,
   ReactFlowProvider,
   useReactFlow,
-  Handle,
-  Position,
-  EdgeProps,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { Artboard } from '@/types/page-builder';
-import { Monitor, Smartphone } from 'lucide-react';
+import { Artboard, ComponentNode } from '@/types/page-builder';
+import { Plus, ZoomIn, ZoomOut, Lock, Unlock } from 'lucide-react';
 import { Button } from '@/components/button';
 import { ArtboardComponent } from './artboard';
 
@@ -45,28 +36,15 @@ interface FlowCanvasProps {
 function ArtboardNode({ data, selected }: NodeProps) {
   const artboard = data.artboard;
   const handlers = data.handlers;
-
   return (
     <div 
       style={{
-        width: artboard.width,
+        width: 'auto',
         height: 'auto',
-        border: selected ? '2px solid #3b82f6' : 'none',
         borderRadius: '8px',
+        position: 'relative',
       }}
-      onClick={(e) => e.stopPropagation()}
     >
-      {/* Handle для исходящих связей */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{
-          background: '#555',
-          width: '12px',
-          height: '12px',
-        }}
-      />
-      
       <ArtboardComponent
         artboard={artboard}
         canvasTransform={{ x: 0, y: 0, scale: 1 }}
@@ -82,17 +60,6 @@ function ArtboardNode({ data, selected }: NodeProps) {
         onSaveEditing={handlers?.onSaveEditing}
         onCancelEditing={handlers?.onCancelEditing}
       />
-      
-      {/* Handle для входящих связей */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{
-          background: '#555',
-          width: '12px',
-          height: '12px',
-        }}
-      />
     </div>
   );
 }
@@ -100,6 +67,66 @@ function ArtboardNode({ data, selected }: NodeProps) {
 const nodeTypes = {
   artboard: ArtboardNode,
 };
+
+// Кастомный Controls компонент
+function CustomControls({ 
+  onAddArtboard, 
+  isInteractive, 
+  onToggleInteractive 
+}: { 
+  onAddArtboard?: (type: 'desktop' | 'mobile') => void;
+  isInteractive: boolean;
+  onToggleInteractive: () => void;
+}) {
+  const reactFlowInstance = useReactFlow();
+
+  const handleZoomIn = () => {
+    reactFlowInstance.zoomIn();
+  };
+
+  const handleZoomOut = () => {
+    reactFlowInstance.zoomOut();
+  };
+
+  return (
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1">
+      {onAddArtboard && (
+        <Button
+          variant="secondary"
+          semantic="default"
+          size="icon-sm"
+          onClick={() => onAddArtboard('mobile')}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      )}
+      <Button
+          variant="secondary"
+          semantic="default"
+          size="icon-sm"
+          onClick={handleZoomIn}
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="secondary"
+          semantic="default"
+          size="icon-sm"
+          onClick={handleZoomOut}
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="secondary"
+          semantic="default"
+          size="icon-sm"
+          onClick={onToggleInteractive}
+        >
+          {isInteractive ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+        </Button>
+    </div>
+  );
+}
 
 // Внутренний компонент
 function FlowCanvasInner({
@@ -118,27 +145,7 @@ function FlowCanvasInner({
   onCancelEditing,
 }: FlowCanvasProps) {
   const reactFlowInstance = useReactFlow();
-  const [isDark, setIsDark] = useState(false);
-  
-  // Отслеживаем изменение темы
-  useEffect(() => {
-    const root = document.documentElement;
-    setIsDark(root.classList.contains('dark'));
-    
-    // Слушаем изменения в DOM
-    const observer = new MutationObserver(() => {
-      setIsDark(root.classList.contains('dark'));
-    });
-    
-    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
-    
-    return () => observer.disconnect();
-  }, []);
-  
-  // Определяем цвет фона в зависимости от темы
-  const backgroundColor = useMemo(() => {
-    return isDark ? '#1f1f1f' : '#f5f5f5';
-  }, [isDark]);
+  const [isInteractive, setIsInteractive] = React.useState(true);
 
   // Конвертируем артборды в nodes
   const nodeData = useMemo(() => {
@@ -167,51 +174,12 @@ function FlowCanvasInner({
     }));
   }, [artboards, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
-  const initialEdges: Edge[] = [];
   const [nodes, setNodes, onNodesChange] = useNodesState(nodeData);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Обновляем nodes когда artboards меняются
-  useEffect(() => {
+  useLayoutEffect(() => {
     setNodes(nodeData);
   }, [nodeData, setNodes]);
-
-  // Обработчик создания соединения с label
-  const onConnect = useCallback(
-    (params: Connection) => {
-      if (!params.source || !params.target) return;
-      
-      const newEdge: Edge = {
-        id: `edge-${params.source}-${params.target}-${Date.now()}`,
-        source: params.source,
-        target: params.target,
-        label: '',
-        sourceHandle: params.sourceHandle ?? null,
-        targetHandle: params.targetHandle ?? null,
-      };
-      setEdges((eds) => addEdge(newEdge, eds));
-    },
-    [setEdges]
-  );
-
-  // Обработчик клика на edge
-  const onEdgeClick = useCallback(
-    (event: React.MouseEvent, edge: Edge) => {
-      event.stopPropagation();
-      const label = prompt('Enter label text:', edge.label?.toString() || '');
-      if (label !== null) {
-        setEdges((eds) =>
-          eds.map((e) => {
-            if (e.id === edge.id) {
-              return { ...e, label } as Edge;
-            }
-            return e;
-          })
-        );
-      }
-    },
-    [setEdges]
-  );
 
   const onNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
@@ -243,68 +211,38 @@ function FlowCanvasInner({
     [artboards, onSelectElement]
   );
 
-  return (
-    <div className="w-full h-full">
+  const onPaneClick = useCallback(
+    (event: React.MouseEvent) => {
+      // Снимаем выделение при клике на пустую область canvas
+      if (onDeselectElement) {
+        onDeselectElement();
+      }
+    },
+    [onDeselectElement]
+  );
 
-      {/* Add Artboard Buttons */}
-      {onAddArtboard && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 rounded-lg bg-background-primary p-2 shadow-lg">
-          <Button
-            onClick={() => onAddArtboard('desktop')}
-            variant="secondary"
-            semantic="default"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Monitor className="h-4 w-4" />
-            Add Desktop
-          </Button>
-          <Button
-            onClick={() => onAddArtboard('mobile')}
-            variant="secondary"
-            semantic="default"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Smartphone className="h-4 w-4" />
-            Add Mobile
-          </Button>
-        </div>
-      )}
+  return (
+    <div className="w-full h-full bg-background-secondary dark:bg-background-secondary/20">
 
       <ReactFlow
         nodes={nodes}
-        edges={edges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onEdgeClick={onEdgeClick}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         snapToGrid={true}
         snapGrid={[20, 20]}
         minZoom={0.1}
         maxZoom={2}
-        nodesDraggable={true}
-        nodesConnectable={true}
-        // Настройки для соединения
-        connectionLineStyle={{ stroke: '#888', strokeWidth: 2 }}
-        defaultEdgeOptions={{
-          labelStyle: { 
-            fill: '#333', 
-            fontWeight: 600,
-            fontSize: 12,
-          },
-          labelBgStyle: { 
-            fill: 'white', 
-            fillOpacity: 0.9,
-          },
-        }}
+        nodesDraggable={isInteractive}
       >
-        <Background color={backgroundColor} gap={20} />
-        <Controls />
-        <MiniMap />
+        <Background color="#666" gap={20} />
+        <CustomControls 
+          onAddArtboard={onAddArtboard} 
+          isInteractive={isInteractive}
+          onToggleInteractive={() => setIsInteractive(!isInteractive)}
+        />
       </ReactFlow>
     </div>
   );

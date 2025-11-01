@@ -34,7 +34,6 @@ export function ComponentRenderer({
 
   // Проверяем, что компонент существует
   if (!Component) {
-    console.error(`Component not found for id: ${component.id}`);
     return (
       <div className="p-4 border border-red-500 bg-red-50 text-red-700 rounded">
         <p>Component "{component.id}" not found</p>

@@ -10,7 +10,6 @@ import { Header } from "./header";
 import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 import { Diamond, DiamondPlus } from "lucide-react";
 import { Text } from "@/components/text";
-
 export default function PageBuilder() {
   // Настройка сенсора для dnd-kit - не блокируем wheel события
   const sensor = useSensor(PointerSensor, {
@@ -146,14 +145,9 @@ export default function PageBuilder() {
   };
 
   const handleDeleteElement = (elementId: string) => {
-    console.log('handleDeleteElement called with:', elementId);
-    console.log('Current artboards:', artboards);
-    console.log('Selected element:', selectedElement);
-    
     // Check if it's an artboard
     const artboard = artboards.find(ab => ab.id === elementId);
     if (artboard) {
-      console.log('Deleting artboard:', artboard.name);
       // Confirm deletion of artboard
       const confirmed = window.confirm(
         `Are you sure you want to delete the artboard "${artboard.name}"? This action cannot be undone.`
@@ -166,7 +160,6 @@ export default function PageBuilder() {
         }
       }
     } else {
-      console.log('Deleting component from artboards');
       // Delete component from artboards
       setArtboards(prev => prev.map(artboard => ({
         ...artboard,

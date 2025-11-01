@@ -291,7 +291,6 @@ function ComponentProperties({
       
       return Array.from(values);
     } catch (error) {
-      console.warn(`Failed to get options for ${componentType}.${propName}:`, error);
       return [];
     }
   };
