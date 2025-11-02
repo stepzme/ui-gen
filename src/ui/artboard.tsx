@@ -1,30 +1,50 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
-import { Monitor, Smartphone, Settings, Trash2, Move, ChevronUp, ChevronDown } from "lucide-react";
+import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
 import { Text } from "@/components/text";
 import { Artboard, SelectedElement } from "@/types/page-builder";
 import { ComponentRenderer } from "./component-renderer";
 import { useComponentDefinitions } from "@/hooks/use-component-definitions";
+import { Navbar } from "@/components/core/navbar";
+import { InlineEditor } from "./inline-editor";
+
+const getStatusLabel = (status: 'draft' | 'review' | 'approved' | 'published'): string => {
+  const statusLabels: Record<string, string> = {
+    draft: 'В работе',
+    review: 'На ревью',
+    approved: 'Ревью пройдено',
+    published: 'Готово'
+  };
+  return statusLabels[status] || status;
+};
+
+interface EditingElement {
+  id: string;
+  prop: string;
+  value: string;
+}
+
+interface CanvasTransform {
+  x: number;
+  y: number;
+  scale: number;
+}
 
 interface ArtboardComponentProps {
   artboard: Artboard;
-  canvasTransform?: { x: number; y: number; scale: number };
-  disablePositioning?: boolean; // Отключить transform позиционирование (для React Flow)
+  canvasTransform?: CanvasTransform;
+  disablePositioning?: boolean;
   onSelectElement: (element: SelectedElement) => void;
   selectedElement: SelectedElement | null;
   onDeleteElement?: (elementId: string) => void;
   onMoveArtboard?: (artboardId: string, x: number, y: number) => void;
   onMoveComponentUp?: (elementId: string) => void;
   onMoveComponentDown?: (elementId: string) => void;
-  editingElement?: {
-    id: string;
-    prop: string;
-    value: string;
-  } | null;
+  editingElement?: EditingElement | null;
   onStartEditing?: (componentId: string, prop: string, value: string) => void;
   onSaveEditing?: (componentId: string, prop: string, newValue: string) => void;
   onCancelEditing?: () => void;
@@ -38,14 +58,26 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const artboardRef = useRef<HTMLDivElement>(null);
   
-  // Используем позицию из артборда или значения по умолчанию
-  const position = artboard.position || { x: 300, y: 300 };
+  const position = useMemo(() => artboard.position || { x: 300, y: 300 }, [artboard.position]);
+
+  const normalizedTransform = useMemo<CanvasTransform>(() => ({
+    x: canvasTransform.x,
+    y: canvasTransform.y,
+    scale: canvasTransform.scale
+  }), [canvasTransform.x, canvasTransform.y, canvasTransform.scale]);
 
   const isSelected = selectedElement?.type === 'artboard' && selectedElement.id === artboard.id;
 
-  const handleArtboardClick = (e: React.MouseEvent) => {
+  const navbarHeight = useMemo(() => {
+    if (artboard.type !== 'mobile') return 0;
+    const variant = artboard.navbarVariant || 'ios';
+    const statusBarHeight = variant === 'ios' ? 48 : 24;
+    const navBarHeight = 56;
+    return statusBarHeight + navBarHeight;
+  }, [artboard.type, artboard.navbarVariant]);
+
+  const handleArtboardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onSelectElement({
       type: 'artboard',
@@ -55,63 +87,59 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
       artboardType: artboard.type,
       width: artboard.width,
       height: artboard.height,
-      autoHeight: artboard.autoHeight
+      autoHeight: artboard.autoHeight,
+      navbarVariant: artboard.navbarVariant,
+      navbarTitle: artboard.navbarTitle,
+      navbarDescription: artboard.navbarDescription,
+      navbarRightIcon: artboard.navbarRightIcon,
+      navbarShowNavigation: artboard.navbarShowNavigation,
+      navbarShowTitle: artboard.navbarShowTitle,
+      navbarShowDescription: artboard.navbarShowDescription,
+      navbarShowRightButton: artboard.navbarShowRightButton
     });
-  };
+  }, [artboard.id, artboard.name, artboard.status, artboard.type, artboard.width, artboard.height, artboard.autoHeight, artboard.navbarVariant, artboard.navbarTitle, artboard.navbarDescription, artboard.navbarRightIcon, artboard.navbarShowNavigation, artboard.navbarShowTitle, artboard.navbarShowDescription, artboard.navbarShowRightButton, onSelectElement]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Start dragging when clicking on the artboard header
-    if ((e.target as HTMLElement).closest('[data-artboard-header]') ||
-        (e.target as HTMLElement).closest('[data-move-button]')) {
+    if ((e.target as HTMLElement).closest('[data-artboard-header]')) {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
-      // Calculate the actual screen position of the artboard accounting for canvas transform
-      const screenArtboardX = canvasTransform.x + position.x * canvasTransform.scale;
-      const screenArtboardY = canvasTransform.y + position.y * canvasTransform.scale;
-      // Calculate offset from mouse to artboard origin in canvas space
-      const offsetX = (e.clientX - screenArtboardX) / canvasTransform.scale;
-      const offsetY = (e.clientY - screenArtboardY) / canvasTransform.scale;
+      const screenArtboardX = normalizedTransform.x + position.x * normalizedTransform.scale;
+      const screenArtboardY = normalizedTransform.y + position.y * normalizedTransform.scale;
+      const offsetX = (e.clientX - screenArtboardX) / normalizedTransform.scale;
+      const offsetY = (e.clientY - screenArtboardY) / normalizedTransform.scale;
       setDragStart({ x: offsetX, y: offsetY });
     }
-  }, [position.x, position.y, canvasTransform.x, canvasTransform.y, canvasTransform.scale]);
+  }, [position.x, position.y, normalizedTransform]);
 
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Global mouse event handlers for artboard dragging
   useEffect(() => {
+    if (!isDragging || !onMoveArtboard) {
+      return;
+    }
+
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (isDragging && onMoveArtboard) {
-        e.preventDefault();
-        // Convert mouse screen position to canvas position accounting for canvas transform
-        const canvasMouseX = (e.clientX - canvasTransform.x) / canvasTransform.scale;
-        const canvasMouseY = (e.clientY - canvasTransform.y) / canvasTransform.scale;
-        // Calculate new position in canvas space
-        const newPosition = {
-          x: canvasMouseX - dragStart.x,
-          y: canvasMouseY - dragStart.y
-        };
-        onMoveArtboard(artboard.id, newPosition.x, newPosition.y);
-      }
+      e.preventDefault();
+      const canvasMouseX = (e.clientX - normalizedTransform.x) / normalizedTransform.scale;
+      const canvasMouseY = (e.clientY - normalizedTransform.y) / normalizedTransform.scale;
+      const newPosition = {
+        x: canvasMouseX - dragStart.x,
+        y: canvasMouseY - dragStart.y
+      };
+      onMoveArtboard(artboard.id, newPosition.x, newPosition.y);
     };
 
     const handleGlobalMouseUp = () => {
       setIsDragging(false);
     };
 
-    if (isDragging) {
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-    }
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
 
     return () => {
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDragging, dragStart, artboard.id, onMoveArtboard, canvasTransform.x, canvasTransform.y, canvasTransform.scale]);
+  }, [isDragging, dragStart, artboard.id, onMoveArtboard, normalizedTransform]);
 
   return (
     <div 
@@ -122,26 +150,59 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
       }}
       onMouseDown={disablePositioning ? undefined : handleMouseDown}
     >
-      {/* Artboard Header */}
       <div 
         data-artboard-header
-        className={`flex items-center gap-1 mb-1 px-3 py-2 border-1 rounded-lg hover:bg-background-primary transition-colors cursor-pointer ${
+        className={`flex items-center gap-1 mb-1 px-3 py-2 border-1 rounded-lg bg-background-primary/80 hover:bg-background-primary transition-colors cursor-pointer ${
           isSelected ? 'border-1 border-border-info bg-background-primary' : 'border-transparent'
         }`}
         style={{ width: artboard.width }}
         onClick={handleArtboardClick}
       >
-        <Text size="footnote" weight="medium" className="w-full">{artboard.name}</Text>
+        <div className="flex-1 min-w-0">
+          {editingElement?.id === artboard.id && editingElement?.prop === 'name' ? (
+            <div className="text-xs leading-relaxed font-medium text-foreground">
+              <InlineEditor
+                value={editingElement?.value || artboard.name}
+                onSave={(newValue) => {
+                  if (onSaveEditing) {
+                    onSaveEditing(artboard.id, 'name', newValue);
+                  }
+                }}
+                onCancel={() => {
+                  if (onCancelEditing) {
+                    onCancelEditing();
+                  }
+                }}
+                className="truncate w-full bg-transparent border-none outline-none"
+              />
+            </div>
+          ) : (
+            <Text 
+              size="footnote" 
+              weight="medium" 
+              className="truncate"
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                if (onStartEditing) {
+                  onStartEditing(artboard.id, 'name', artboard.name);
+                }
+              }}
+              style={{ cursor: 'text' }}
+            >
+              {artboard.name}
+            </Text>
+          )}
+        </div>
         <Badge 
           semantic={artboard.status === 'published' ? 'accent' : 
                   artboard.status === 'approved' ? 'success' : 
                   artboard.status === 'review' ? 'warning' : 'default'}
           active={false}
-          className="text-xs"
+          className="text-xs flex-shrink-0"
         >
-          {artboard.status}
+          {getStatusLabel(artboard.status)}
         </Badge>
-        {onDeleteElement && (
+        {onDeleteElement && isSelected && (
           <Button
             variant="text"
             semantic="critical"
@@ -150,21 +211,16 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
               e.stopPropagation();
               onDeleteElement(artboard.id);
             }}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         )}
       </div>
 
-      {/* Artboard Container */}
       <div
         ref={setNodeRef}
-        className={`
-          relative border border-dashed border-border-primary rounded-lg transition-colors
-          ${isOver ? 'border-border-critical' : 'border-border-info'}
-          ${isSelected ? 'border-border-critical' : 'border-border-info'}
-        `}
+        className="relative transition-colors"
         style={{
           width: artboard.width,
           height: artboard.autoHeight ? 'auto' : artboard.height,
@@ -173,20 +229,32 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
         }}
         onClick={handleArtboardClick}
       >
-        {/* Artboard Content */}
+        {artboard.type === 'mobile' && (
+          <div className="absolute top-0 left-0 right-0 z-10">
+            <Navbar
+              variant={artboard.navbarVariant || 'ios'}
+              title={artboard.navbarTitle}
+              description={artboard.navbarDescription}
+              rightIcon={artboard.navbarRightIcon}
+              showNavigation={artboard.navbarShowNavigation ?? true}
+              showTitle={artboard.navbarShowTitle ?? true}
+              showDescription={artboard.navbarShowDescription ?? true}
+              showRightButton={artboard.navbarShowRightButton ?? true}
+            />
+          </div>
+        )}
         <div
-          className="w-full h-full bg-background-primary rounded-lg overflow-visible flex flex-col"
-          style={{ gap: `${artboard.gap}px`, padding: '16px' }}
+          className="w-full bg-background-primary flex flex-col"
+          style={{ 
+            gap: `${artboard.gap}px`, 
+            padding: '16px',
+            paddingTop: artboard.type === 'mobile' ? `${navbarHeight + 16}px` : '16px',
+            minHeight: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box'
+          }}
         >
-          {artboard.children.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <Text size="caption">Drop components here</Text>
-                <Text size="footnote" className="mt-1">or click to select artboard</Text>
-              </div>
-            </div>
-          ) : (
-            artboard.children.map((child) => {
+          {artboard.children.map((child) => {
               const componentDef = componentDefinitions.find(comp => comp.id === child.type);
               if (!componentDef) return null;
 
@@ -196,11 +264,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                   <div
                     key={child.id}
                     data-component-id={child.id}
-                    className={`
-                      relative group
-                      ${isChildSelected ? '' : ''}
-                      ${child.fullWidth ? 'w-full' : 'w-auto'}
-                    `}
+                    className={`relative group ${child.fullWidth ? 'w-full' : 'w-auto'} max-w-full`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelectElement({
@@ -210,16 +274,13 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       });
                     }}
                   >
-                    {/* Full Width Indicator - removed to avoid visual artifacts */}
-
-                    {/* Move Up button - Left side */}
                     {onMoveComponentUp && (
                       <Button
-                        variant="secondary"
+                        variant="primary"
                         semantic="default"
                         size="sm"
                         className={`absolute top-1/2 -left-23 w-8 z-[100] transition-opacity -translate-y-1/2 ${
-                          isChildSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                          isChildSelected ? 'opacity-100' : 'opacity-0'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -230,14 +291,13 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       </Button>
                     )}
 
-                    {/* Move Down button - Left side */}
                     {onMoveComponentDown && (
                       <Button
-                        variant="secondary"
+                        variant="primary"
                         semantic="default"
                         size="sm"
                         className={`absolute top-1/2 -left-14 w-8 z-[100] transition-opacity -translate-y-1/2 ${
-                          isChildSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                          isChildSelected ? 'opacity-100' : 'opacity-0'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -248,14 +308,13 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       </Button>
                     )}
 
-                    {/* Delete button - Right side */}
                     {onDeleteElement && (
                       <Button
                         variant="secondary"
-                        semantic="default"
+                        semantic="critical"
                         size="sm"
                         className={`absolute top-1/2 -right-14 w-8 z-[100] transition-opacity -translate-y-1/2 ${
-                          isChildSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                          isChildSelected ? 'opacity-100' : 'opacity-0'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -271,8 +330,8 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       props={{
                         ...child.props,
                         className: child.fullWidth 
-                          ? `${child.props.className || ''} w-full ${isChildSelected ? '' : ''}`.trim()
-                          : `${child.props.className || ''} ${isChildSelected ? '' : ''}`.trim()
+                          ? `${child.props.className || ''} w-full`.trim()
+                          : (child.props.className || '').trim()
                       }}
                       componentId={child.id}
                       editingElement={editingElement}
@@ -283,17 +342,14 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       {child.children}
                     </ComponentRenderer>
                   
-                  {/* Selection indicator - simplified */}
                   {isChildSelected && (
                     <div className="absolute -m-2 inset-0 border-2 border-border-info rounded-xl pointer-events-none" />
                   )}
                 </div>
               );
-            })
-          )}
+            })}
         </div>
 
-        {/* Drop indicator */}
         {isOver && (
           <div className="absolute inset-0 bg-primary/10 border border-border-info border-dashed rounded-lg flex items-center justify-center">
             <Text size="body" textColor="primary" weight="medium">Drop component here</Text>

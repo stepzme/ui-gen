@@ -20,10 +20,12 @@ import { Skeleton } from '@/components/skeleton';
 import { Switch } from '@/components/switch';
 import { Textarea } from '@/components/textarea';
 import { Tooltip } from '@/components/tooltip';
+import { ButtonIcon } from '@/components/buttonIcon';
 
 // Реестр компонентов на клиенте
 const componentRegistry: Record<string, React.ComponentType<any>> = {
   button: Button,
+  buttonIcon: ButtonIcon,
   input: Input,
   badge: Badge,
   text: Text,
@@ -87,6 +89,11 @@ function getDefaultPropsById(id: string): Record<string, any> {
       variant: 'primary',
       semantic: 'default',
       size: 'default'
+    },
+    buttonIcon: {
+      icon: 'placeholder',
+      variant: 'primary',
+      semantic: 'default'
     },
     input: {
       placeholder: 'Enter text...',

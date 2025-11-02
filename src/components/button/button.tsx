@@ -317,16 +317,11 @@ function Button({
     <motion.button
       data-slot="button"
       className={cn(buttonVariants({ variant, semantic, size }), className)}
-      whileHover={{ 
-        scale: 1,
-        transition: { duration: 0.2, ease: "easeOut" }
-      }}
       whileTap={{ 
         scale: 0.96,
         transition: { duration: 0.1, ease: "easeIn" }
       }}
       initial={{ scale: 1 }}
-      animate={{ scale: 1 }}
       transition={{ 
         duration: 0.2,
         ease: "easeInOut"

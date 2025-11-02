@@ -1,0 +1,23 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function CardArrowRight({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path fillRule="evenodd" clipRule="evenodd" d="M3 4C1.89543 4 1 4.89543 1 6V17.9902C1 19.0948 1.89543 19.9902 3 19.9902H21C22.1046 19.9902 23 19.0948 23 17.9902V6C23 4.89543 22.1046 4 21 4H3ZM14.4341 9.72249C14.4341 9.01862 15.2775 8.65781 15.7866 9.14393L18.1718 11.4218C18.5018 11.7369 18.5018 12.2638 18.1718 12.5789L15.7866 14.8567C15.2775 15.3428 14.4341 14.982 14.4341 14.2781V13.0005L6.39902 12.9907C6.17811 12.9905 5.99924 12.8111 5.99951 12.5902L6.00097 11.3902C6.00124 11.1693 6.18054 10.9905 6.40145 10.9907L14.4341 11.0005V9.72249Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

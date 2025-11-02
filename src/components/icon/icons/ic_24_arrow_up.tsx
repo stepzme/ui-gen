@@ -1,0 +1,24 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function ArrowUp({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path d="M22.6361 3.01416C22.857 3.01416 23.0361 2.83507 23.0361 2.61416V1.41416C23.0361 1.19325 22.857 1.01416 22.6361 1.01416H1.4C1.17909 1.01416 1 1.19325 1 1.41416V2.61416C1 2.83507 1.17909 3.01416 1.4 3.01416H22.6361Z" fill="currentColor"/>
+      <path d="M18.7194 14.9743C19.8518 14.9743 20.4447 13.629 19.6807 12.7932L12.9769 5.45978C12.4611 4.89558 11.5726 4.89481 11.0559 5.45811L4.32862 12.7915C3.56242 13.6267 4.15491 14.9743 5.28834 14.9743H8.75985L10.0983 21.4664C10.2824 22.3593 11.0686 22.9999 11.9802 22.9999C12.888 22.9999 13.6719 22.3647 13.86 21.4766L15.2373 14.9743H18.7194Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

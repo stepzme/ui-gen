@@ -1,15 +1,15 @@
 "use client";
 
-import { Settings, Monitor, Smartphone } from "lucide-react";
+import { Settings, Monitor, Smartphone, Dice1 } from "lucide-react";
 import { Label } from "@/components/label";
 import { Input } from "@/components/input";
-import { Textarea } from "@/components/textarea";
 import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
 import { Separator } from "@/components/separator";
 import { Text } from "@/components/text";
 import { Switch } from "@/components/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/select";
+import { SelectIcon } from "@/components/core/select-icon";
 import { ComponentDocs } from "./component-docs";
 import { useComponentDocs } from "@/hooks/use-component-docs";
 import { SelectedElement, ComponentNode, Artboard } from "@/types/page-builder";
@@ -77,7 +77,7 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
     return (
       <div className="flex w-80 flex-col flex-1 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg">
         <div className="p-4 border-b border-border-primary">
-          <Text size="h5" weight="semibold" className="flex items-center gap-2">
+          <Text size="h5" weight="medium" className="flex items-center gap-2">
             Свойства
           </Text>
         </div>
@@ -110,7 +110,7 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
   return (
     <div className="flex w-80 flex-col flex-1 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg">
       <div className="p-4 border-b border-border-primary">
-        <Text size="h5" weight="semibold" className="flex items-center gap-2">
+        <Text size="h5" weight="medium" className="flex items-center gap-2">
           Свойства
         </Text>
         {selectedElement.type === 'component' && (
@@ -141,45 +141,29 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
 function ArtboardProperties({ selectedElement, onPropChange }: { selectedElement: SelectedElement; onPropChange: (key: string, value: any) => void }) {
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="name">Название</Label>
-        <Input
-          id="name"
-          placeholder="Название артборда"
-          value={selectedElement.name || ''}
-          onChange={(e) => onPropChange('name', e.target.value)}
-        />
+      
+      <div className="flex items-center gap-2">
+        <Text size="caption" weight="medium" className="w-2/3">Статус</Text>
+        <Select
+          value={selectedElement.status || 'draft'}
+          onValueChange={(value) => onPropChange('status', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Выберите статус" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft"><Badge semantic="default" active={false}>В работе</Badge></SelectItem>
+            <SelectItem value="review"><Badge semantic="warning" active={false}>На ревью</Badge></SelectItem>
+            <SelectItem value="approved"><Badge semantic="success" active={false}>Ревью пройдено</Badge></SelectItem>
+            <SelectItem value="published"><Badge semantic="accent" active={false}>Готово</Badge></SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div>
-        <Label>Тип устройства</Label>
-        <div className="flex items-center gap-2 mt-2">
-          <Button
-            variant={selectedElement.artboardType === 'desktop' ? 'primary' : 'secondary'}
-            semantic={selectedElement.artboardType === 'desktop' ? 'default' : 'default'}
-            size="sm"
-            className="flex-1"
-            onClick={() => onPropChange('type', 'desktop')}
-          >
-            <Monitor className="h-4 w-4 mr-2" />
-            Desktop
-          </Button>
-          <Button
-            variant={selectedElement.artboardType === 'mobile' ? 'primary' : 'secondary'}
-            semantic={selectedElement.artboardType === 'mobile' ? 'default' : 'default'}
-            size="sm"
-            className="flex-1"
-            onClick={() => onPropChange('type', 'mobile')}
-          >
-            <Smartphone className="h-4 w-4 mr-2" />
-            Mobile
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="height">Высота</Label>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
+        <Text size="caption" weight="medium" className="w-2/3">Высота</Text>
+        <div className="flex w-full items-center gap-2">
+          
           <Input
             id="height"
             type="number"
@@ -205,32 +189,149 @@ function ArtboardProperties({ selectedElement, onPropChange }: { selectedElement
           <Button
             variant={selectedElement.autoHeight ? 'primary' : 'secondary'}
             semantic="default"
-            size="sm"
+            size="default"
             onClick={() => onPropChange('autoHeight', !selectedElement.autoHeight)}
             title={selectedElement.autoHeight ? "Фиксированная высота" : "Автоматическая высота"}
           >
-            A
+            Auto
           </Button>
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="status">Статус</Label>
-        <Select
-          value={selectedElement.status || 'draft'}
-          onValueChange={(value) => onPropChange('status', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Выберите статус" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="review">Review</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex items-center gap-2">
+        <Text size="caption" weight="medium" className="w-2/3">Устройство</Text>
+        <div className="flex items-center w-full gap-2">
+          <Button
+            variant={selectedElement.artboardType === 'desktop' ? 'primary' : 'secondary'}
+            semantic={selectedElement.artboardType === 'desktop' ? 'default' : 'default'}
+            size="sm"
+            className="flex-1"
+            onClick={() => onPropChange('type', 'desktop')}
+          >
+            Desktop
+          </Button>
+          <Button
+            variant={selectedElement.artboardType === 'mobile' ? 'primary' : 'secondary'}
+            semantic={selectedElement.artboardType === 'mobile' ? 'default' : 'default'}
+            size="sm"
+            className="flex-1"
+            onClick={() => onPropChange('type', 'mobile')}
+          >
+            Mobile
+          </Button>
+        </div>
       </div>
+
+
+      {selectedElement.artboardType === 'mobile' && (
+        <>
+          <Separator />
+          <div>
+            <Text size="h5" weight="medium" className="mb-3">Навбар</Text>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Text size="caption" weight="medium" className="w-2/3">Платформа</Text>
+            <div className="flex items-center w-full gap-2">
+              <Button
+                variant={selectedElement.navbarVariant === 'ios' ? 'primary' : 'secondary'}
+                semantic={selectedElement.navbarVariant === 'ios' ? 'default' : 'default'}
+                size="sm"
+                className="flex-1"
+                onClick={() => onPropChange('navbarVariant', 'ios')}
+              >
+                iOS
+              </Button>
+              <Button
+                variant={selectedElement.navbarVariant === 'android' ? 'primary' : 'secondary'}
+                semantic={selectedElement.navbarVariant === 'android' ? 'default' : 'default'}
+                size="sm"
+                className="flex-1"
+                onClick={() => onPropChange('navbarVariant', 'android')}
+              >
+                Android
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mt-2">
+              <Text size="caption" weight="medium" className="w-2/3">
+                Навбар
+              </Text>
+              <Switch
+                id="navbarShowNavigation"
+                checked={selectedElement.navbarShowNavigation ?? true}
+                onCheckedChange={(checked) => onPropChange('navbarShowNavigation', checked)}
+              />
+            </div>
+          </div>
+
+          {(selectedElement.navbarShowNavigation ?? true) && (
+            <>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Text size="caption" weight="medium" className="w-2/3">Тайтл</Text>
+                  <Switch
+                    id="navbarShowTitle"
+                    checked={selectedElement.navbarShowTitle ?? true}
+                    onCheckedChange={(checked) => onPropChange('navbarShowTitle', checked)}
+                  />
+                </div>
+                {(selectedElement.navbarShowTitle ?? true) && (
+                  <Input
+                    id="navbarTitle"
+                    placeholder="Заголовок навбара"
+                    value={selectedElement.navbarTitle || ''}
+                    onChange={(e) => onPropChange('navbarTitle', e.target.value)}
+                    className="w-full"
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Text size="caption" weight="medium" className="w-2/3">Описание</Text>
+                  <Switch
+                    id="navbarShowDescription"
+                    checked={selectedElement.navbarShowDescription ?? true}
+                    onCheckedChange={(checked) => onPropChange('navbarShowDescription', checked)}
+                  />
+                </div>
+                {(selectedElement.navbarShowDescription ?? true) && (
+                  <Input
+                    id="navbarDescription"
+                    placeholder="Описание навбара"
+                    value={selectedElement.navbarDescription || ''}
+                    onChange={(e) => onPropChange('navbarDescription', e.target.value)}
+                    className="w-full"
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Text size="caption" weight="medium" className="w-2/3">Правая кнопка</Text>
+                  <Switch
+                    id="navbarShowRightButton"
+                    checked={selectedElement.navbarShowRightButton ?? true}
+                    onCheckedChange={(checked) => onPropChange('navbarShowRightButton', checked)}
+                  />
+                </div>
+                {(selectedElement.navbarShowRightButton ?? true) && (
+                  <SelectIcon
+                    value={selectedElement.navbarRightIcon || 'three_dots_vert'}
+                    onValueChange={(value) => onPropChange('navbarRightIcon', value)}
+                    placeholder="Выберите иконку..."
+                    className="w-full"
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -296,9 +397,11 @@ function ComponentProperties({
   };
 
   // Определяем тип контрола
-  const getControlType = (propName: string, val: any): 'text' | 'number' | 'boolean' | 'select' => {
+  const getControlType = (propName: string, val: any): 'text' | 'number' | 'boolean' | 'select' | 'icon' => {
     if (typeof val === 'boolean') return 'boolean';
     if (typeof val === 'number') return 'number';
+    // Специальная обработка для icon в buttonIcon
+    if (propName === 'icon' && component.type === 'buttonIcon') return 'icon';
     if (SELECT_PROPS.includes(propName)) return 'select';
     return 'text';
   };
@@ -368,6 +471,20 @@ function ComponentProperties({
           </div>
         );
         
+      case 'icon':
+        return (
+          <div>
+            <Label htmlFor={propName}>
+              {propName.charAt(0).toUpperCase() + propName.slice(1)}
+            </Label>
+            <SelectIcon
+              value={propValue || ''}
+              onValueChange={(value) => onPropChange(propName, value)}
+              placeholder="Select icon..."
+            />
+          </div>
+        );
+        
       default: // text
         return (
           <div>
@@ -399,11 +516,19 @@ function ComponentProperties({
       <Separator />
 
       {/* Автоматически генерируемые контролы для всех пропсов */}
-      {Object.entries(allProps).map(([propName, propValue]) => (
-        <div key={propName}>
-          {renderPropControl(propName, propValue)}
+      {Object.entries(allProps)
+        .filter(([propName]) => {
+          // Исключаем size для buttonIcon
+          if (component.type === 'buttonIcon' && propName === 'size') {
+            return false;
+          }
+          return true;
+        })
+        .map(([propName, propValue]) => (
+          <div key={propName}>
+            {renderPropControl(propName, propValue)}
           </div>
-      ))}
+        ))}
     </div>
   );
 }

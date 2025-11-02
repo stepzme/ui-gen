@@ -21,6 +21,14 @@ export interface Artboard {
   children: ComponentNode[];
   position?: { x: number; y: number };
   autoHeight?: boolean;
+  navbarVariant?: 'ios' | 'android';
+  navbarTitle?: string;
+  navbarDescription?: string;
+  navbarRightIcon?: string;
+  navbarShowNavigation?: boolean;
+  navbarShowTitle?: boolean;
+  navbarShowDescription?: boolean;
+  navbarShowRightButton?: boolean;
 }
 
 export interface ComponentDefinition {
@@ -41,4 +49,12 @@ export interface SelectedElement {
   width?: number;
   height?: number;
   autoHeight?: boolean;
+  navbarVariant?: 'ios' | 'android';
+  navbarTitle?: string;
+  navbarDescription?: string;
+  navbarRightIcon?: string;
+  navbarShowNavigation?: boolean;
+  navbarShowTitle?: boolean;
+  navbarShowDescription?: boolean;
+  navbarShowRightButton?: boolean;
 }

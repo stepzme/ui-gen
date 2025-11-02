@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const textVariants = cva(
-  "text-foreground",
+  "text-foreground-primary",
   {
     variants: {
       size: {
@@ -28,12 +28,15 @@ const textVariants = cva(
         black: "font-black",
       },
       textColor: {
-        default: "text-foreground",
-        muted: "text-muted-foreground",
-        primary: "text-primary",
-        secondary: "text-secondary-foreground",
-        destructive: "text-destructive",
-        accent: "text-accent-foreground",
+        default: "text-foreground-primary",
+        muted: "text-foreground-secondary",
+        primary: "text-foreground-primary",
+        secondary: "text-foreground-secondary",
+        accent: "text-foreground-brand",
+        success: "text-foreground-success",
+        warning: "text-foreground-warning",
+        info: "text-foreground-info",
+        critical: "text-foreground-critical",
       },
     },
     defaultVariants: {

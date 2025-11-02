@@ -32,7 +32,7 @@ import { Text } from "@/components/text/text"
 |------|------|---------|-------------|
 | `size` | `'h1' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6' \| 'body' \| 'caption' \| 'footnote'` | `'body'` | Text size |
 | `weight` | `'thin' \| 'light' \| 'normal' \| 'medium' \| 'semibold' \| 'bold' \| 'extrabold' \| 'black'` | `'normal'` | Font weight |
-| `textColor` | `'default' \| 'muted' \| 'primary' \| 'secondary' \| 'destructive' \| 'accent'` | `'default'` | Text color |
+| `textColor` | `'default' \| 'muted' \| 'primary' \| 'secondary' \| 'accent' \| 'success' \| 'warning' \| 'info' \| 'critical'` | `'default'` | Text color |
 | `as` | `ElementType` | `'p'` | HTML element to render as |
 | `bPadding` | `number` | - | Bottom padding in pixels |
 | `tPadding` | `number` | - | Top padding in pixels |
@@ -77,8 +77,11 @@ import { Text } from "@/components/text/text"
 <Text textColor="muted">Muted</Text>
 <Text textColor="primary">Primary</Text>
 <Text textColor="secondary">Secondary</Text>
-<Text textColor="destructive">Destructive</Text>
 <Text textColor="accent">Accent</Text>
+<Text textColor="success">Success</Text>
+<Text textColor="warning">Warning</Text>
+<Text textColor="info">Info</Text>
+<Text textColor="critical">Critical</Text>
 ```
 
 ## Examples

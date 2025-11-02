@@ -1,0 +1,23 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function CardRectangleCross({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path fillRule="evenodd" clipRule="evenodd" d="M3 4C1.89543 4 1 4.89543 1 6V17.9902C1 19.0948 1.89543 19.9902 3 19.9902H21C22.1046 19.9902 23 19.0948 23 17.9902V6C23 4.89543 22.1046 4 21 4H3ZM8.68812 14.4593C8.53191 14.3031 8.53191 14.0498 8.68812 13.8936L10.5865 11.9953L8.68832 10.0971C8.53211 9.9409 8.53211 9.68763 8.68832 9.53142L9.53685 8.6829C9.69306 8.52669 9.94632 8.52669 10.1025 8.6829L12.0007 10.5811L13.899 8.68274C14.0552 8.52654 14.3085 8.52654 14.4647 8.68274L15.3132 9.53127C15.4694 9.68748 15.4694 9.94075 15.3132 10.097L13.4149 11.9953L15.3134 13.8938C15.4696 14.05 15.4696 14.3033 15.3134 14.4595L14.4649 15.308C14.3087 15.4642 14.0554 15.4642 13.8992 15.308L12.0007 13.4095L10.1023 15.3078C9.94612 15.4641 9.69285 15.4641 9.53664 15.3078L8.68812 14.4593Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

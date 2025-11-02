@@ -1,0 +1,24 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function WalletCardArrowRight({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path d="M9.85742 0.999878C8.75285 0.999878 7.85742 1.88179 7.85742 2.96969V7.203H20.9839V2.96969C20.9839 1.88179 20.0885 0.999878 18.9839 0.999878H9.85742Z" fill="currentColor"/>
+      <path fillRule="evenodd" clipRule="evenodd" d="M3.99902 5.20007H5.85742V7.20007H3.99902C3.44674 7.20007 2.99902 7.64779 2.99902 8.20007V9.58191H21.0002C22.1048 9.58191 23.0002 10.4773 23.0002 11.5819V20.9997C23.0002 22.1042 22.1048 22.9997 21.0002 22.9997H3C1.89543 22.9997 1 22.1042 1 20.9997L0.999023 8.20007C0.999023 6.54322 2.34217 5.20007 3.99902 5.20007ZM14.4209 14.0129C14.4209 13.309 15.2644 12.9482 15.7734 13.4343L18.1587 15.7122C18.4887 16.0273 18.4887 16.5542 18.1587 16.8693L15.7734 19.1471C15.2644 19.6332 14.4209 19.2724 14.4209 18.5686V17.1478H6.42441C6.2035 17.1478 6.02441 16.9687 6.02441 16.7478V15.5478C6.02441 15.3269 6.2035 15.1478 6.42441 15.1478H14.4209V14.0129Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

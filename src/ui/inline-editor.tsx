@@ -46,8 +46,16 @@ export function InlineEditor({
     onSave(editValue);
   };
 
-  const baseClasses = "w-full bg-transparent border-none outline-none resize-none";
+  const baseClasses = "w-full bg-transparent border-none outline-none resize-none m-0 p-0";
   const combinedClasses = `${baseClasses} ${className}`;
+
+  const inputStyle: React.CSSProperties = {
+    font: 'inherit',
+    lineHeight: 'inherit',
+    letterSpacing: 'inherit',
+    textAlign: 'inherit',
+    color: 'inherit',
+  };
 
   if (multiline) {
     return (
@@ -58,6 +66,7 @@ export function InlineEditor({
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         className={combinedClasses}
+        style={inputStyle}
         placeholder={placeholder}
         rows={3}
       />
@@ -72,6 +81,7 @@ export function InlineEditor({
       onKeyDown={handleKeyDown}
       onBlur={handleBlur}
       className={combinedClasses}
+      style={inputStyle}
       placeholder={placeholder}
     />
   );

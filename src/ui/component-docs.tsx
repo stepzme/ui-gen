@@ -9,6 +9,7 @@ import { getCategoryBadgeColor } from "@/lib/component-docs/categories"
 
 // Импортируем компоненты статически
 import { Button } from '@/components/button';
+import { ButtonIcon } from '@/components/buttonIcon';
 import { Input } from '@/components/input';
 import { Badge } from '@/components/badge';
 import { Text } from '@/components/text';
@@ -30,6 +31,7 @@ import { Tooltip } from '@/components/tooltip';
 // Маппинг компонентов
 const componentMap: Record<string, React.ComponentType<any>> = {
   button: Button,
+  buttonIcon: ButtonIcon,
   input: Input,
   badge: Badge,
   text: Text,

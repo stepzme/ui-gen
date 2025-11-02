@@ -1,0 +1,25 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function WindowMagnifier({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path d="M1 4C1 2.89543 1.89543 2 3 2H19C20.1046 2 21 2.89543 21 4V7H1V4Z" fill="currentColor"/>
+      <path d="M1 9H21V12.5278C19.9385 11.5777 18.5367 11 17 11C13.6863 11 11 13.6863 11 17C11 17.3407 11.0284 17.6748 11.083 18H3C1.89543 18 1 17.1046 1 16V9Z" fill="currentColor"/>
+      <path d="M17 13C19.0098 13 20.6734 14.4823 20.9573 16.4132C20.9854 16.6047 21 16.8007 21 17C21 17.7418 20.7981 18.4365 20.4462 19.032L22.9243 21.5101C23.0805 21.6663 23.0805 21.9196 22.9243 22.0758L22.0758 22.9243C21.9196 23.0805 21.6663 23.0805 21.5101 22.9243L19.032 20.4462C18.4365 20.7981 17.7418 21 17 21C15.1362 21 13.5701 19.7252 13.126 18C13.0438 17.6804 13 17.3453 13 17C13 14.7909 14.7909 13 17 13Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

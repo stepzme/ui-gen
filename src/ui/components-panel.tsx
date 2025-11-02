@@ -176,7 +176,7 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
   if (error) {
     return (
       <div className="w-80 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg p-4">
-        <Text size="body" textColor="destructive">Ошибка загрузки: {error}</Text>
+        <Text size="body" textColor="critical">Ошибка загрузки: {error}</Text>
       </div>
     );
   }

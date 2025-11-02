@@ -1,0 +1,23 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function CircleCross({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path fillRule="evenodd" clipRule="evenodd" d="M23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12ZM7.21967 8.28033C6.92678 7.98744 6.92678 7.51256 7.21967 7.21967C7.51256 6.92678 7.98744 6.92678 8.28033 7.21967L11.8765 10.8159L15.4727 7.21967C15.7656 6.92678 16.2405 6.92678 16.5334 7.21967C16.8263 7.51256 16.8263 7.98744 16.5334 8.28033L12.9372 11.8765L16.5334 15.4727C16.8263 15.7656 16.8263 16.2405 16.5334 16.5334C16.2405 16.8263 15.7656 16.8263 15.4727 16.5334L11.8765 12.9372L8.28033 16.5334C7.98744 16.8263 7.51256 16.8263 7.21967 16.5334C6.92678 16.2405 6.92678 15.7656 7.21967 15.4727L10.8159 11.8765L7.21967 8.28033Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

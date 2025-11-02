@@ -91,7 +91,8 @@ export default function PageBuilder() {
       status: 'draft',
       children: [],
       position: { x: centerX, y: centerY },
-      autoHeight: false
+      autoHeight: false,
+      navbarVariant: type === 'mobile' ? 'ios' : undefined
     };
 
     setArtboards(prev => [...prev, newArtboard]);
@@ -124,6 +125,16 @@ export default function PageBuilder() {
       const isMobile = updates.type === 'mobile';
       updates.width = isMobile ? 375 : 1440;
       updates.height = isMobile ? 800 : 900;
+      // Если меняем на desktop, удаляем navbarVariant
+      if (updates.type === 'desktop') {
+        updates.navbarVariant = undefined;
+      } else if (updates.type === 'mobile') {
+        // При переключении на mobile, устанавливаем ios по умолчанию, если navbarVariant не задан
+        const currentArtboard = artboards.find(ab => ab.id === artboardId);
+        if (!updates.navbarVariant && (!currentArtboard?.navbarVariant || currentArtboard?.type === 'desktop')) {
+          updates.navbarVariant = 'ios';
+        }
+      }
     }
     
     setArtboards(prev => prev.map(artboard => 
@@ -132,6 +143,15 @@ export default function PageBuilder() {
     
     // Update selectedElement if it's the current artboard
     if (selectedElement?.type === 'artboard' && selectedElement.id === artboardId) {
+      let updatedNavbarVariant: 'ios' | 'android' | undefined;
+      if (updates.type === 'desktop') {
+        updatedNavbarVariant = undefined;
+      } else if (updates.type === 'mobile') {
+        updatedNavbarVariant = updates.navbarVariant ?? 'ios';
+      } else {
+        updatedNavbarVariant = updates.navbarVariant ?? selectedElement.navbarVariant;
+      }
+      
       setSelectedElement(prev => prev ? { 
         ...prev, 
         name: updates.name ?? prev.name,
@@ -139,7 +159,15 @@ export default function PageBuilder() {
         artboardType: updates.type ?? prev.artboardType,
         width: updates.width ?? prev.width,
         height: updates.height ?? prev.height,
-        autoHeight: updates.autoHeight ?? prev.autoHeight
+        autoHeight: updates.autoHeight ?? prev.autoHeight,
+        navbarVariant: updatedNavbarVariant,
+        navbarTitle: updates.navbarTitle !== undefined ? updates.navbarTitle : prev.navbarTitle,
+        navbarDescription: updates.navbarDescription !== undefined ? updates.navbarDescription : prev.navbarDescription,
+        navbarRightIcon: updates.navbarRightIcon !== undefined ? updates.navbarRightIcon : prev.navbarRightIcon,
+        navbarShowNavigation: updates.navbarShowNavigation !== undefined ? updates.navbarShowNavigation : prev.navbarShowNavigation,
+        navbarShowTitle: updates.navbarShowTitle !== undefined ? updates.navbarShowTitle : prev.navbarShowTitle,
+        navbarShowDescription: updates.navbarShowDescription !== undefined ? updates.navbarShowDescription : prev.navbarShowDescription,
+        navbarShowRightButton: updates.navbarShowRightButton !== undefined ? updates.navbarShowRightButton : prev.navbarShowRightButton
       } : null);
     }
   };
@@ -228,22 +256,29 @@ export default function PageBuilder() {
   };
 
   const handleSaveEditing = (componentId: string, prop: string, newValue: string) => {
-    // Найти артборд с этим компонентом и обновить его
-    setArtboards(prev => prev.map(artboard => ({
-      ...artboard,
-      children: artboard.children.map((component: ComponentNode) => 
-        component.id === componentId 
-          ? { ...component, props: { ...component.props, [prop]: newValue } }
-          : component
-      )
-    })));
+    // Проверяем, является ли это артбордом
+    const artboard = artboards.find(ab => ab.id === componentId);
+    if (artboard) {
+      // Это артборд - обновляем его через handleUpdateArtboard
+      handleUpdateArtboard(componentId, { [prop]: newValue });
+    } else {
+      // Это компонент - обновляем его как раньше
+      setArtboards(prev => prev.map(artboard => ({
+        ...artboard,
+        children: artboard.children.map((component: ComponentNode) => 
+          component.id === componentId 
+            ? { ...component, props: { ...component.props, [prop]: newValue } }
+            : component
+        )
+      })));
 
-    // Обновить selectedElement если он редактируется
-    if (selectedElement && selectedElement.type === 'component' && selectedElement.id === componentId) {
-      setSelectedElement(prev => prev ? {
-        ...prev,
-        node: prev.node ? { ...prev.node, props: { ...prev.node.props, [prop]: newValue } } : prev.node
-      } : null);
+      // Обновить selectedElement если он редактируется
+      if (selectedElement && selectedElement.type === 'component' && selectedElement.id === componentId) {
+        setSelectedElement(prev => prev ? {
+          ...prev,
+          node: prev.node ? { ...prev.node, props: { ...prev.node.props, [prop]: newValue } } : prev.node
+        } : null);
+      }
     }
 
     setEditingElement(null);

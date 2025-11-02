@@ -1,4 +1,5 @@
 import type { ComponentDefinition } from "@/types/page-builder";
+import { buttonIconSandboxConfig } from "@/components/buttonIcon/sandbox.config";
 
 export interface SandboxVariant {
   label: string;
@@ -17,7 +18,7 @@ export interface SandboxConfig {
 // Helper function for text components
 function generateTextVariants(component: ComponentDefinition): SandboxSection[] {
   const weights = ['thin', 'light', 'normal', 'medium', 'semibold', 'bold', 'extrabold', 'black'];
-  const textColors = ['default', 'muted', 'primary', 'secondary', 'destructive', 'accent'];
+  const textColors = ['default', 'muted', 'primary', 'secondary', 'accent', 'success', 'warning', 'info', 'critical'];
 
   const sections: SandboxSection[] = [];
 
@@ -284,7 +285,8 @@ const componentSandboxConfigs: Record<string, SandboxConfig> = {
 
       return sections;
     }
-  }
+  },
+  buttonIcon: buttonIconSandboxConfig
 };
 
 export function getSandboxConfig(componentId: string): SandboxConfig | null {

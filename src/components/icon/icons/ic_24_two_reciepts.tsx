@@ -1,0 +1,24 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function TwoReciepts({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path fillRule="evenodd" clipRule="evenodd" d="M20 23C20.5523 23 21 22.5523 21 22V7C21 6.44772 20.5523 6 20 6H9C8.44771 6 8 6.44772 8 7V22C8 22.5523 8.44772 23 9 23H9.7334C9.87632 23 9.99219 22.8841 9.99219 22.7412C9.99219 21.7796 10.7718 21 11.7334 21C12.695 21 13.4746 21.7796 13.4746 22.7412C13.4746 22.8841 13.5905 23 13.7334 23H15.2666C15.4095 23 15.5254 22.8841 15.5254 22.7412C15.5254 21.7796 16.305 21 17.2666 21C18.2282 21 19.0078 21.7796 19.0078 22.7412C19.0078 22.8841 19.1237 23 19.2666 23H20ZM17.6 11C17.8209 11 18 10.8209 18 10.6V9.4C18 9.17909 17.8209 9 17.6 9H11.4C11.1791 9 11 9.17909 11 9.4V10.6C11 10.8209 11.1791 11 11.4 11H17.6ZM18 14.6C18 14.8209 17.8209 15 17.6 15H11.4C11.1791 15 11 14.8209 11 14.6V13.4C11 13.1791 11.1791 13 11.4 13H17.6C17.8209 13 18 13.1791 18 13.4V14.6Z" fill="currentColor"/>
+      <path d="M4 19H6V7C6 5.34315 7.34315 4 9 4H17V2C17 1.44772 16.5523 1 16 1H4C3.44772 1 3 1.44772 3 2V18C3 18.5523 3.44772 19 4 19Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

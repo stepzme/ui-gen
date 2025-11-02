@@ -1,0 +1,23 @@
+import * as React from "react"
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  className?: string
+}
+
+export function ChipProcessor({ className, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+      className={className}
+      {...props}
+    >
+      
+      <path fillRule="evenodd" clipRule="evenodd" d="M9.6 1C9.82091 1 10 1.17909 10 1.4V4H14V1.4C14 1.17909 14.1791 1 14.4 1H15.6C15.8209 1 16 1.17909 16 1.4V4H18C19.1046 4 20 4.89543 20 6V8H22.6C22.8209 8 23 8.17909 23 8.4V9.6C23 9.82091 22.8209 10 22.6 10H20V14H22.6C22.8209 14 23 14.1791 23 14.4V15.6C23 15.8209 22.8209 16 22.6 16H20V18C20 19.1046 19.1046 20 18 20H16V22.6C16 22.8209 15.8209 23 15.6 23H14.4C14.1791 23 14 22.8209 14 22.6V20H10V22.6C10 22.8209 9.82091 23 9.6 23H8.4C8.17909 23 8 22.8209 8 22.6V20H6C4.89543 20 4 19.1046 4 18V16H1.4C1.17909 16 1 15.8209 1 15.6V14.4C1 14.1791 1.17909 14 1.4 14H4V10H1.4C1.17909 10 1 9.82091 1 9.6V8.4C1 8.17909 1.17909 8 1.4 8H4V6C4 4.89543 4.89543 4 6 4H8V1.4C8 1.17909 8.17909 1 8.4 1H9.6ZM9 10C9 9.44772 9.44772 9 10 9H14C14.5523 9 15 9.44772 15 10V14C15 14.5523 14.5523 15 14 15H10C9.44772 15 9 14.5523 9 14V10Z" fill="currentColor"/>
+      
+    </svg>
+  )
+}

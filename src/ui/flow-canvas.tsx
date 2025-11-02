@@ -92,7 +92,7 @@ function CustomControls({
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1">
       {onAddArtboard && (
         <Button
-          variant="secondary"
+          variant="primary"
           semantic="default"
           size="icon-sm"
           onClick={() => onAddArtboard('mobile')}
@@ -101,7 +101,7 @@ function CustomControls({
         </Button>
       )}
       <Button
-          variant="secondary"
+          variant="primary"
           semantic="default"
           size="icon-sm"
           onClick={handleZoomIn}
@@ -109,7 +109,7 @@ function CustomControls({
           <ZoomIn className="h-4 w-4" />
         </Button>
         <Button
-          variant="secondary"
+          variant="primary"
           semantic="default"
           size="icon-sm"
           onClick={handleZoomOut}
@@ -117,7 +117,7 @@ function CustomControls({
           <ZoomOut className="h-4 w-4" />
         </Button>
         <Button
-          variant="secondary"
+          variant="primary"
           semantic="default"
           size="icon-sm"
           onClick={onToggleInteractive}
