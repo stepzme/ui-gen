@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useWorkspaces, useRecentDocuments, useWorkspaceProjects } from "@/hooks/api";
@@ -80,7 +81,7 @@ export default function WorkspaceDashboardPage() {
               {projects.length === 0 ? (
                 <div className="text-center py-12 text-neutral-400">
                   <p className="mb-4">No projects yet</p>
-                  <Button onClick={() => setShowCreateProject(true)}>Create Project</Button>
+                  <p className="text-sm">Use the sidebar to create your first project</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-4 gap-4">
