@@ -47,7 +47,7 @@ export default function DocumentPage({ params }: Params) {
   const { data: locks } = useLocks(params.document);
   const { data: session } = useSession();
   const [q, setQ] = useState("");
-  const { data: search } = useSearch(params.workspace, q);
+  const { data: searchResults } = useSearch(params.workspace, q);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   const addEdge = useAddFlowEdge(params.document);
@@ -147,14 +147,14 @@ export default function DocumentPage({ params }: Params) {
               className="rounded border border-neutral-800 bg-neutral-900 px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-sky-500"
               aria-label="Search"
             />
-            {q && (search?.projects?.length || search?.documents?.length) ? (
+            {q && (searchResults?.projects?.length || searchResults?.documents?.length) ? (
               <div className="absolute top-12 left-4 z-50 w-96 rounded border border-neutral-800 bg-neutral-950 p-2">
                 <div className="mb-1 text-xs uppercase text-neutral-400">Results</div>
                 <div className="max-h-64 overflow-auto space-y-1 text-sm">
-                  {(search?.projects || []).map((p:any)=>(
+                  {(searchResults?.projects || []).map((p:any)=>(
                     <div key={p.id} className="rounded px-2 py-1 hover:bg-neutral-800">Project: {p.name}</div>
                   ))}
-                  {(search?.documents || []).map((d:any)=>(
+                  {(searchResults?.documents || []).map((d:any)=>(
                     <div key={d.id} className="rounded px-2 py-1 hover:bg-neutral-800">Document: {d.name}</div>
                   ))}
                 </div>
