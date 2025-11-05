@@ -49,7 +49,13 @@ export function Sidebar({ workspaceId, activeSection = "recent", onSectionChange
       
       <nav className="flex-1 p-4 space-y-2">
         <button
-          onClick={() => onSectionChange?.("recent")}
+          onClick={() => {
+            if (onSectionChange) {
+              onSectionChange("recent");
+            } else {
+              router.push(`/workspace/${workspaceId}`);
+            }
+          }}
           className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
             activeSection === "recent"
               ? "bg-neutral-800 text-neutral-50"
@@ -59,7 +65,11 @@ export function Sidebar({ workspaceId, activeSection = "recent", onSectionChange
           Recent
         </button>
         <button
-          onClick={() => onSectionChange?.("projects")}
+          onClick={() => {
+            if (onSectionChange) {
+              onSectionChange("projects");
+            }
+          }}
           className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
             activeSection === "projects"
               ? "bg-neutral-800 text-neutral-50"

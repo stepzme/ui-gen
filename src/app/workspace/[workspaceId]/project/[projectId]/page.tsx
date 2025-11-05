@@ -43,9 +43,16 @@ export default function ProjectPage() {
     }
   };
 
+  const handleSectionChange = (section: "recent" | "projects") => {
+    if (section === "recent") {
+      router.push(`/workspace/${workspaceId}`);
+    }
+    // If "projects", stay on current page
+  };
+
   return (
     <div className="flex h-screen bg-neutral-950">
-      <Sidebar workspaceId={workspaceId} activeSection="projects" />
+      <Sidebar workspaceId={workspaceId} activeSection="projects" onSectionChange={handleSectionChange} />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
