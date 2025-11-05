@@ -52,9 +52,10 @@ interface ArtboardComponentProps {
   onCancelEditing?: () => void;
   lockedElementIds?: Set<string>;
   onReorderElements?: (ids: string[]) => void;
+  theme?: "light" | "dark";
 }
 
-export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing, lockedElementIds, onReorderElements }: ArtboardComponentProps) {
+export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing, lockedElementIds, onReorderElements, theme = "dark" }: ArtboardComponentProps) {
   const { componentDefinitions } = useComponentDefinitions();
   const { isOver, setNodeRef } = useDroppable({
     id: `artboard-${artboard.id}`,

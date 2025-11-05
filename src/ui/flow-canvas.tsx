@@ -32,12 +32,14 @@ interface FlowCanvasProps {
   onStartEditing?: (componentId: string, prop: string, value: string) => void;
   onSaveEditing?: (componentId: string, prop: string, newValue: string) => void;
   onCancelEditing?: () => void;
+  theme?: "light" | "dark";
 }
 
 // Custom Node type для артбордов
 function ArtboardNode({ data, selected }: NodeProps) {
   const artboard = data.artboard;
   const handlers = data.handlers;
+  const theme = data.theme || "dark";
   return (
     <div 
       style={{
@@ -61,6 +63,7 @@ function ArtboardNode({ data, selected }: NodeProps) {
         onStartEditing={handlers?.onStartEditing}
         onSaveEditing={handlers?.onSaveEditing}
         onCancelEditing={handlers?.onCancelEditing}
+        theme={theme}
       />
     </div>
   );
@@ -158,6 +161,7 @@ function FlowCanvasInner({
       position: artboard.position || { x: 100, y: 100 },
       data: { 
         artboard,
+        theme,
         handlers: {
           onSelectElement,
           selectedElement,
@@ -175,7 +179,7 @@ function FlowCanvasInner({
       width: artboard.width,
       height: artboard.height,
     }));
-  }, [artboards, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
+  }, [artboards, theme, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(nodeData);
 
