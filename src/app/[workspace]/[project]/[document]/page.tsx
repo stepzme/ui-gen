@@ -138,9 +138,32 @@ export default function DocumentPage({ params }: Params) {
   return (
     <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-50">
       <header className="flex items-center justify-between border-b border-neutral-800 px-4 py-2">
-        <h1 className="text-base font-medium" aria-label="Document name">
-          {headerTitle}
-        </h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push(`/workspace/${params.workspace}`)}
+            className="rounded p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-colors"
+            aria-label="Go to dashboard"
+            title="Go to dashboard"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+          </button>
+          <h1 className="text-base font-medium" aria-label="Document name">
+            {headerTitle}
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
           <div className="hidden md:flex items-center gap-2">
             <input
