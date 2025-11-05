@@ -234,7 +234,7 @@ function FlowCanvasInner({
   );
 
   return (
-    <div className="w-full h-full bg-background-secondary dark:bg-background-secondary/20">
+    <div className={`w-full h-full bg-background-secondary dark:bg-background-secondary/20 ${theme}`}>
 
       <ReactFlow
         nodes={nodes}
