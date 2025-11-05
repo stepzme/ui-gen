@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useDroppable } from "@dnd-kit/core";
+import { DndContext, PointerSensor, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
@@ -49,9 +51,10 @@ interface ArtboardComponentProps {
   onSaveEditing?: (componentId: string, prop: string, newValue: string) => void;
   onCancelEditing?: () => void;
   lockedElementIds?: Set<string>;
+  onReorderElements?: (ids: string[]) => void;
 }
 
-export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing, lockedElementIds }: ArtboardComponentProps) {
+export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing, lockedElementIds, onReorderElements }: ArtboardComponentProps) {
   const { componentDefinitions } = useComponentDefinitions();
   const { isOver, setNodeRef } = useDroppable({
     id: `artboard-${artboard.id}`,
@@ -69,6 +72,34 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
   }), [canvasTransform.x, canvasTransform.y, canvasTransform.scale]);
 
   const isSelected = selectedElement?.type === 'artboard' && selectedElement.id === artboard.id;
+
+  // DnD support for canvas ordering
+  const sensors = useSensors(useSensor(PointerSensor));
+  function handleDragEnd(event: any) {
+    if (!onReorderElements) return;
+    const ids = artboard.children.map((c) => c.id);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+    const next = arrayMove(ids, oldIndex, newIndex);
+    onReorderElements(next);
+  }
+
+  function SortableWrapper({ id, children }: { id: string; children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.85 : 1,
+    } as React.CSSProperties;
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        {children}
+      </div>
+    );
+  }
 
   const navbarHeight = useMemo(() => {
     if (artboard.type !== 'mobile') return 0;
@@ -244,7 +275,104 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
             boxSizing: 'border-box'
           }}
         >
-          {artboard.children.map((child) => {
+          {onReorderElements ? (
+            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+              <SortableContext items={artboard.children.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                {artboard.children.map((child) => {
+                  const componentDef = componentDefinitions.find(comp => comp.id === child.type);
+                  if (!componentDef) return null;
+
+                  const isChildSelected = selectedElement?.type === 'component' && selectedElement.id === child.id;
+                  const isLocked = lockedElementIds?.has(child.id);
+                  return (
+                    <SortableWrapper key={child.id} id={child.id}>
+                      <div
+                        data-component-id={child.id}
+                        className={`relative group ${child.fullWidth ? 'w-full' : 'w-auto'} max-w-full`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectElement({ type: 'component', id: child.id, node: child });
+                        }}
+                      >
+                        {isLocked && (
+                          <div className="absolute inset-0 z-[60] rounded-xl bg-black/10 pointer-events-none" />
+                        )}
+                        {onMoveComponentUp && (
+                          <Button
+                            variant="primary"
+                            semantic="default"
+                            size="sm"
+                            className={`absolute top-1/2 -left-23 w-8 z-[100] transition-opacity -translate-y-1/2 ${
+                              isChildSelected ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onMoveComponentUp(child.id);
+                            }}
+                          >
+                            <ChevronUp className="h-1 w-1" />
+                          </Button>
+                        )}
+
+                        {onMoveComponentDown && (
+                          <Button
+                            variant="primary"
+                            semantic="default"
+                            size="sm"
+                            className={`absolute top-1/2 -left-14 w-8 z-[100] transition-opacity -translate-y-1/2 ${
+                              isChildSelected ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onMoveComponentDown(child.id);
+                            }}
+                          >
+                            <ChevronDown className="h-1 w-1" />
+                          </Button>
+                        )}
+
+                        {onDeleteElement && (
+                          <Button
+                            variant="secondary"
+                            semantic="critical"
+                            size="sm"
+                            className={`absolute top-1/2 -right-14 w-8 z-[100] transition-opacity -translate-y-1/2 ${
+                              isChildSelected ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteElement(child.id);
+                            }}
+                          >
+                            <Trash2 className="h-1 w-1" />
+                          </Button>
+                        )}
+                        
+                        <ComponentRenderer
+                          component={componentDef}
+                          props={{
+                            ...child.props,
+                            className: child.fullWidth ? `${child.props.className || ''} w-full`.trim() : (child.props.className || '').trim(),
+                          }}
+                          componentId={child.id}
+                          editingElement={editingElement}
+                          onStartEditing={onStartEditing}
+                          onSaveEditing={onSaveEditing}
+                          onCancelEditing={onCancelEditing}
+                        >
+                          {child.children}
+                        </ComponentRenderer>
+                        {(isChildSelected || isLocked) && (
+                          <div className="absolute -m-2 inset-0 border-2 border-border-info rounded-xl pointer-events-none" />
+                        )}
+                      </div>
+                    </SortableWrapper>
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
+          ) : (
+            artboard.children.map((child) => {
               const componentDef = componentDefinitions.find(comp => comp.id === child.type);
               if (!componentDef) return null;
 
@@ -341,7 +469,8 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                   )}
                 </div>
               );
-            })}
+            })
+          )}
         </div>
 
         {isOver && (

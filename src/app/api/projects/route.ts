@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const pr = db.createProject(parsed.data.workspaceId, parsed.data.name);
+  const pr = db.createProject(parsed.data.workspaceId, parsed.data.name, (session as any).user?.id || 'admin');
   return NextResponse.json(pr, { status: 201 });
 }
 

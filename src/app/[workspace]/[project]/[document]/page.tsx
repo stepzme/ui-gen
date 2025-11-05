@@ -262,6 +262,12 @@ export default function DocumentPage({ params }: Params) {
                   onSelectElement={() => {}}
                   selectedElement={null}
                   lockedElementIds={new Set((locks?.items || []).filter((l:any)=>l.scope==='ELEMENT').map((l:any)=>l.elementId))}
+                  onReorderElements={(ids) => {
+                    if (!selectedPage?.elements) return;
+                    const byId = new Map(selectedPage.elements.map((n: any) => [n.id, n]));
+                    const next = ids.map((id) => byId.get(id)).filter(Boolean) as any[];
+                    updatePage.mutate({ elements: next });
+                  }}
                   onStartEditing={(componentId, prop, value) => {
                     if (!canEdit((session as any)?.role || 'OWNER')) return;
                     // acquire element lock if not already held
