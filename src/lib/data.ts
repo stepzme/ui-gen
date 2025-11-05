@@ -190,6 +190,7 @@ export async function addWorkspaceMember(workspaceId: string, userId: string, ro
   const map = (db as any).workspaceMembers.get(workspaceId) || new Map();
   map.set(userId, role);
   (db as any).workspaceMembers.set(workspaceId, map);
+  (db as any).save().catch(console.error);
   return { ok: true };
 }
 
@@ -212,6 +213,7 @@ export async function addProjectMember(projectId: string, userId: string, role: 
   const map = (db as any).projectMembers.get(projectId) || new Map();
   map.set(userId, role);
   (db as any).projectMembers.set(projectId, map);
+  (db as any).save().catch(console.error);
   return { ok: true };
 }
 
@@ -230,6 +232,7 @@ export async function addDocumentMember(documentId: string, userId: string, role
   const map = (db as any).documentMembers.get(documentId) || new Map();
   map.set(userId, role);
   (db as any).documentMembers.set(documentId, map);
+  (db as any).save().catch(console.error);
   return { ok: true };
 }
 

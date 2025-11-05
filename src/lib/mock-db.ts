@@ -1,6 +1,12 @@
 // Simple in-memory store for local testing without a DB. Not for production use.
+// Optionally persists to JSON file for development.
+
+import { promises as fs } from "fs";
+import { join } from "path";
 
 type ID = string;
+
+const DB_FILE = join(process.cwd(), ".data", "mock-db.json");
 
 export interface User { id: ID; email: string; password: string; name?: string; createdAt: number }
 export interface Workspace { id: ID; name: string; ownerId: ID; createdAt: number }
@@ -113,10 +119,12 @@ class MockDB {
   acquireLock(body: Omit<Lock,"id"|"updatedAt">) {
     const id = uid();
     const lock: Lock = { id, ...body, updatedAt: Date.now() } as Lock;
-    this.locks.set(id, lock); return lock;
+    this.locks.set(id, lock);
+    scheduleSave();
+    return lock;
   }
-  refreshLock(lockId: ID) { const l = this.locks.get(lockId); if (!l) return null; l.updatedAt = Date.now(); this.locks.set(lockId,l); return l }
-  releaseLock(lockId: ID) { return this.locks.delete(lockId) }
+  refreshLock(lockId: ID) { const l = this.locks.get(lockId); if (!l) return null; l.updatedAt = Date.now(); this.locks.set(lockId,l); scheduleSave(); return l }
+  releaseLock(lockId: ID) { const result = this.locks.delete(lockId); scheduleSave(); return result }
   listLocks(documentId: ID) {
     return Array.from(this.locks.values()).filter(l => l.documentId === documentId);
   }
@@ -147,8 +155,128 @@ class MockDB {
     if (doc.ownerId === userId) return 'OWNER';
     return this.documentMembers.get(documentId)?.get(userId) || this.getProjectRole(doc.projectId, userId);
   }
+
+  // Persistence
+  async save() {
+    try {
+      const data = {
+        users: Array.from(this.users.entries()),
+        usersByEmail: Array.from(this.usersByEmail.entries()),
+        workspaces: Array.from(this.workspaces.entries()),
+        projects: Array.from(this.projects.entries()),
+        documents: Array.from(this.documents.entries()),
+        pages: Array.from(this.pages.entries()),
+        flow: Array.from(this.flow.entries()),
+        locks: Array.from(this.locks.entries()),
+        audit: Array.from(this.audit.entries()),
+        workspaceMembers: Array.from(this.workspaceMembers.entries()).map(([k, v]) => [k, Array.from(v.entries())]),
+        projectMembers: Array.from(this.projectMembers.entries()).map(([k, v]) => [k, Array.from(v.entries())]),
+        documentMembers: Array.from(this.documentMembers.entries()).map(([k, v]) => [k, Array.from(v.entries())]),
+      };
+      await fs.mkdir(join(process.cwd(), ".data"), { recursive: true });
+      await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+    } catch (err) {
+      console.warn("Failed to save mock-db:", err);
+    }
+  }
+
+  async load() {
+    try {
+      const content = await fs.readFile(DB_FILE, "utf-8");
+      const data = JSON.parse(content);
+      
+      this.users = new Map(data.users || []);
+      this.usersByEmail = new Map(data.usersByEmail || []);
+      this.workspaces = new Map(data.workspaces || []);
+      this.projects = new Map(data.projects || []);
+      this.documents = new Map(data.documents || []);
+      this.pages = new Map(data.pages || []);
+      this.flow = new Map(data.flow || []);
+      this.locks = new Map(data.locks || []);
+      this.audit = new Map(data.audit || []);
+      this.workspaceMembers = new Map((data.workspaceMembers || []).map(([k, v]: [string, [string, string][]]) => [k, new Map(v)]));
+      this.projectMembers = new Map((data.projectMembers || []).map(([k, v]: [string, [string, string][]]) => [k, new Map(v)]));
+      this.documentMembers = new Map((data.documentMembers || []).map(([k, v]: [string, [string, string][]]) => [k, new Map(v)]));
+    } catch (err) {
+      // File doesn't exist or invalid - start fresh
+      if ((err as any)?.code !== 'ENOENT') {
+        console.warn("Failed to load mock-db:", err);
+      }
+    }
+  }
+}
+
+// Auto-save on mutations (debounced)
+let saveTimeout: NodeJS.Timeout | null = null;
+function scheduleSave() {
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    db.save().catch(console.error);
+  }, 1000);
 }
 
 export const db = new MockDB();
+
+// Override mutation methods to auto-save
+const originalCreateWorkspace = db.createWorkspace.bind(db);
+db.createWorkspace = function(...args) {
+  const result = originalCreateWorkspace(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalCreateProject = db.createProject.bind(db);
+db.createProject = function(...args) {
+  const result = originalCreateProject(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalCreateDocument = db.createDocument.bind(db);
+db.createDocument = function(...args) {
+  const result = originalCreateDocument(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalCreatePage = db.createPage.bind(db);
+db.createPage = function(...args) {
+  const result = originalCreatePage(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalUpdatePage = db.updatePage.bind(db);
+db.updatePage = function(...args) {
+  const result = originalUpdatePage(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalDeletePage = db.deletePage.bind(db);
+db.deletePage = function(...args) {
+  const result = originalDeletePage(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalAddFlowEdge = db.addFlowEdge.bind(db);
+db.addFlowEdge = function(...args) {
+  const result = originalAddFlowEdge(...args);
+  scheduleSave();
+  return result;
+};
+
+const originalDeleteFlowEdge = db.deleteFlowEdge.bind(db);
+db.deleteFlowEdge = function(...args) {
+  const result = originalDeleteFlowEdge(...args);
+  scheduleSave();
+  return result;
+};
+
+// Load on init (only in Node.js runtime)
+if (typeof window === 'undefined') {
+  db.load().catch(console.error);
+}
 
 
