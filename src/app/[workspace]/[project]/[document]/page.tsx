@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocument, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/hooks/api";
 import { PageListItem } from "@/ui/page-list-item";
@@ -15,7 +15,7 @@ import { canEdit } from "@/lib/rbac";
 import { ElementList } from "@/ui/element-list";
 
 interface Params {
-  params: { workspace: string; project: string; document: string };
+  params: Promise<{ workspace: string; project: string; document: string }>;
 }
 
 const modes = ["pages", "flow"] as const;
@@ -24,6 +24,7 @@ const devices = ["mobile", "desktop"] as const;
 type Device = (typeof devices)[number];
 
 export default function DocumentPage({ params }: Params) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const search = useSearchParams();
   const mode = (search.get("mode") as Mode) || useEditorStore.getState().mode;
@@ -36,24 +37,24 @@ export default function DocumentPage({ params }: Params) {
   function setQuery(key: string, value: string) {
     const sp = new URLSearchParams(search.toString());
     sp.set(key, value);
-    router.replace(`/${params.workspace}/${params.project}/${params.document}?${sp.toString()}`);
+    router.replace(`/${resolvedParams.workspace}/${resolvedParams.project}/${resolvedParams.document}?${sp.toString()}`);
   }
 
-  const { data: documentData } = useDocument(params.document);
-  const headerTitle = useMemo(() => documentData?.name || params.document, [documentData?.name, params.document]);
-  const { data } = useDocumentPages(params.document);
-  const createPage = useCreatePage(params.document);
-  const updatePage = useUpdatePage(params.document, selectedPageId || undefined);
-  const { data: flow } = useFlow(params.document);
-  const { data: locks } = useLocks(params.document);
+  const { data: documentData } = useDocument(resolvedParams.document);
+  const headerTitle = useMemo(() => documentData?.name || resolvedParams.document, [documentData?.name, resolvedParams.document]);
+  const { data } = useDocumentPages(resolvedParams.document);
+  const createPage = useCreatePage(resolvedParams.document);
+  const updatePage = useUpdatePage(resolvedParams.document, selectedPageId || undefined);
+  const { data: flow } = useFlow(resolvedParams.document);
+  const { data: locks } = useLocks(resolvedParams.document);
   const { data: session } = useSession();
   const [q, setQ] = useState("");
-  const { data: searchResults } = useSearch(params.workspace, q);
+  const { data: searchResults } = useSearch(resolvedParams.workspace, q);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [artboardTheme, setArtboardTheme] = useState<"light" | "dark">("dark");
 
-  const addEdge = useAddFlowEdge(params.document);
-  const deleteEdgeMutation = useDeleteFlowEdge(params.document, undefined);
+  const addEdge = useAddFlowEdge(resolvedParams.document);
+  const deleteEdgeMutation = useDeleteFlowEdge(resolvedParams.document, undefined);
   const deleteEdge = useCallback((edgeId: string) => {
     deleteEdgeMutation.mutate(edgeId);
   }, [deleteEdgeMutation]);
@@ -122,7 +123,7 @@ export default function DocumentPage({ params }: Params) {
 
   useEffect(() => {
     let active = true;
-    acquire({ documentId: params.document, scope: "DOCUMENT" }, {
+    acquire({ documentId: resolvedParams.document, scope: "DOCUMENT" }, {
       onSuccess: (res: any) => {
         if (!active) return;
         setCurrentLock(res.id);
@@ -135,14 +136,14 @@ export default function DocumentPage({ params }: Params) {
       setCurrentLock(null);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.document]);
+  }, [resolvedParams.document]);
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-50">
       <header className="flex items-center justify-between border-b border-neutral-800 px-4 py-2">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => router.push(`/workspace/${params.workspace}`)}
+            onClick={() => router.push(`/workspace/${resolvedParams.workspace}`)}
             className="rounded p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-colors"
             aria-label="Go to dashboard"
             title="Go to dashboard"
@@ -343,7 +344,7 @@ export default function DocumentPage({ params }: Params) {
                     if (!canEdit((session as any)?.role || 'OWNER')) return;
                     // acquire element lock if not already held
                     if (!elementLocksRef.get(componentId)) {
-                      acquire({ documentId: params.document, scope: "ELEMENT", elementId: componentId }, {
+                      acquire({ documentId: resolvedParams.document, scope: "ELEMENT", elementId: componentId }, {
                         onSuccess: (res: any) => elementLocksRef.set(componentId, res.id),
                       });
                     }
