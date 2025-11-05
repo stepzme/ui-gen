@@ -14,4 +14,8 @@ export function canWriteFromSession(session: any): boolean {
   return role === "OWNER" || role === "ADMIN" || role === "EDITOR";
 }
 
+export function getSessionUserId(session: any): string {
+  return (session as any)?.user?.id || (session as any)?.user?.email || "";
+}
+
 

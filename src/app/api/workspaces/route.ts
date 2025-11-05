@@ -4,7 +4,13 @@ import { db } from "@/src/lib/mock-db";
 import { canEdit } from "@/src/lib/rbac";
 import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
 
-export async function GET() { return NextResponse.json({ items: db.listWorkspaces() }); }
+export async function GET() {
+  const session = await requireSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = (session as any).user?.id || (session as any).user?.email || '';
+  const items = db.listWorkspaces().filter((w) => db.getWorkspaceRole(w.id, userId));
+  return NextResponse.json({ items });
+}
 
 export async function POST(request: Request) {
   const session = await requireSession();
