@@ -134,4 +134,67 @@ export async function listLocks(documentId: string) {
   return db.listLocks(documentId);
 }
 
+// Members
+export async function listWorkspaceMembers(workspaceId: string) {
+  if (prisma) {
+    const items = await prisma.workspaceMember.findMany({ where: { workspaceId } });
+    return items.map((m) => ({ userId: m.userId, role: m.role }));
+  }
+  return Array.from((db as any).workspaceMembers.get(workspaceId)?.entries() || []).map(([userId, role]: any) => ({ userId, role }));
+}
+export async function addWorkspaceMember(workspaceId: string, userId: string, role: 'OWNER'|'ADMIN'|'EDITOR'|'VIEWER') {
+  if (prisma) {
+    await prisma.workspaceMember.upsert({
+      where: { workspaceId_userId: { workspaceId, userId } },
+      create: { workspaceId, userId, role },
+      update: { role },
+    });
+    return { ok: true };
+  }
+  const map = (db as any).workspaceMembers.get(workspaceId) || new Map();
+  map.set(userId, role);
+  (db as any).workspaceMembers.set(workspaceId, map);
+  return { ok: true };
+}
+
+export async function listProjectMembers(projectId: string) {
+  if (prisma) {
+    const items = await prisma.projectMember.findMany({ where: { projectId } });
+    return items.map((m) => ({ userId: m.userId, role: m.role }));
+  }
+  return Array.from((db as any).projectMembers.get(projectId)?.entries() || []).map(([userId, role]: any) => ({ userId, role }));
+}
+export async function addProjectMember(projectId: string, userId: string, role: 'OWNER'|'ADMIN'|'EDITOR'|'VIEWER') {
+  if (prisma) {
+    await prisma.projectMember.upsert({
+      where: { projectId_userId: { projectId, userId } },
+      create: { projectId, userId, role },
+      update: { role },
+    });
+    return { ok: true };
+  }
+  const map = (db as any).projectMembers.get(projectId) || new Map();
+  map.set(userId, role);
+  (db as any).projectMembers.set(projectId, map);
+  return { ok: true };
+}
+
+export async function listDocumentMembers(documentId: string) {
+  if (prisma) {
+    // No dedicated document members in schema; return empty for now or derive from project members
+    return [];
+  }
+  return Array.from((db as any).documentMembers.get(documentId)?.entries() || []).map(([userId, role]: any) => ({ userId, role }));
+}
+export async function addDocumentMember(documentId: string, userId: string, role: 'OWNER'|'ADMIN'|'EDITOR'|'VIEWER') {
+  if (prisma) {
+    // Not implemented without a table; noop
+    return { ok: true };
+  }
+  const map = (db as any).documentMembers.get(documentId) || new Map();
+  map.set(userId, role);
+  (db as any).documentMembers.set(documentId, map);
+  return { ok: true };
+}
+
 
