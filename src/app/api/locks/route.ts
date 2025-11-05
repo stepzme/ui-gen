@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { lockAcquireBody, lockRefreshBody, lockReleaseBody } from "@/src/types/document";
 import { db } from "@/src/lib/mock-db";
 import { requireSession } from "@/src/app/api/_util/auth";
+
+export async function GET(request: NextRequest) {
+  const documentId = request.nextUrl.searchParams.get("documentId");
+  if (!documentId) return NextResponse.json({ items: [] });
+  return NextResponse.json({ items: db.listLocks(documentId) });
+}
 
 export async function POST(request: Request) {
   const session = await requireSession();

@@ -84,6 +84,9 @@ class MockDB {
   }
   refreshLock(lockId: ID) { const l = this.locks.get(lockId); if (!l) return null; l.updatedAt = Date.now(); this.locks.set(lockId,l); return l }
   releaseLock(lockId: ID) { return this.locks.delete(lockId) }
+  listLocks(documentId: ID) {
+    return Array.from(this.locks.values()).filter(l => l.documentId === documentId);
+  }
 
   addAudit(a: Omit<Audit,"id"|"createdAt">) { const id=uid(); const rec:Audit={id,createdAt:Date.now(),...a}; this.audit.set(id,rec); return rec }
   listAudit(filter?: Partial<Pick<Audit,"entityType"|"entityId">>) {

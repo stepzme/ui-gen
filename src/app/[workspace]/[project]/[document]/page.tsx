@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCreatePage, useDocumentPages, useFlow, useUpdatePage } from "@/src/hooks/api";
+import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocumentPages, useFlow, useLocks, useUpdatePage } from "@/src/hooks/api";
 import { PageListItem } from "@/src/ui/page-list-item";
 import { useEditorStore } from "@/src/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
@@ -43,7 +43,11 @@ export default function DocumentPage({ params }: Params) {
   const createPage = useCreatePage(params.document);
   const updatePage = useUpdatePage(params.document, selectedPageId || undefined);
   const { data: flow } = useFlow(params.document);
+  const { data: locks } = useLocks(params.document);
   const { data: session } = useSession();
+
+  const addEdge = useAddFlowEdge(params.document);
+  const deleteEdge = (edgeId: string) => useDeleteFlowEdge(params.document, edgeId).mutate();
 
   function handleCreatePage() {
     const count = (data?.items?.length || 0) + 1;
@@ -240,6 +244,7 @@ export default function DocumentPage({ params }: Params) {
                   selectedElement={null}
                   onMoveComponentUp={(elementId) => {
                     if (!selectedPage?.elements) return;
+                    if (!canEdit((session as any)?.role || 'OWNER')) return;
                     const idx = selectedPage.elements.findIndex((n: any) => n.id === elementId);
                     if (idx <= 0) return;
                     const next = [...selectedPage.elements];
@@ -249,6 +254,7 @@ export default function DocumentPage({ params }: Params) {
                   }}
                   onMoveComponentDown={(elementId) => {
                     if (!selectedPage?.elements) return;
+                    if (!canEdit((session as any)?.role || 'OWNER')) return;
                     const idx = selectedPage.elements.findIndex((n: any) => n.id === elementId);
                     if (idx < 0 || idx >= selectedPage.elements.length - 1) return;
                     const next = [...selectedPage.elements];
@@ -258,12 +264,17 @@ export default function DocumentPage({ params }: Params) {
                   }}
                   onDeleteElement={(elementId) => {
                     if (!selectedPage?.elements) return;
+                    if (!canEdit((session as any)?.role || 'OWNER')) return;
+                    const lockedIds = new Set((locks?.items || []).filter((l:any)=>l.scope==='ELEMENT').map((l:any)=>l.elementId));
+                    if (lockedIds.has(elementId)) return;
                     const next = selectedPage.elements.filter((n: any) => n.id !== elementId);
                     updatePage.mutate({ elements: next });
                   }}
                   onSaveEditing={(elementId, prop, value) => {
                     if (!selectedPage) return;
                     if (!canEdit((session as any)?.role || 'OWNER')) return;
+                    const lockedIds = new Set((locks?.items || []).filter((l:any)=>l.scope==='ELEMENT').map((l:any)=>l.elementId));
+                    if (lockedIds.has(elementId)) return;
                     // immutably update element by id
                     function patch(nodes: any[]): any[] {
                       return nodes.map((n) => {
@@ -288,7 +299,32 @@ export default function DocumentPage({ params }: Params) {
             )
           ) : (
             <div className="h-full min-h-[60vh] rounded border border-neutral-800 p-2">
+              <div className="mb-2 flex items-center gap-2">
+                <select id="flow-source" className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm">
+                  {(data?.items || []).map((p:any)=> (<option key={p.id} value={p.id}>{p.name}</option>))}
+                </select>
+                <span className="text-neutral-400 text-sm">→</span>
+                <select id="flow-target" className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm">
+                  {(data?.items || []).map((p:any)=> (<option key={p.id} value={p.id}>{p.name}</option>))}
+                </select>
+                <button
+                  className="rounded border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800"
+                  onClick={() => {
+                    const s = (document.getElementById('flow-source') as HTMLSelectElement).value;
+                    const t = (document.getElementById('flow-target') as HTMLSelectElement).value;
+                    if (s && t && s !== t) addEdge.mutate({ source: { kind: 'page', id: s }, targetPageId: t });
+                  }}
+                >Add edge</button>
+              </div>
               <FlowCanvas artboards={flowArtboards} edges={flow?.edges || []} />
+              <div className="mt-2 text-sm text-neutral-300">
+                {(flow?.edges || []).map((e:any)=> (
+                  <div key={e.id} className="flex items-center justify-between border border-neutral-800 rounded px-2 py-1 mb-1">
+                    <span>{e.source.id} → {e.targetPageId}</span>
+                    <button className="rounded border border-neutral-700 px-2 py-0.5 text-xs hover:bg-neutral-800" onClick={()=>deleteEdge(e.id)}>Delete</button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </main>

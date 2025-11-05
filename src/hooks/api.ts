@@ -67,6 +67,10 @@ export function useDeleteFlowEdge(documentId: string | undefined, edgeId: string
   });
 }
 
+export function useLocks(documentId: string | undefined, options?: UseQueryOptions<{ items: any[] }>) {
+  return useQuery({ queryKey: ["locks", documentId], queryFn: () => jsonFetch(`/api/locks?${new URLSearchParams({ documentId: documentId || "" })}`), enabled: !!documentId, ...(options || {}) });
+}
+
 export function useDocumentPages(documentId: string | undefined, options?: UseQueryOptions<{ documentId: string; items: any[] }>) {
   return useQuery({ queryKey: ["document-pages", documentId], queryFn: () => jsonFetch(`/api/documents/${documentId}/pages`), enabled: !!documentId, ...(options || {}) });
 }
