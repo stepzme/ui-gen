@@ -58,9 +58,39 @@ export const updateDocumentBody = z.object({
   data: documentDataSchema.optional(),
 });
 
+// Pages CRUD
+export const createPageBody = z.object({
+  name: z.string().min(1),
+  device: deviceModeSchema,
+});
+export const updatePageBody = z.object({
+  name: z.string().min(1).optional(),
+  device: deviceModeSchema.optional(),
+  index: z.number().int().nonnegative().optional(),
+  elements: z.array(elementNodeSchema).optional(),
+});
+
+// Locks
+export const lockAcquireBody = z.object({
+  documentId: z.string().uuid(),
+  scope: z.union([z.literal("DOCUMENT"), z.literal("ELEMENT")]),
+  elementId: z.string().uuid().optional(),
+});
+export const lockRefreshBody = z.object({
+  lockId: z.string().uuid(),
+});
+export const lockReleaseBody = z.object({
+  lockId: z.string().uuid(),
+});
+
 export type CreateWorkspaceBody = z.infer<typeof createWorkspaceBody>;
 export type CreateProjectBody = z.infer<typeof createProjectBody>;
 export type CreateDocumentBody = z.infer<typeof createDocumentBody>;
 export type UpdateDocumentBody = z.infer<typeof updateDocumentBody>;
+export type CreatePageBody = z.infer<typeof createPageBody>;
+export type UpdatePageBody = z.infer<typeof updatePageBody>;
+export type LockAcquireBody = z.infer<typeof lockAcquireBody>;
+export type LockRefreshBody = z.infer<typeof lockRefreshBody>;
+export type LockReleaseBody = z.infer<typeof lockReleaseBody>;
 
 
