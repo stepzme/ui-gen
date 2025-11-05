@@ -12,12 +12,14 @@ interface EditorState {
   device: Device;
   selectedPageId: string | null;
   locks: LockState;
+  currentLockId: string | null;
   setMode: (mode: Mode) => void;
   setDevice: (device: Device) => void;
   selectPage: (pageId: string | null) => void;
   lockElement: (id: string) => void;
   unlockElement: (id: string) => void;
   resetLocks: () => void;
+  setCurrentLock: (lockId: string | null) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -25,6 +27,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   device: "desktop",
   selectedPageId: null,
   locks: { lockedElementIds: new Set() },
+  currentLockId: null,
   setMode: (mode) => set({ mode }),
   setDevice: (device) => set({ device }),
   selectPage: (selectedPageId) => set({ selectedPageId }),
@@ -41,6 +44,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       return { locks: { lockedElementIds: next } };
     }),
   resetLocks: () => set({ locks: { lockedElementIds: new Set() } }),
+  setCurrentLock: (currentLockId) => set({ currentLockId }),
 }));
 
 

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCreatePage, useDocumentPages } from "@/src/hooks/api";
 import { PageListItem } from "@/src/ui/page-list-item";
 import { useEditorStore } from "@/src/store/editor";
+import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
+import { useEffect } from "react";
 
 interface Params {
   params: { workspace: string; project: string; document: string };
@@ -41,6 +43,30 @@ export default function DocumentPage({ params }: Params) {
   }
 
   const selectedPage = useMemo(() => data?.items?.find((p: any) => p.id === selectedPageId), [data, selectedPageId]);
+
+  // Document-level lock on mount/unmount (scaffold)
+  const { mutate: acquire } = useAcquireLock();
+  const { mutate: release } = useReleaseLock();
+  const lockId = useEditorStore((s) => s.currentLockId);
+  const setCurrentLock = useEditorStore((s) => s.setCurrentLock);
+  useLockHeartbeat(lockId, 10000);
+
+  useEffect(() => {
+    let active = true;
+    acquire({ documentId: params.document, scope: "DOCUMENT" }, {
+      onSuccess: (res: any) => {
+        if (!active) return;
+        setCurrentLock(res.id);
+      },
+    });
+    return () => {
+      active = false;
+      const id = useEditorStore.getState().currentLockId;
+      if (id) release({ lockId: id });
+      setCurrentLock(null);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.document]);
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-50">
