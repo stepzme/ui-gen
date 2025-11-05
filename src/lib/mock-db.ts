@@ -2,6 +2,7 @@
 
 type ID = string;
 
+export interface User { id: ID; email: string; password: string; name?: string; createdAt: number }
 export interface Workspace { id: ID; name: string; ownerId: ID; createdAt: number }
 export interface Project { id: ID; workspaceId: ID; name: string; ownerId: ID; createdAt: number }
 export interface Document { id: ID; projectId: ID; name: string; slug: string; ownerId: ID; createdAt: number }
@@ -14,6 +15,8 @@ export interface Audit { id: ID; entityType: string; entityId: ID; action: strin
 function uid() { return crypto.randomUUID() }
 
 class MockDB {
+  users = new Map<ID, User>();
+  usersByEmail = new Map<string, ID>(); // email -> userId
   workspaces = new Map<ID, Workspace>();
   projects = new Map<ID, Project>();
   documents = new Map<ID, Document>();
@@ -24,6 +27,29 @@ class MockDB {
   workspaceMembers = new Map<ID, Map<ID, 'OWNER'|'ADMIN'|'EDITOR'|'VIEWER'>>();
   projectMembers = new Map<ID, Map<ID, 'OWNER'|'ADMIN'|'EDITOR'|'VIEWER'>>();
   documentMembers = new Map<ID, Map<ID, 'OWNER'|'ADMIN'|'EDITOR'|'VIEWER'>>();
+
+  getUserByEmail(email: string): User | null {
+    const userId = this.usersByEmail.get(email);
+    if (!userId) return null;
+    return this.users.get(userId) || null;
+  }
+
+  getUserOrCreateByEmail(email: string, password: string, name?: string): User {
+    let user = this.getUserByEmail(email);
+    if (!user) {
+      const id = uid();
+      user = { id, email, password, name, createdAt: Date.now() };
+      this.users.set(id, user);
+      this.usersByEmail.set(email, id);
+    }
+    return user;
+  }
+
+  verifyUser(email: string, password: string): User | null {
+    const user = this.getUserByEmail(email);
+    if (!user || user.password !== password) return null;
+    return user;
+  }
 
   listWorkspaces() {
     return Array.from(this.workspaces.values()).sort((a,b)=>a.createdAt-b.createdAt);

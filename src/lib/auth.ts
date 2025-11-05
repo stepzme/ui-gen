@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { verifyUser, getUserOrCreateByEmail } from "@/lib/data";
 
 export const authOptions = {
   providers: [
@@ -10,13 +11,33 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        // First try to verify existing user
+        let user = await verifyUser(credentials.email, credentials.password);
+        
+        // If admin credentials from env, create/get admin user
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
-        if (!credentials?.email || !credentials?.password) return null;
         if (credentials.email === adminEmail && credentials.password === adminPassword) {
-          return { id: "admin", email: adminEmail, role: "OWNER" } as any;
+          user = await getUserOrCreateByEmail(adminEmail, adminPassword, "Admin");
+          return { 
+            id: user.id, 
+            email: user.email, 
+            name: user.name,
+            role: "OWNER" 
+          } as any;
         }
-        return null;
+        
+        if (!user) return null;
+        
+        // For now, all users get OWNER role (can be changed later based on memberships)
+        return { 
+          id: user.id, 
+          email: user.email, 
+          name: user.name,
+          role: "OWNER" 
+        } as any;
       },
     }),
   ],

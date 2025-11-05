@@ -15,7 +15,7 @@ export function canWriteFromSession(session: any): boolean {
 }
 
 export function getSessionUserId(session: any): string {
-  // Use email as primary identifier for consistency (matches auth.ts)
-  return (session as any)?.user?.email || (session as any)?.user?.id || "";
+  // Use UUID from user.id as primary identifier
+  return (session as any)?.user?.id || "";
 }
 

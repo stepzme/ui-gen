@@ -284,4 +284,31 @@ export async function listAudit(filters?: { entityType?: string; entityId?: stri
   return logs.slice(0, 100).sort((a: any, b: any) => b.createdAt - a.createdAt);
 }
 
+export async function getUserByEmail(email: string) {
+  if (prisma) {
+    return await prisma.user.findUnique({ where: { email } });
+  }
+  return (db as any).getUserByEmail(email);
+}
+
+export async function getUserOrCreateByEmail(email: string, password: string, name?: string) {
+  if (prisma) {
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      user = await prisma.user.create({ data: { email, password, name } });
+    }
+    return user;
+  }
+  return (db as any).getUserOrCreateByEmail(email, password, name);
+}
+
+export async function verifyUser(email: string, password: string) {
+  if (prisma) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.password !== password) return null;
+    return user;
+  }
+  return (db as any).verifyUser(email, password);
+}
+
 
