@@ -107,6 +107,10 @@ export default function DocumentPage({ params }: Params) {
   const setCurrentLock = useEditorStore((s) => s.setCurrentLock);
   useLockHeartbeat(lockId, 10000);
 
+  // element-level lock map
+  const elementLocksRef = (globalThis as any).__elementLocksRef || new Map<string, string>();
+  ;(globalThis as any).__elementLocksRef = elementLocksRef;
+
   useEffect(() => {
     let active = true;
     acquire({ documentId: params.document, scope: "DOCUMENT" }, {
@@ -242,6 +246,22 @@ export default function DocumentPage({ params }: Params) {
                   disablePositioning
                   onSelectElement={() => {}}
                   selectedElement={null}
+                  onStartEditing={(componentId, prop, value) => {
+                    if (!canEdit((session as any)?.role || 'OWNER')) return;
+                    // acquire element lock if not already held
+                    if (!elementLocksRef.get(componentId)) {
+                      acquire({ documentId: params.document, scope: "ELEMENT", elementId: componentId }, {
+                        onSuccess: (res: any) => elementLocksRef.set(componentId, res.id),
+                      });
+                    }
+                  }}
+                  onCancelEditing={() => {
+                    // release all element locks held by this page instance
+                    for (const [el, id] of elementLocksRef.entries()) {
+                      release({ lockId: id });
+                      elementLocksRef.delete(el);
+                    }
+                  }}
                   onMoveComponentUp={(elementId) => {
                     if (!selectedPage?.elements) return;
                     if (!canEdit((session as any)?.role || 'OWNER')) return;
@@ -289,6 +309,9 @@ export default function DocumentPage({ params }: Params) {
                     }
                     const nextElements = patch(selectedPage.elements || []);
                     updatePage.mutate({ elements: nextElements });
+                    // release element lock after save
+                    const held = elementLocksRef.get(elementId);
+                    if (held) { release({ lockId: held }); elementLocksRef.delete(elementId); }
                   }}
                 />
               </div>
