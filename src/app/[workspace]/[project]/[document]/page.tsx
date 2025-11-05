@@ -48,6 +48,7 @@ export default function DocumentPage({ params }: Params) {
   const { data: session } = useSession();
   const [q, setQ] = useState("");
   const { data: search } = useSearch(params.workspace, q);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   const addEdge = useAddFlowEdge(params.document);
   const deleteEdge = (edgeId: string) => useDeleteFlowEdge(params.document, edgeId).mutate();
@@ -284,7 +285,7 @@ export default function DocumentPage({ params }: Params) {
                 <ArtboardComponent
                   artboard={artboard}
                   disablePositioning
-                  onSelectElement={() => {}}
+                  onSelectElement={(el) => setSelectedElementId(el.id)}
                   selectedElement={null}
                   lockedElementIds={new Set((locks?.items || []).filter((l:any)=>l.scope==='ELEMENT').map((l:any)=>l.elementId))}
                   onReorderElements={(ids) => {
@@ -412,7 +413,30 @@ export default function DocumentPage({ params }: Params) {
         </main>
         <aside className="hidden w-80 border-l border-neutral-800 p-3 lg:block" aria-label="Inspector">
           <div className="mb-3 text-xs uppercase text-neutral-400">Inspector</div>
-          <div className="text-sm text-neutral-300">Select an element to edit props</div>
+          {selectedElementId && selectedPage ? (
+            <div className="space-y-3 text-sm">
+              <div className="text-neutral-300">Element ID: <span className="text-neutral-400">{selectedElementId}</span></div>
+              <label className="block text-neutral-400">Content</label>
+              <input
+                className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 outline-none focus:ring-2 focus:ring-sky-500"
+                value={(() => {
+                  const el = (selectedPage.elements || []).find((n:any)=>n.id===selectedElementId);
+                  return (el?.props?.content ?? el?.props?.children ?? "");
+                })()}
+                onChange={(e) => {
+                  if (!canEdit((session as any)?.role || 'OWNER')) return;
+                  const el = (selectedPage.elements || []).find((n:any)=>n.id===selectedElementId);
+                  if (!el) return;
+                  const next = (selectedPage.elements || []).map((n:any)=> n.id===selectedElementId ? { ...n, props: { ...(n.props||{}), content: e.target.value } } : n);
+                  updatePage.mutate({ elements: next });
+                }}
+                placeholder="Text content"
+                aria-label="Element content"
+              />
+            </div>
+          ) : (
+            <div className="text-sm text-neutral-300">Select an element to edit props</div>
+          )}
         </aside>
       </div>
     </div>
