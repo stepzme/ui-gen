@@ -215,32 +215,53 @@ function FlowCanvasInner({
   const reactFlowInstance = useReactFlow();
   const [isInteractive, setIsInteractive] = React.useState(true);
 
-  // Конвертируем артборды в nodes
+  // Конвертируем артборды в nodes с автолейаутом
   const nodeData = useMemo(() => {
-    return artboards.map((artboard) => ({
-      id: artboard.id,
-      type: 'artboard',
-      position: artboard.position || { x: 100, y: 100 },
-      data: { 
-        artboard,
-        theme,
-        handlers: {
-          onSelectElement,
-          selectedElement,
-          onDeleteElement,
-          onMoveArtboard,
-          onMoveComponentUp,
-          onMoveComponentDown,
-          editingElement,
-          onStartEditing,
-          onSaveEditing,
-          onCancelEditing,
-        }
-      },
-      selected: selectedElement?.id === artboard.id,
-      width: artboard.width,
-      height: artboard.height,
-    }));
+    const nodeWidth = 320;
+    const nodeHeight = 120;
+    const spacing = 100;
+    const cols = Math.ceil(Math.sqrt(artboards.length));
+    
+    return artboards.map((artboard, index) => {
+      // Если есть сохраненная позиция, используем её, иначе автолейаут
+      const savedPosition = artboard.position;
+      let position = savedPosition;
+      
+      if (!savedPosition || (savedPosition.x === 0 && savedPosition.y === 0)) {
+        // Автоматическое размещение в сетке
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+        position = {
+          x: 100 + col * (nodeWidth + spacing),
+          y: 100 + row * (nodeHeight + spacing),
+        };
+      }
+      
+      return {
+        id: artboard.id,
+        type: 'artboard',
+        position,
+        data: { 
+          artboard,
+          theme,
+          handlers: {
+            onSelectElement,
+            selectedElement,
+            onDeleteElement,
+            onMoveArtboard,
+            onMoveComponentUp,
+            onMoveComponentDown,
+            editingElement,
+            onStartEditing,
+            onSaveEditing,
+            onCancelEditing,
+          }
+        },
+        selected: selectedElement?.id === artboard.id,
+        width: nodeWidth,
+        height: nodeHeight,
+      };
+    });
   }, [artboards, theme, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(nodeData);
