@@ -40,6 +40,15 @@ export function useCreateDocument() {
   });
 }
 
+export function useSearch(workspaceId?: string, q?: string, options?: UseQueryOptions<{ projects: any[]; documents: any[] }>) {
+  return useQuery({
+    queryKey: ["search", workspaceId, q],
+    queryFn: () => jsonFetch(`/api/search?${new URLSearchParams({ workspaceId: workspaceId || "", q: q || "" })}`),
+    enabled: typeof q === "string" && q.length > 0,
+    ...(options || {}),
+  });
+}
+
 export function useDocumentPages(documentId: string | undefined, options?: UseQueryOptions<{ documentId: string; items: any[] }>) {
   return useQuery({ queryKey: ["document-pages", documentId], queryFn: () => jsonFetch(`/api/documents/${documentId}/pages`), enabled: !!documentId, ...(options || {}) });
 }

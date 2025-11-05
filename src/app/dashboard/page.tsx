@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, useProjects, useWorkspaces } from "@/src/hooks/api";
+import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, useProjects, useSearch, useWorkspaces } from "@/src/hooks/api";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -14,6 +14,8 @@ export default function DashboardPage() {
   const createDoc = useCreateDocument();
 
   const [workspaceName, setWorkspaceName] = useState("");
+  const [query, setQuery] = useState("");
+  const { data: search } = useSearch(workspaceId, query);
   const [projectName, setProjectName] = useState("");
   const [documentName, setDocumentName] = useState("");
   const [workspaceId, setWorkspaceId] = useState<string>("");
@@ -45,6 +47,18 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-5xl p-6 text-neutral-50">
       <h1 className="mb-6 text-xl font-semibold">Dashboard</h1>
+      <div className="mb-6 flex items-center gap-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search projects/documents"
+          className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-sky-500"
+          aria-label="Search"
+        />
+        <span className="text-xs text-neutral-400">
+          {(search?.projects?.length || 0) + (search?.documents?.length || 0)} results
+        </span>
+      </div>
       <div className="grid gap-6 md:grid-cols-3">
         <section className="rounded border border-neutral-800 p-4">
           <h2 className="mb-2 text-sm font-medium text-neutral-300">Create Workspace</h2>
@@ -123,6 +137,27 @@ export default function DashboardPage() {
             >Create & Open</button>
           </div>
           <div className="mt-3 text-xs text-neutral-400">{(docs?.items || []).length} documents</div>
+        </section>
+        <section className="md:col-span-3 rounded border border-neutral-800 p-4">
+          <h2 className="mb-2 text-sm font-medium text-neutral-300">Search results</h2>
+          <div className="grid gap-2 md:grid-cols-2">
+            <div>
+              <div className="mb-1 text-xs uppercase text-neutral-400">Projects</div>
+              <ul className="space-y-1 text-sm">
+                {(search?.projects || []).map((p: any) => (
+                  <li key={p.id} className="rounded border border-neutral-800 px-2 py-1">{p.name}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <div className="mb-1 text-xs uppercase text-neutral-400">Documents</div>
+              <ul className="space-y-1 text-sm">
+                {(search?.documents || []).map((d: any) => (
+                  <li key={d.id} className="rounded border border-neutral-800 px-2 py-1">{d.name}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </section>
       </div>
     </div>

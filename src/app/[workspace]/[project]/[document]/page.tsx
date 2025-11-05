@@ -9,6 +9,7 @@ import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/lo
 import { useEffect } from "react";
 import { ArtboardComponent } from "@/src/ui/artboard";
 import type { Artboard as ArtboardType } from "@/src/types/page-builder";
+import { FlowCanvas } from "@/src/ui/flow-canvas";
 
 interface Params {
   params: { workspace: string; project: string; document: string };
@@ -71,6 +72,25 @@ export default function DocumentPage({ params }: Params) {
       navbarShowRightButton: false,
     } as ArtboardType;
   }, [selectedPage, device]);
+
+  const flowArtboards: ArtboardType[] = useMemo(() => {
+    const items = data?.items || [];
+    return items.map((p: any) => {
+      const width = 320;
+      const height = 200;
+      return {
+        id: p.id,
+        name: p.name,
+        width,
+        height,
+        type: "desktop",
+        gap: 8,
+        status: "draft",
+        children: p.elements || [],
+        autoHeight: false,
+      } as ArtboardType;
+    });
+  }, [data]);
 
   // Document-level lock on mount/unmount (scaffold)
   const { mutate: acquire } = useAcquireLock();
@@ -214,8 +234,8 @@ export default function DocumentPage({ params }: Params) {
               </div>
             )
           ) : (
-            <div className="grid place-items-center rounded border border-neutral-800 p-8 text-neutral-400">
-              <div className="text-sm">Flow map placeholder</div>
+            <div className="h-full min-h-[60vh] rounded border border-neutral-800 p-2">
+              <FlowCanvas artboards={flowArtboards} />
             </div>
           )}
         </main>
