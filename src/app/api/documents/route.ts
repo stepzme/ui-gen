@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createDocumentBody } from "@/src/types/document";
 import * as data from "@/src/lib/data";
-import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
+import { canWriteFromSession, requireSession } from "@/src/lib/auth-util";
 import { canEdit } from "@/src/lib/rbac";
 
 export async function GET() {

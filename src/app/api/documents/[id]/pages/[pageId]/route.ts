@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { updatePageBody } from "@/src/types/document";
 import * as data from "@/src/lib/data";
-import { requireSession } from "@/src/app/api/_util/auth";
-import { canWriteFromSession } from "@/src/app/api/_util/auth";
+import { requireSession } from "@/src/lib/auth-util";
+import { canWriteFromSession } from "@/src/lib/auth-util";
 import { canEdit } from "@/src/lib/rbac";
 
 type Params = { params: { id: string; pageId: string } };

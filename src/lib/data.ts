@@ -233,4 +233,55 @@ export async function addDocumentMember(documentId: string, userId: string, role
   return { ok: true };
 }
 
+export async function addAudit(params: {
+  actorId: string;
+  entityType: 'WORKSPACE' | 'PROJECT' | 'DOCUMENT' | 'PAGE' | 'LOCK' | 'EXPORT';
+  entityId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'PERMISSION_CHANGE' | 'EXPORT';
+  diff?: any;
+}) {
+  if (prisma) {
+    await prisma.auditLog.create({
+      data: {
+        actorId: params.actorId,
+        entityType: params.entityType,
+        entityId: params.entityId,
+        action: params.action,
+        diff: params.diff || {},
+      },
+    });
+    return { ok: true };
+  }
+  const logs = (db as any).auditLogs || [];
+  logs.push({
+    id: crypto.randomUUID(),
+    actorId: params.actorId,
+    entityType: params.entityType,
+    entityId: params.entityId,
+    action: params.action,
+    diff: params.diff || {},
+    createdAt: new Date(),
+  });
+  (db as any).auditLogs = logs;
+  return { ok: true };
+}
+
+export async function listAudit(filters?: { entityType?: string; entityId?: string }) {
+  if (prisma) {
+    const where: any = {};
+    if (filters?.entityType) where.entityType = filters.entityType;
+    if (filters?.entityId) where.entityId = filters.entityId;
+    const items = await prisma.auditLog.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    return items;
+  }
+  let logs = (db as any).auditLogs || [];
+  if (filters?.entityType) logs = logs.filter((l: any) => l.entityType === filters.entityType);
+  if (filters?.entityId) logs = logs.filter((l: any) => l.entityId === filters.entityId);
+  return logs.slice(0, 100).sort((a: any, b: any) => b.createdAt - a.createdAt);
+}
+
 

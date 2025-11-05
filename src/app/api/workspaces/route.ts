@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createWorkspaceBody } from "@/src/types/document";
 import * as data from "@/src/lib/data";
 import { canEdit } from "@/src/lib/rbac";
-import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
+import { canWriteFromSession, requireSession } from "@/src/lib/auth-util";
 
 export async function GET() {
   const session = await requireSession();
