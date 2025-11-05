@@ -224,7 +224,7 @@ export async function addAudit(params: {
   actorId: string;
   entityType: 'WORKSPACE' | 'PROJECT' | 'DOCUMENT' | 'PAGE' | 'LOCK' | 'EXPORT';
   entityId: string;
-  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'PERMISSION_CHANGE' | 'EXPORT';
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'PERMISSION_CHANGE' | 'EXPORT' | 'AUTH_LOGIN' | 'AUTH_LOGOUT' | 'PERMISSIONS_CHANGED' | 'DOCUMENT_CREATED' | 'DOCUMENT_UPDATED' | 'DOCUMENT_TRASHED' | 'DOCUMENT_RESTORED' | 'LOCK_ACQUIRE' | 'LOCK_RELEASE' | 'EXPORT_REQUESTED' | 'EXPORT_COMPLETED';
   diff?: any;
 }) {
   await prisma.auditLog.create({
@@ -232,7 +232,7 @@ export async function addAudit(params: {
       actorId: params.actorId,
       entityType: params.entityType,
       entityId: params.entityId,
-      action: params.action,
+      action: params.action as any, // Type assertion needed due to enum mismatch
       diff: params.diff || {},
     },
   });
