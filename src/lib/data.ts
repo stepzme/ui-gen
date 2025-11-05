@@ -10,6 +10,42 @@ try {
   prisma = null;
 }
 
+export async function getWorkspaceRole(workspaceId: string, userId: string): Promise<'OWNER'|'ADMIN'|'EDITOR'|'VIEWER'|null> {
+  if (prisma) {
+    const m = await prisma.workspaceMember.findUnique({ where: { workspaceId_userId: { workspaceId, userId } } });
+    return (m?.role as any) || null;
+  }
+  const map = (db as any).workspaceMembers.get(workspaceId) as Map<string, any> | undefined;
+  if (!map) return null;
+  return (map.get(userId) as any) || null;
+}
+
+export async function getProjectRole(projectId: string, userId: string): Promise<'OWNER'|'ADMIN'|'EDITOR'|'VIEWER'|null> {
+  if (prisma) {
+    const m = await prisma.projectMember.findUnique({ where: { projectId_userId: { projectId, userId } } });
+    if (m?.role) return m.role as any;
+    const pr = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!pr) return null;
+    const wr = await prisma.workspaceMember.findUnique({ where: { workspaceId_userId: { workspaceId: pr.workspaceId, userId } } });
+    return (wr?.role as any) || null;
+  }
+  return (db as any).getProjectRole(projectId, userId);
+}
+
+export async function getDocumentRole(documentId: string, userId: string): Promise<'OWNER'|'ADMIN'|'EDITOR'|'VIEWER'|null> {
+  if (prisma) {
+    const doc = await prisma.document.findUnique({ where: { id: documentId } });
+    if (!doc) return null;
+    const pr = await prisma.projectMember.findUnique({ where: { projectId_userId: { projectId: doc.projectId, userId } } });
+    if (pr?.role) return pr.role as any;
+    const proj = await prisma.project.findUnique({ where: { id: doc.projectId } });
+    if (!proj) return null;
+    const wr = await prisma.workspaceMember.findUnique({ where: { workspaceId_userId: { workspaceId: proj.workspaceId, userId } } });
+    return (wr?.role as any) || null;
+  }
+  return (db as any).getDocumentRole(documentId, userId);
+}
+
 export async function listWorkspacesForUser(userId: string) {
   if (prisma) {
     const memberships = await prisma.workspaceMember.findMany({ where: { userId: userId } });
