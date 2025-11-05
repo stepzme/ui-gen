@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { createWorkspaceBody } from "@/src/types/document";
+import { db } from "@/src/lib/mock-db";
 
-export async function GET() {
-  // TODO: fetch from DB
-  return NextResponse.json({ items: [] });
-}
+export async function GET() { return NextResponse.json({ items: db.listWorkspaces() }); }
 
 export async function POST(request: Request) {
   const json = await request.json().catch(() => null);
@@ -13,8 +10,8 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  // TODO: create in DB
-  return NextResponse.json({ id: "temp", name: parsed.data.name }, { status: 201 });
+  const ws = db.createWorkspace(parsed.data.name);
+  return NextResponse.json(ws, { status: 201 });
 }
 
 

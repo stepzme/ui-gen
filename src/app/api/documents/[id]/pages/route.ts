@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createPageBody } from "@/src/types/document";
+import { db } from "@/src/lib/mock-db";
 
 type Params = { params: { id: string } };
 
 export async function GET(_: Request, { params }: Params) {
   const { id } = params;
-  // TODO: fetch pages for document id
-  return NextResponse.json({ documentId: id, items: [] });
+  return NextResponse.json({ documentId: id, items: db.listPages(id) });
 }
 
 export async function POST(request: Request, { params }: Params) {
@@ -16,8 +16,8 @@ export async function POST(request: Request, { params }: Params) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  // TODO: create page
-  return NextResponse.json({ id: "temp", documentId: id, ...parsed.data }, { status: 201 });
+  const created = db.createPage(id, parsed.data.name, parsed.data.device);
+  return NextResponse.json(created, { status: 201 });
 }
 
 
