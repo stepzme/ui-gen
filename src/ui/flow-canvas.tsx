@@ -250,8 +250,18 @@ function FlowCanvasInner({
         minZoom={0.1}
         maxZoom={2}
         nodesDraggable={isInteractive}
+        defaultEdgeOptions={{
+          style: { strokeWidth: 2, stroke: theme === 'light' ? '#3b82f6' : '#60a5fa' },
+          type: 'smoothstep',
+          animated: true,
+        }}
+        connectionLineStyle={{ strokeWidth: 2, stroke: theme === 'light' ? '#3b82f6' : '#60a5fa' }}
       >
-        <Background color="#666" gap={20} />
+        <Background 
+          color={theme === 'light' ? '#e5e7eb' : '#666'} 
+          gap={20} 
+          size={1}
+        />
         <CustomControls 
           onAddArtboard={onAddArtboard} 
           isInteractive={isInteractive}

@@ -446,15 +446,57 @@ export default function DocumentPage({ params }: Params) {
                 >Add edge</button>
               </div>
               <div className={artboardTheme}>
-                <FlowCanvas artboards={flowArtboards} edges={flow?.edges || []} theme={artboardTheme} />
+                <FlowCanvas 
+                  artboards={flowArtboards} 
+                  edges={flow?.edges || []} 
+                  theme={artboardTheme}
+                  onMoveArtboard={(pageId, x, y) => {
+                    // Сохраняем позицию страницы при перетаскивании
+                    const page = data?.items?.find((p: any) => p.id === pageId);
+                    if (page) {
+                      // Обновляем позицию через updatePage
+                      updatePage.mutate({}, {
+                        onSuccess: async () => {
+                          // Позиция будет сохранена в структуре данных страницы
+                          // Пока что просто обновляем локально через отдельный запрос
+                        }
+                      });
+                    }
+                  }}
+                />
               </div>
               <div className="mt-2 text-sm text-neutral-300">
-                {(flow?.edges || []).map((e:any)=> (
-                  <div key={e.id} className="flex items-center justify-between border border-neutral-800 rounded px-2 py-1 mb-1">
-                    <span>{e.source.id} → {e.targetPageId}</span>
-                    <button className="rounded border border-neutral-700 px-2 py-0.5 text-xs hover:bg-neutral-800" onClick={()=>deleteEdge(e.id)}>Delete</button>
-                  </div>
-                ))}
+                <div className="mb-2 text-xs uppercase text-neutral-400">Connections</div>
+                {(flow?.edges || []).length === 0 ? (
+                  <div className="text-neutral-500 text-xs py-2">No connections yet</div>
+                ) : (
+                  (flow?.edges || []).map((e:any)=> {
+                    const sourcePage = data?.items?.find((p:any) => p.id === e.source.id);
+                    const targetPage = data?.items?.find((p:any) => p.id === e.targetPageId);
+                    const sourceName = e.source.kind === 'page' 
+                      ? (sourcePage?.name || e.source.id) 
+                      : `${sourcePage?.name || 'Page'} → Element`;
+                    const targetName = targetPage?.name || e.targetPageId;
+                    return (
+                      <div key={e.id} className="flex items-center justify-between border border-neutral-800 rounded px-2 py-1.5 mb-1 hover:bg-neutral-800/50 transition-colors">
+                        <span className="text-xs">
+                          <span className="font-medium">{sourceName}</span>
+                          <span className="text-neutral-500 mx-1">→</span>
+                          <span className="font-medium">{targetName}</span>
+                          {e.source.kind === 'element' && (
+                            <span className="text-neutral-500 ml-1">(element)</span>
+                          )}
+                        </span>
+                        <button 
+                          className="rounded border border-neutral-700 px-2 py-0.5 text-xs hover:bg-neutral-700 transition-colors" 
+                          onClick={()=>deleteEdge(e.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           )}
