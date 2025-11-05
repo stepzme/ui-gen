@@ -261,6 +261,7 @@ export default function DocumentPage({ params }: Params) {
                   disablePositioning
                   onSelectElement={() => {}}
                   selectedElement={null}
+                  lockedElementIds={new Set((locks?.items || []).filter((l:any)=>l.scope==='ELEMENT').map((l:any)=>l.elementId))}
                   onStartEditing={(componentId, prop, value) => {
                     if (!canEdit((session as any)?.role || 'OWNER')) return;
                     // acquire element lock if not already held
@@ -345,12 +346,24 @@ export default function DocumentPage({ params }: Params) {
                 <select id="flow-target" className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm">
                   {(data?.items || []).map((p:any)=> (<option key={p.id} value={p.id}>{p.name}</option>))}
                 </select>
+                <select id="flow-source-kind" className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm">
+                  <option value="page">page</option>
+                  <option value="element">element</option>
+                </select>
+                {selectedPage && (
+                  <select id="flow-element" className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm">
+                    {(selectedPage.elements || []).map((e:any)=> (<option key={e.id} value={e.id}>{e.type}</option>))}
+                  </select>
+                )}
                 <button
                   className="rounded border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800"
                   onClick={() => {
                     const s = (document.getElementById('flow-source') as HTMLSelectElement).value;
                     const t = (document.getElementById('flow-target') as HTMLSelectElement).value;
-                    if (s && t && s !== t) addEdge.mutate({ source: { kind: 'page', id: s }, targetPageId: t });
+                    const kind = (document.getElementById('flow-source-kind') as HTMLSelectElement).value as 'page'|'element';
+                    const elementId = (document.getElementById('flow-element') as HTMLSelectElement | null)?.value;
+                    const source = kind === 'page' ? { kind: 'page', id: s } : { kind: 'element', id: elementId || '' };
+                    if (source.id && t && source.id !== t) addEdge.mutate({ source, targetPageId: t });
                   }}
                 >Add edge</button>
               </div>

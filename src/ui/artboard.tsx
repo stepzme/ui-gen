@@ -48,9 +48,10 @@ interface ArtboardComponentProps {
   onStartEditing?: (componentId: string, prop: string, value: string) => void;
   onSaveEditing?: (componentId: string, prop: string, newValue: string) => void;
   onCancelEditing?: () => void;
+  lockedElementIds?: Set<string>;
 }
 
-export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing }: ArtboardComponentProps) {
+export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, scale: 1 }, disablePositioning = false, onSelectElement, selectedElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing, lockedElementIds }: ArtboardComponentProps) {
   const { componentDefinitions } = useComponentDefinitions();
   const { isOver, setNodeRef } = useDroppable({
     id: `artboard-${artboard.id}`,
@@ -79,7 +80,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
 
   const handleArtboardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const { type, ...artboardData } = artboard;
+    const { type, id: _omitId, ...artboardData } = artboard;
     onSelectElement({
       type: 'artboard',
       id: artboard.id,
@@ -249,6 +250,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
 
               const isChildSelected = selectedElement?.type === 'component' && selectedElement.id === child.id;
 
+              const isLocked = lockedElementIds?.has(child.id);
               return (
                   <div
                     key={child.id}
@@ -263,6 +265,9 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       });
                     }}
                   >
+                    {isLocked && (
+                      <div className="absolute inset-0 z-[60] rounded-xl bg-black/10 pointer-events-none" />
+                    )}
                     {onMoveComponentUp && (
                       <Button
                         variant="primary"
@@ -331,7 +336,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                       {child.children}
                     </ComponentRenderer>
                   
-                  {isChildSelected && (
+                  {(isChildSelected || isLocked) && (
                     <div className="absolute -m-2 inset-0 border-2 border-border-info rounded-xl pointer-events-none" />
                   )}
                 </div>
