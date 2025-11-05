@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const deviceModeSchema = z.union([z.literal("mobile"), z.literal("desktop")]);
 
-export const elementNodeSchema = z.lazy(() => z.object({
+export const elementNodeSchema: z.ZodType<any> = z.lazy(() => z.object({
   id: z.string().uuid(),
   type: z.string(),
   props: z.record(z.any()).default({}),
