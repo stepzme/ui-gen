@@ -5,6 +5,7 @@ type ID = string;
 export interface Workspace { id: ID; name: string; createdAt: number }
 export interface Project { id: ID; workspaceId: ID; name: string; createdAt: number }
 export interface Document { id: ID; projectId: ID; name: string; slug: string; createdAt: number }
+export interface FlowEdge { id: ID; source: { kind: 'page'|'element'; id: ID }; targetPageId: ID; label?: string }
 export interface Page { id: ID; documentId: ID; name: string; device: "mobile" | "desktop"; index: number; elements: ElementNode[] }
 export interface ElementNode { id: ID; type: string; props?: Record<string, any>; children?: ElementNode[] }
 export interface Lock { id: ID; documentId: ID; scope: "DOCUMENT" | "ELEMENT"; elementId?: ID; holderId?: ID; ttlSeconds: number; updatedAt: number }
@@ -17,6 +18,7 @@ class MockDB {
   projects = new Map<ID, Project>();
   documents = new Map<ID, Document>();
   pages = new Map<ID, Page>();
+  flow = new Map<ID, FlowEdge[]>(); // key: documentId
   locks = new Map<ID, Lock>();
   audit = new Map<ID, Audit>();
 
@@ -61,6 +63,19 @@ class MockDB {
     return page;
   }
   deletePage(pageId: ID) { return this.pages.delete(pageId) }
+
+  listFlow(documentId: ID) { return this.flow.get(documentId) || [] }
+  addFlowEdge(documentId: ID, edge: Omit<FlowEdge,'id'>) {
+    const e = { id: uid(), ...edge } as FlowEdge;
+    const list = this.listFlow(documentId);
+    this.flow.set(documentId, [...list, e]);
+    return e;
+  }
+  deleteFlowEdge(documentId: ID, edgeId: ID) {
+    const list = this.listFlow(documentId);
+    this.flow.set(documentId, list.filter(e=>e.id!==edgeId));
+    return true;
+  }
 
   acquireLock(body: Omit<Lock,"id"|"updatedAt">) {
     const id = uid();

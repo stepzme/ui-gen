@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { lockAcquireBody, lockRefreshBody, lockReleaseBody } from "@/src/types/document";
 import { db } from "@/src/lib/mock-db";
+import { requireSession } from "@/src/app/api/_util/auth";
 
 export async function POST(request: Request) {
+  const session = await requireSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   // acquire
   const json = await request.json().catch(() => null);
   const parsed = lockAcquireBody.safeParse(json);
@@ -14,6 +17,8 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const session = await requireSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   // refresh
   const json = await request.json().catch(() => null);
   const parsed = lockRefreshBody.safeParse(json);
@@ -25,6 +30,8 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const session = await requireSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   // release
   const json = await request.json().catch(() => null);
   const parsed = lockReleaseBody.safeParse(json);
