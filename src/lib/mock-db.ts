@@ -40,7 +40,9 @@ class MockDB {
   createProject(workspaceId: ID, name: string, ownerId: ID) {
     const id = uid();
     const pr: Project = { id, workspaceId, name, ownerId, createdAt: Date.now() };
-    this.projects.set(id, pr); return pr;
+    this.projects.set(id, pr);
+    this.projectMembers.set(id, new Map([[ownerId, 'OWNER']]));
+    return pr;
   }
 
   listDocuments() { return Array.from(this.documents.values()) }
