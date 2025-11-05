@@ -93,14 +93,15 @@ export async function createPage(documentId: string, name: string, device: "mobi
   return { id: created.id, documentId, name, device, index: created.index, elements: [] };
 }
 
-export async function updatePage(pageId: string, patch: { name?: string; device?: "mobile"|"desktop"; index?: number; elements?: any[] }) {
+export async function updatePage(pageId: string, patch: { name?: string; device?: "mobile"|"desktop"; index?: number; elements?: any[]; position?: { x: number; y: number } }) {
   const existing = await prisma.documentPage.findUnique({ where: { id: pageId } });
   if (!existing) return null;
   const existingData = (existing.data as any) || {};
   const nextData = { 
     ...existingData, 
     ...(patch.device ? { device: patch.device } : {}),
-    ...(patch.elements !== undefined ? { elements: patch.elements } : {})
+    ...(patch.elements !== undefined ? { elements: patch.elements } : {}),
+    ...(patch.position ? { position: patch.position } : {})
   };
   const updated = await prisma.documentPage.update({ 
     where: { id: pageId }, 
