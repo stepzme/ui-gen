@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/api/auth") || request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/dashboard";
-  if (isAuthRoute) return NextResponse.next();
+  // Allow public routes
+  const isPublicRoute = request.nextUrl.pathname.startsWith("/api/auth") || request.nextUrl.pathname === "/login";
+  if (isPublicRoute) return NextResponse.next();
+  
+  // Check session token for all other routes
   const sessionToken = request.cookies.get("next-auth.session-token") || request.cookies.get("__Secure-next-auth.session-token");
   if (!sessionToken) {
     const url = new URL("/login", request.url);

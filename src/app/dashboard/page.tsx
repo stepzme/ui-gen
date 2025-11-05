@@ -1,11 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, useProjects, useSearch, useWorkspaces } from "@/hooks/api";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login?redirect=/dashboard");
+    }
+  }, [status, router]);
+  
+  if (status === "loading" || !session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-neutral-400">Loading...</div>
+      </div>
+    );
+  }
   const { data: ws } = useWorkspaces();
   const { data: pr } = useProjects();
   const { data: docs } = useDocuments();
