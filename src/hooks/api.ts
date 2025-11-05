@@ -14,12 +14,30 @@ export function useWorkspaces(options?: UseQueryOptions<{ items: any[] }>) {
   return useQuery({ queryKey: ["workspaces"], queryFn: () => jsonFetch("/api/workspaces"), ...(options || {}) });
 }
 
+export function useCreateWorkspace() {
+  return useMutation({
+    mutationFn: (body: { name: string }) => jsonFetch(`/api/workspaces`, { method: "POST", body: JSON.stringify(body) }),
+  });
+}
+
 export function useProjects(options?: UseQueryOptions<{ items: any[] }>) {
   return useQuery({ queryKey: ["projects"], queryFn: () => jsonFetch("/api/projects"), ...(options || {}) });
 }
 
+export function useCreateProject() {
+  return useMutation({
+    mutationFn: (body: { workspaceId: string; name: string }) => jsonFetch(`/api/projects`, { method: "POST", body: JSON.stringify(body) }),
+  });
+}
+
 export function useDocuments(options?: UseQueryOptions<{ items: any[] }>) {
   return useQuery({ queryKey: ["documents"], queryFn: () => jsonFetch("/api/documents"), ...(options || {}) });
+}
+
+export function useCreateDocument() {
+  return useMutation({
+    mutationFn: (body: { projectId: string; name: string; slug: string }) => jsonFetch(`/api/documents`, { method: "POST", body: JSON.stringify(body) }),
+  });
 }
 
 export function useDocumentPages(documentId: string | undefined, options?: UseQueryOptions<{ documentId: string; items: any[] }>) {
