@@ -23,6 +23,8 @@ export async function POST(request: Request, { params }: Params) {
   const json = await request.json().catch(() => null);
   if (!json?.userId || !json?.role) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   await data.addWorkspaceMember(params.id, json.userId, json.role);
+  const userId = getSessionUserId(session);
+  await data.addAudit({ actorId: userId, entityType: 'WORKSPACE', entityId: params.id, action: 'PERMISSION_CHANGE', diff: { userId: json.userId, role: json.role } });
   return NextResponse.json({ ok: true });
 }
 

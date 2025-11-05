@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createDocumentBody } from "@/src/types/document";
 import * as data from "@/src/lib/data";
-import { canWriteFromSession, requireSession } from "@/src/lib/auth-util";
+import { canWriteFromSession, requireSession, getSessionUserId } from "@/src/lib/auth-util";
 import { canEdit } from "@/src/lib/rbac";
 
 export async function GET() {
@@ -22,8 +22,9 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const ownerId = (session as any).user?.id || (session as any).user?.email || 'admin';
-  const doc = await data.createDocument(parsed.data.projectId, parsed.data.name, parsed.data.slug, ownerId);
+  const userId = getSessionUserId(session);
+  const doc = await data.createDocument(parsed.data.projectId, parsed.data.name, parsed.data.slug, userId);
+  await data.addAudit({ actorId: userId, entityType: 'DOCUMENT', entityId: doc.id, action: 'CREATE' });
   return NextResponse.json(doc, { status: 201 });
 }
 

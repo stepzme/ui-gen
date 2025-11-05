@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createProjectBody } from "@/src/types/document";
 import * as data from "@/src/lib/data";
-import { canWriteFromSession, requireSession } from "@/src/lib/auth-util";
+import { canWriteFromSession, requireSession, getSessionUserId } from "@/src/lib/auth-util";
 import { canEdit } from "@/src/lib/rbac";
 
 export async function GET() {
@@ -22,7 +22,9 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const pr = await data.createProject(parsed.data.workspaceId, parsed.data.name, (session as any).user?.id || (session as any).user?.email || 'admin');
+  const userId = getSessionUserId(session);
+  const pr = await data.createProject(parsed.data.workspaceId, parsed.data.name, userId);
+  await data.addAudit({ actorId: userId, entityType: 'PROJECT', entityId: pr.id, action: 'CREATE' });
   return NextResponse.json(pr, { status: 201 });
 }
 

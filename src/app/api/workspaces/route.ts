@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createWorkspaceBody } from "@/src/types/document";
 import * as data from "@/src/lib/data";
 import { canEdit } from "@/src/lib/rbac";
-import { canWriteFromSession, requireSession } from "@/src/lib/auth-util";
+import { canWriteFromSession, requireSession, getSessionUserId } from "@/src/lib/auth-util";
 
 export async function GET() {
   const session = await requireSession();
@@ -22,7 +22,9 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const ws = await data.createWorkspace(parsed.data.name, (session as any).user?.id || (session as any).user?.email || 'admin');
+  const userId = getSessionUserId(session);
+  const ws = await data.createWorkspace(parsed.data.name, userId);
+  await data.addAudit({ actorId: userId, entityType: 'WORKSPACE', entityId: ws.id, action: 'CREATE' });
   return NextResponse.json(ws, { status: 201 });
 }
 
