@@ -8,6 +8,12 @@ import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, 
 export default function DashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { data: ws } = useWorkspaces();
+  const { data: pr } = useProjects();
+  const { data: docs } = useDocuments();
+  const createWs = useCreateWorkspace();
+  const createPr = useCreateProject();
+  const createDoc = useCreateDocument();
   
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -22,12 +28,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-  const { data: ws } = useWorkspaces();
-  const { data: pr } = useProjects();
-  const { data: docs } = useDocuments();
-  const createWs = useCreateWorkspace();
-  const createPr = useCreateProject();
-  const createDoc = useCreateDocument();
 
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceId, setWorkspaceId] = useState<string>("");
