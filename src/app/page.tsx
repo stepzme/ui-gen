@@ -1,5 +1,5 @@
-import PageBuilder from "@/ui/page-builder";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <PageBuilder />;
+  redirect("/dashboard");
 }

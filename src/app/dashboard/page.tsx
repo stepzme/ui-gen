@@ -14,12 +14,12 @@ export default function DashboardPage() {
   const createDoc = useCreateDocument();
 
   const [workspaceName, setWorkspaceName] = useState("");
-  const [query, setQuery] = useState("");
-  const { data: search } = useSearch(workspaceId, query);
-  const [projectName, setProjectName] = useState("");
-  const [documentName, setDocumentName] = useState("");
   const [workspaceId, setWorkspaceId] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
+  const [query, setQuery] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [documentName, setDocumentName] = useState("");
+  const { data: search } = useSearch(workspaceId, query);
 
   function handleCreateWorkspace() {
     if (!workspaceName.trim()) return;
