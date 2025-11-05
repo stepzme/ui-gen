@@ -41,4 +41,32 @@ export function useCreatePage(documentId: string | undefined) {
   });
 }
 
+export function useUpdatePage(documentId: string | undefined, pageId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { name?: string; device?: "mobile" | "desktop"; index?: number; elements?: any[] }) =>
+      jsonFetch(`/api/documents/${documentId}/pages/${pageId}`, { method: "PATCH", body: JSON.stringify(body) }),
+    onSuccess: (updated) => {
+      if (!documentId) return;
+      qc.setQueryData<{ documentId: string; items: any[] }>(["document-pages", documentId], (prev) => {
+        if (!prev) return prev;
+        return { ...prev, items: prev.items.map((p) => (p.id === pageId ? { ...p, ...updated } : p)) } as any;
+      });
+    },
+  });
+}
+
+export function useDeletePage(documentId: string | undefined, pageId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => jsonFetch(`/api/documents/${documentId}/pages/${pageId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      if (!documentId) return;
+      qc.setQueryData<{ documentId: string; items: any[] }>(["document-pages", documentId], (prev) => {
+        if (!prev) return prev;
+        return { ...prev, items: prev.items.filter((p) => p.id !== pageId) } as any;
+      });
+    },
+  });
+}
 
