@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCreatePage, useDocumentPages } from "@/src/hooks/api";
 import { PageListItem } from "@/src/ui/page-list-item";
+import { useEditorStore } from "@/src/store/editor";
 
 interface Params {
   params: { workspace: string; project: string; document: string };
@@ -17,8 +18,12 @@ type Device = (typeof devices)[number];
 export default function DocumentPage({ params }: Params) {
   const router = useRouter();
   const search = useSearchParams();
-  const mode = (search.get("mode") as Mode) || "pages";
-  const device = (search.get("device") as Device) || "desktop";
+  const mode = (search.get("mode") as Mode) || useEditorStore.getState().mode;
+  const device = (search.get("device") as Device) || useEditorStore.getState().device;
+  const setMode = useEditorStore((s) => s.setMode);
+  const setDevice = useEditorStore((s) => s.setDevice);
+  const selectedPageId = useEditorStore((s) => s.selectedPageId);
+  const selectPage = useEditorStore((s) => s.selectPage);
 
   function setQuery(key: string, value: string) {
     const sp = new URLSearchParams(search.toString());
@@ -29,7 +34,6 @@ export default function DocumentPage({ params }: Params) {
   const headerTitle = useMemo(() => `${params.document}`, [params.document]);
   const { data } = useDocumentPages(params.document);
   const createPage = useCreatePage(params.document);
-  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
   function handleCreatePage() {
     const count = (data?.items?.length || 0) + 1;
@@ -51,12 +55,12 @@ export default function DocumentPage({ params }: Params) {
                 key={m}
                 role="tab"
                 aria-selected={mode === m}
-                onClick={() => setQuery("mode", m)}
+                onClick={() => { setMode(m); setQuery("mode", m); }}
                 className={`px-3 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${mode === m ? "bg-neutral-800" : "bg-transparent"}`}
                 tabIndex={0}
                 aria-label={`Switch to ${m} mode`}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") setQuery("mode", m);
+                  if (e.key === "Enter" || e.key === " ") { setMode(m); setQuery("mode", m); }
                 }}
               >
                 {m}
@@ -70,12 +74,12 @@ export default function DocumentPage({ params }: Params) {
                   key={d}
                   role="tab"
                   aria-selected={device === d}
-                  onClick={() => setQuery("device", d)}
+                  onClick={() => { setDevice(d); setQuery("device", d); }}
                   className={`px-3 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${device === d ? "bg-neutral-800" : "bg-transparent"}`}
                   tabIndex={0}
                   aria-label={`Switch to ${d}`}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") setQuery("device", d);
+                    if (e.key === "Enter" || e.key === " ") { setDevice(d); setQuery("device", d); }
                   }}
                 >
                   {d}
@@ -106,7 +110,7 @@ export default function DocumentPage({ params }: Params) {
                 documentId={params.document}
                 page={p}
                 isSelected={selectedPageId === p.id}
-                onSelect={setSelectedPageId}
+                onSelect={selectPage}
               />
             ))}
             <button
