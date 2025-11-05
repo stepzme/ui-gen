@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPageBody } from "@/src/types/document";
-import { db } from "@/src/lib/mock-db";
+import * as data from "@/src/lib/data";
 import { canWriteFromSession, getSessionUserId, requireSession } from "@/src/app/api/_util/auth";
 import { canEdit } from "@/src/lib/rbac";
 
@@ -11,7 +11,7 @@ export async function GET(_: Request, { params }: Params) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = getSessionUserId(session);
   if (!db.getDocumentRole(params.id, userId)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  return NextResponse.json({ documentId: params.id, items: db.listPages(params.id) });
+  return NextResponse.json({ documentId: params.id, items: await data.listPages(params.id) });
 }
 
 export async function POST(request: Request, { params }: Params) {
@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: Params) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const created = db.createPage(id, parsed.data.name, parsed.data.device);
+  const created = await data.createPage(id, parsed.data.name, parsed.data.device);
   return NextResponse.json(created, { status: 201 });
 }
 

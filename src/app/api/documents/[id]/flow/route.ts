@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/src/lib/mock-db";
+import * as data from "@/src/lib/data";
 import { canWriteFromSession, getSessionUserId, requireSession } from "@/src/app/api/_util/auth";
 
 type Params = { params: { id: string } };
@@ -9,7 +9,7 @@ export async function GET(_: Request, { params }: Params) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = getSessionUserId(session);
   if (!db.getDocumentRole(params.id, userId)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  return NextResponse.json({ documentId: params.id, edges: db.listFlow(params.id) });
+  return NextResponse.json({ documentId: params.id, edges: await data.listFlow(params.id) });
 }
 
 export async function POST(request: Request, { params }: Params) {
@@ -23,7 +23,7 @@ export async function POST(request: Request, { params }: Params) {
   if (!body || !body.source || !body.targetPageId) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
-  const created = db.addFlowEdge(params.id, { source: body.source, targetPageId: body.targetPageId, label: body.label });
+  const created = await data.addFlowEdge(params.id, { source: body.source, targetPageId: body.targetPageId, label: body.label });
   return NextResponse.json(created, { status: 201 });
 }
 

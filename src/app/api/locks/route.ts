@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lockAcquireBody, lockRefreshBody, lockReleaseBody } from "@/src/types/document";
-import { db } from "@/src/lib/mock-db";
+import * as data from "@/src/lib/data";
 import { canWriteFromSession, getSessionUserId, requireSession } from "@/src/app/api/_util/auth";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   if (!documentId) return NextResponse.json({ items: [] });
   const userId = getSessionUserId(session);
   if (!db.getDocumentRole(documentId, userId)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  return NextResponse.json({ items: db.listLocks(documentId) });
+  return NextResponse.json({ items: await data.listLocks(documentId) });
 }
 
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const lock = db.acquireLock({ ...parsed.data, ttlSeconds: 30 });
+  const lock = await data.acquireLock({ ...parsed.data, ttlSeconds: 30 });
   return NextResponse.json({ id: lock.id, ttlSeconds: 30 }, { status: 201 });
 }
 
@@ -37,7 +37,7 @@ export async function PATCH(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  db.refreshLock(parsed.data.lockId);
+  await data.refreshLock(parsed.data.lockId);
   return NextResponse.json({ id: parsed.data.lockId, refreshed: true });
 }
 
@@ -51,7 +51,7 @@ export async function DELETE(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  db.releaseLock(parsed.data.lockId);
+  await data.releaseLock(parsed.data.lockId);
   return NextResponse.json({ id: parsed.data.lockId, released: true });
 }
 
