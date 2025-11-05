@@ -338,32 +338,40 @@ export async function getRecentDocuments(userId: string, workspaceId: string, li
 }
 
 export async function getWorkspaceProjects(workspaceId: string, userId: string) {
-  // Get all projects where user is a member
-  const projectMemberships = await prisma.projectMember.findMany({
-    where: { userId },
+  // First, get all projects in the workspace
+  const workspaceProjects = await prisma.project.findMany({
+    where: { workspaceId },
     include: {
-      project: {
-        where: { workspaceId },
-        include: {
-          _count: { select: { documents: true } },
-          members: {
-            where: { role: 'OWNER' },
-            include: { user: true },
-            take: 1,
-          },
-        },
+      _count: { select: { documents: true } },
+      members: {
+        where: { role: 'OWNER' },
+        include: { user: true },
+        take: 1,
       },
     },
   });
   
-  return projectMemberships
-    .filter(pm => pm.project)
-    .map(pm => ({
-      id: pm.project.id,
-      name: pm.project.name,
-      workspaceId: pm.project.workspaceId,
-      documentCount: pm.project._count.documents,
-      owner: pm.project.members[0]?.user?.name || 'Unknown',
-      createdAt: pm.project.createdAt,
+  // Then check which ones the user is a member of
+  const projectIds = workspaceProjects.map(p => p.id);
+  const userMemberships = await prisma.projectMember.findMany({
+    where: {
+      userId,
+      projectId: { in: projectIds },
+    },
+    select: { projectId: true },
+  });
+  
+  const userProjectIds = new Set(userMemberships.map(m => m.projectId));
+  
+  // Filter and map projects
+  return workspaceProjects
+    .filter(p => userProjectIds.has(p.id))
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      workspaceId: p.workspaceId,
+      documentCount: p._count.documents,
+      owner: p.members[0]?.user?.name || 'Unknown',
+      createdAt: p.createdAt,
     }));
 }
