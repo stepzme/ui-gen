@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useWorkspaceProjects, useCreateDocument, useProjectDocuments } from "@/hooks/api";
 import { DocumentCard } from "@/ui/document-card";
+import { Sidebar } from "@/components/sidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/dialog/dialog";
 import { Button } from "@/components/button/button";
 import { Input } from "@/components/input/input";
@@ -44,18 +45,7 @@ export default function ProjectPage() {
 
   return (
     <div className="flex h-screen bg-neutral-950">
-      {/* Sidebar - same as workspace dashboard */}
-      <aside className="w-64 border-r border-neutral-800 bg-neutral-900 flex flex-col">
-        <div className="p-4 border-b border-neutral-800">
-          <button
-            onClick={() => router.push(`/workspace/${workspaceId}`)}
-            className="text-sm text-neutral-400 hover:text-neutral-50"
-          >
-            ← Back to Workspace
-          </button>
-        </div>
-        {/* TODO: Add same sidebar navigation */}
-      </aside>
+      <Sidebar workspaceId={workspaceId} activeSection="projects" />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
