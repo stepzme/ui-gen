@@ -3,7 +3,7 @@ import * as data from "@/lib/data";
 import { requireSession, canWriteFromSession, getSessionUserId } from "@/lib/auth-util";
 import { getWorkspaceRole } from "@/lib/data";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ workspaceId: string }> };
 
 export async function GET(_: Request, { params }: Params) {
   const session = await requireSession();
