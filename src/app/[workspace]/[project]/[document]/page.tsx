@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocumentPages, useFlow, useLocks, useUpdatePage } from "@/src/hooks/api";
+import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/src/hooks/api";
 import { PageListItem } from "@/src/ui/page-list-item";
 import { useEditorStore } from "@/src/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
@@ -46,6 +46,8 @@ export default function DocumentPage({ params }: Params) {
   const { data: flow } = useFlow(params.document);
   const { data: locks } = useLocks(params.document);
   const { data: session } = useSession();
+  const [q, setQ] = useState("");
+  const { data: search } = useSearch(params.workspace, q);
 
   const addEdge = useAddFlowEdge(params.document);
   const deleteEdge = (edgeId: string) => useDeleteFlowEdge(params.document, edgeId).mutate();
@@ -136,6 +138,28 @@ export default function DocumentPage({ params }: Params) {
           {headerTitle}
         </h1>
         <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
+            <input
+              value={q}
+              onChange={(e)=>setQ(e.target.value)}
+              placeholder="Search projects/documents"
+              className="rounded border border-neutral-800 bg-neutral-900 px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-sky-500"
+              aria-label="Search"
+            />
+            {q && (search?.projects?.length || search?.documents?.length) ? (
+              <div className="absolute top-12 left-4 z-50 w-96 rounded border border-neutral-800 bg-neutral-950 p-2">
+                <div className="mb-1 text-xs uppercase text-neutral-400">Results</div>
+                <div className="max-h-64 overflow-auto space-y-1 text-sm">
+                  {(search?.projects || []).map((p:any)=>(
+                    <div key={p.id} className="rounded px-2 py-1 hover:bg-neutral-800">Project: {p.name}</div>
+                  ))}
+                  {(search?.documents || []).map((d:any)=>(
+                    <div key={d.id} className="rounded px-2 py-1 hover:bg-neutral-800">Document: {d.name}</div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
           <nav aria-label="Mode switch" className="flex rounded border border-neutral-800 p-1" role="tablist">
             {modes.map((m) => (
               <button
@@ -204,6 +228,7 @@ export default function DocumentPage({ params }: Params) {
               className="mt-2 w-full rounded bg-neutral-900 px-2 py-1 text-left text-sm hover:bg-neutral-800"
               aria-label="Create page"
               tabIndex={0}
+              disabled={!canEdit((session as any)?.role || 'OWNER')}
               onClick={handleCreatePage}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") handleCreatePage();
