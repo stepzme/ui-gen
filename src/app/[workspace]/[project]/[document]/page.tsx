@@ -444,7 +444,9 @@ export default function DocumentPage({ params }: Params) {
                   }}
                 >Add edge</button>
               </div>
-              <FlowCanvas artboards={flowArtboards} edges={flow?.edges || []} />
+              <div className={artboardTheme}>
+                <FlowCanvas artboards={flowArtboards} edges={flow?.edges || []} theme={artboardTheme} />
+              </div>
               <div className="mt-2 text-sm text-neutral-300">
                 {(flow?.edges || []).map((e:any)=> (
                   <div key={e.id} className="flex items-center justify-between border border-neutral-800 rounded px-2 py-1 mb-1">
