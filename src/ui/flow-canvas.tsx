@@ -149,6 +149,7 @@ function FlowCanvasInner({
   onStartEditing,
   onSaveEditing,
   onCancelEditing,
+  theme = "dark",
 }: FlowCanvasProps) {
   const reactFlowInstance = useReactFlow();
   const [isInteractive, setIsInteractive] = React.useState(true);
