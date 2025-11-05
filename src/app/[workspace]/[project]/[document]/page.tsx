@@ -96,6 +96,9 @@ export default function DocumentPage({ params }: Params) {
     return items.map((p: any) => {
       const width = 320;
       const height = 200;
+      // Получаем позицию из data страницы, если она есть
+      const pageData = (p.data as any) || {};
+      const position = pageData.position || null;
       return {
         id: p.id,
         name: p.name,
@@ -106,6 +109,7 @@ export default function DocumentPage({ params }: Params) {
         status: "draft",
         children: p.elements || [],
         autoHeight: false,
+        position: position ? { x: position.x, y: position.y } : undefined,
       } as ArtboardType;
     });
   }, [data]);
@@ -454,13 +458,7 @@ export default function DocumentPage({ params }: Params) {
                     // Сохраняем позицию страницы при перетаскивании
                     const page = data?.items?.find((p: any) => p.id === pageId);
                     if (page) {
-                      // Обновляем позицию через updatePage
-                      updatePage.mutate({}, {
-                        onSuccess: async () => {
-                          // Позиция будет сохранена в структуре данных страницы
-                          // Пока что просто обновляем локально через отдельный запрос
-                        }
-                      });
+                      updatePage.mutate({ position: { x, y } });
                     }
                   }}
                 />

@@ -68,6 +68,7 @@ export const updatePageBody = z.object({
   device: deviceModeSchema.optional(),
   index: z.number().int().nonnegative().optional(),
   elements: z.array(elementNodeSchema).optional(),
+  position: z.object({ x: z.number(), y: z.number() }).optional(),
 });
 
 // Locks

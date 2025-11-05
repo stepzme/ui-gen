@@ -35,36 +35,97 @@ interface FlowCanvasProps {
   theme?: "light" | "dark";
 }
 
-// Custom Node type для артбордов
+// Custom Node type для артбордов в flow режиме - компактное представление
 function ArtboardNode({ data, selected }: NodeProps) {
   const artboard = data.artboard;
   const handlers = data.handlers;
   const theme = data.theme || "dark";
+  const isSelected = selected;
+  
+  // Компактное представление для flow - показываем только заголовок и миниатюру
   return (
     <div 
+      className={`rounded-lg border-2 shadow-lg transition-all cursor-pointer ${
+        isSelected 
+          ? 'border-blue-500 shadow-blue-500/20' 
+          : 'border-neutral-700 hover:border-neutral-600'
+      } ${theme === 'light' ? 'bg-white' : 'bg-neutral-900'}`}
       style={{
-        width: 'auto',
-        height: 'auto',
-        borderRadius: '8px',
+        width: artboard.width || 320,
+        minHeight: 120,
         position: 'relative',
       }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (handlers?.onSelectElement) {
+          handlers.onSelectElement({
+            type: 'artboard',
+            id: artboard.id,
+            name: artboard.name,
+            status: artboard.status,
+            artboardType: artboard.type,
+            width: artboard.width,
+            height: artboard.height,
+            autoHeight: artboard.autoHeight,
+          });
+        }
+      }}
     >
-      <ArtboardComponent
-        artboard={artboard}
-        canvasTransform={{ x: 0, y: 0, scale: 1 }}
-        disablePositioning={true}
-        onSelectElement={handlers?.onSelectElement}
-        selectedElement={handlers?.selectedElement}
-        onDeleteElement={handlers?.onDeleteElement}
-        onMoveArtboard={undefined}
-        onMoveComponentUp={handlers?.onMoveComponentUp}
-        onMoveComponentDown={handlers?.onMoveComponentDown}
-        editingElement={handlers?.editingElement}
-        onStartEditing={handlers?.onStartEditing}
-        onSaveEditing={handlers?.onSaveEditing}
-        onCancelEditing={handlers?.onCancelEditing}
-        theme={theme}
-      />
+      {/* Заголовок страницы */}
+      <div className={`px-3 py-2 border-b ${
+        theme === 'light' ? 'border-neutral-200 bg-neutral-50' : 'border-neutral-700 bg-neutral-800'
+      }`}>
+        <div className="flex items-center justify-between">
+          <h3 className={`text-sm font-semibold truncate ${
+            theme === 'light' ? 'text-neutral-900' : 'text-neutral-50'
+          }`}>
+            {artboard.name}
+          </h3>
+          {artboard.type === 'mobile' && (
+            <span className={`text-xs px-1.5 py-0.5 rounded ${
+              theme === 'light' ? 'bg-blue-100 text-blue-700' : 'bg-blue-900/30 text-blue-300'
+            }`}>
+              Mobile
+            </span>
+          )}
+        </div>
+      </div>
+      
+      {/* Миниатюра/превью содержимого */}
+      <div 
+        className={`p-2 ${
+          theme === 'light' ? 'bg-white' : 'bg-neutral-900'
+        }`}
+        style={{ minHeight: 80 }}
+      >
+        {/* Упрощенное превью элементов */}
+        {artboard.children && artboard.children.length > 0 ? (
+          <div className="space-y-1">
+            {artboard.children.slice(0, 3).map((child: any) => (
+              <div 
+                key={child.id}
+                className={`h-4 rounded ${
+                  theme === 'light' ? 'bg-neutral-200' : 'bg-neutral-700'
+                }`}
+                style={{ width: `${Math.min(100, (child.props?.width || 80))}%` }}
+              />
+            ))}
+            {artboard.children.length > 3 && (
+              <div className={`text-xs ${
+                theme === 'light' ? 'text-neutral-500' : 'text-neutral-400'
+              }`}>
+                +{artboard.children.length - 3} more
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className={`text-xs text-center py-4 ${
+            theme === 'light' ? 'text-neutral-400' : 'text-neutral-500'
+          }`}>
+            Empty page
+          </div>
+        )}
+      </div>
     </div>
   );
 }
