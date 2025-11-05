@@ -7,6 +7,8 @@ import { PageListItem } from "@/src/ui/page-list-item";
 import { useEditorStore } from "@/src/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
 import { useEffect } from "react";
+import { ArtboardComponent } from "@/src/ui/artboard";
+import type { Artboard as ArtboardType } from "@/src/types/page-builder";
 
 interface Params {
   params: { workspace: string; project: string; document: string };
@@ -43,6 +45,31 @@ export default function DocumentPage({ params }: Params) {
   }
 
   const selectedPage = useMemo(() => data?.items?.find((p: any) => p.id === selectedPageId), [data, selectedPageId]);
+
+  const artboard: ArtboardType | null = useMemo(() => {
+    if (!selectedPage) return null;
+    const width = device === "mobile" ? 390 : 1200;
+    const height = device === "mobile" ? 844 : 900;
+    return {
+      id: selectedPage.id,
+      name: selectedPage.name,
+      width,
+      height,
+      type: device,
+      gap: 16,
+      status: "draft",
+      children: selectedPage.elements || [],
+      autoHeight: true,
+      navbarVariant: "ios",
+      navbarTitle: selectedPage.name,
+      navbarDescription: "",
+      navbarRightIcon: undefined,
+      navbarShowNavigation: true,
+      navbarShowTitle: true,
+      navbarShowDescription: false,
+      navbarShowRightButton: false,
+    } as ArtboardType;
+  }, [selectedPage, device]);
 
   // Document-level lock on mount/unmount (scaffold)
   const { mutate: acquire } = useAcquireLock();
@@ -154,9 +181,20 @@ export default function DocumentPage({ params }: Params) {
         </aside>
         <main className="flex-1 p-4" aria-live="polite">
           {mode === "pages" ? (
-            <div className="grid place-items-center rounded border border-neutral-800 p-8 text-neutral-400">
-              <div className="text-sm">Pages canvas placeholder ({device})</div>
-            </div>
+            artboard ? (
+              <div className="flex justify-center">
+                <ArtboardComponent
+                  artboard={artboard}
+                  disablePositioning
+                  onSelectElement={() => {}}
+                  selectedElement={null}
+                />
+              </div>
+            ) : (
+              <div className="grid place-items-center rounded border border-neutral-800 p-8 text-neutral-400">
+                <div className="text-sm">Select or create a page</div>
+              </div>
+            )
           ) : (
             <div className="grid place-items-center rounded border border-neutral-800 p-8 text-neutral-400">
               <div className="text-sm">Flow map placeholder</div>
