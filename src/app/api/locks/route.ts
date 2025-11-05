@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lockAcquireBody, lockRefreshBody, lockReleaseBody } from "@/src/types/document";
 import { db } from "@/src/lib/mock-db";
-import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
+import { canWriteFromSession, getSessionUserId, requireSession } from "@/src/app/api/_util/auth";
 
 export async function GET(request: NextRequest) {
   const documentId = request.nextUrl.searchParams.get("documentId");
+  const session = await requireSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!documentId) return NextResponse.json({ items: [] });
+  const userId = getSessionUserId(session);
+  if (!db.getDocumentRole(documentId, userId)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   return NextResponse.json({ items: db.listLocks(documentId) });
 }
 
