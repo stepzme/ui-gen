@@ -7,7 +7,7 @@ import { canEdit } from "@/lib/rbac";
 export async function GET() {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = (session as any).user?.id || (session as any).user?.email || '';
+  const userId = getSessionUserId(session);
   const items = await data.listDocumentsForUser(userId);
   return NextResponse.json({ items });
 }

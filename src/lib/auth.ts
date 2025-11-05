@@ -27,6 +27,7 @@ export const authOptions = {
         token.role = user.role;
         token.id = user.id;
         token.email = user.email;
+        token.sub = user.email; // Use email as sub for consistency
       }
       return token;
     },
