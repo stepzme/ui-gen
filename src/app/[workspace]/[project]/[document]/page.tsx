@@ -325,10 +325,11 @@ export default function DocumentPage({ params }: Params) {
         <main className="flex-1 p-4" aria-live="polite">
           {mode === "pages" ? (
             artboard ? (
-              <div className="flex justify-center">
+              <div className={`flex justify-center ${artboardTheme}`}>
                 <ArtboardComponent
                   artboard={artboard}
                   disablePositioning
+                  theme={artboardTheme}
                   onSelectElement={(el) => setSelectedElementId(el.id)}
                   selectedElement={null}
                   lockedElementIds={new Set((locks?.items || []).filter((l:any)=>l.scope==='ELEMENT').map((l:any)=>l.elementId))}
