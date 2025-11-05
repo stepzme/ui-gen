@@ -25,7 +25,8 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const lock = await data.acquireLock({ ...parsed.data, ttlSeconds: 30 });
+  const userId = getSessionUserId(session);
+  const lock = await data.acquireLock({ ...parsed.data, holderId: userId, ttlSeconds: 30 });
   return NextResponse.json({ id: lock.id, ttlSeconds: 30 }, { status: 201 });
 }
 
