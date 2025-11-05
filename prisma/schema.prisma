@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Roles across entities
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum LockScope {
+  DOCUMENT
+  ELEMENT
+}
+
+enum AuditAction {
+  AUTH_LOGIN
+  AUTH_LOGOUT
+  PERMISSIONS_CHANGED
+  DOCUMENT_CREATED
+  DOCUMENT_UPDATED
+  DOCUMENT_TRASHED
+  DOCUMENT_RESTORED
+  LOCK_ACQUIRE
+  LOCK_RELEASE
+  EXPORT_REQUESTED
+  EXPORT_COMPLETED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspaceMemberships WorkspaceMember[]
+  projectMemberships   ProjectMember[]
+  auditLogs            AuditLog[]      @relation("AuditActor")
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects  Project[]
+  members   WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  role        Role
+  createdAt   DateTime  @default(now())
+
+  @@unique([workspaceId, userId])
+}
+
+model Project {
+  id          String     @id @default(uuid())
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  name        String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  documents Document[]
+  members   ProjectMember[]
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  role      Role
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String
+  name        String
+  slug        String
+  data        Json     // DocumentData: pages, flow.edges, etc.
+  trashedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pages DocumentPage[]
+
+  @@unique([projectId, slug])
+}
+
+model DocumentPage {
+  id         String    @id @default(uuid())
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String
+  name       String
+  index      Int       // ordering
+  data       Json      // page-specific layout data; element UUIDs live here
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([documentId, name])
+  @@unique([documentId, index])
+}
+
+model Lock {
+  id         String    @id @default(uuid())
+  scope      LockScope
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String
+  elementId  String?   // when scope == ELEMENT
+  holderId   String
+  ttlSeconds Int
+  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime  @default(now())
+
+  @@index([documentId])
+  @@index([documentId, elementId])
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  action     AuditAction
+  actor      User?       @relation("AuditActor", fields: [actorId], references: [id])
+  actorId    String?
+  entityType String
+  entityId   String
+  diff       Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([entityType, entityId])
+}
