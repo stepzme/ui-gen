@@ -14,6 +14,22 @@ export function useWorkspaces(options?: UseQueryOptions<{ items: any[] }>) {
   return useQuery({ queryKey: ["workspaces"], queryFn: () => jsonFetch("/api/workspaces"), ...(options || {}) });
 }
 
+export function useRecentDocuments(workspaceId: string | undefined, limit: number = 16, offset: number = 0) {
+  return useQuery({
+    queryKey: ["recent", workspaceId, limit, offset],
+    queryFn: () => jsonFetch(`/api/workspaces/${workspaceId}/recent?limit=${limit}&offset=${offset}`),
+    enabled: !!workspaceId,
+  });
+}
+
+export function useWorkspaceProjects(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["workspace-projects", workspaceId],
+    queryFn: () => jsonFetch(`/api/workspaces/${workspaceId}/projects`),
+    enabled: !!workspaceId,
+  });
+}
+
 export function useCreateWorkspace() {
   const qc = useQueryClient();
   return useMutation({
@@ -34,10 +50,14 @@ export function useProjects(options?: UseQueryOptions<{ items: any[] }>) {
 export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { workspaceId: string; name: string }) => jsonFetch(`/api/projects`, { method: "POST", body: JSON.stringify(body) }),
-    onSuccess: async () => {
+    mutationFn: async (body: { workspaceId: string; name: string }) => {
+      const res = await jsonFetch(`/api/projects`, { method: "POST", body: JSON.stringify(body) });
+      return res;
+    },
+    onSuccess: async (data, variables) => {
       await qc.invalidateQueries({ queryKey: ["projects"] });
       await qc.invalidateQueries({ queryKey: ["workspaces"] });
+      await qc.invalidateQueries({ queryKey: ["workspace-projects", variables.workspaceId] });
     },
   });
 }

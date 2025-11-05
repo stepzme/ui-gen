@@ -268,3 +268,102 @@ export async function verifyUser(email: string, password: string) {
   if (!user || user.password !== password) return null;
   return user;
 }
+
+// Recent documents
+export async function trackDocumentView(userId: string, documentId: string) {
+  await prisma.userDocumentView.upsert({
+    where: { userId_documentId: { userId, documentId } },
+    create: { userId, documentId, lastViewedAt: new Date(), lastEditedAt: new Date() },
+    update: { lastViewedAt: new Date() },
+  });
+}
+
+export async function trackDocumentEdit(userId: string, documentId: string) {
+  await prisma.userDocumentView.upsert({
+    where: { userId_documentId: { userId, documentId } },
+    create: { userId, documentId, lastViewedAt: new Date(), lastEditedAt: new Date() },
+    update: { lastEditedAt: new Date(), lastViewedAt: new Date() },
+  });
+}
+
+export async function getRecentDocuments(userId: string, workspaceId: string, limit: number = 16, offset: number = 0) {
+  // Get all documents in workspace first
+  const workspaceDocuments = await prisma.document.findMany({
+    where: {
+      project: { workspaceId },
+    },
+    select: { id: true },
+  });
+  
+  const documentIds = workspaceDocuments.map(d => d.id);
+  
+  if (documentIds.length === 0) {
+    return [];
+  }
+  
+  // Get recent views for these documents
+  const views = await prisma.userDocumentView.findMany({
+    where: {
+      userId,
+      documentId: { in: documentIds },
+    },
+    orderBy: { lastEditedAt: 'desc' },
+    take: limit + offset,
+    skip: offset,
+    include: {
+      document: {
+        include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+              workspaceId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  
+  // Map to response format
+  return views.slice(0, limit).map(v => ({
+    id: v.document.id,
+    name: v.document.name,
+    slug: v.document.slug,
+    projectId: v.document.projectId,
+    projectName: v.document.project.name,
+    lastEditedAt: v.lastEditedAt,
+    updatedAt: v.document.updatedAt,
+  }));
+}
+
+export async function getWorkspaceProjects(workspaceId: string, userId: string) {
+  // Get all projects where user is a member
+  const projectMemberships = await prisma.projectMember.findMany({
+    where: { userId },
+    include: {
+      project: {
+        where: { workspaceId },
+        include: {
+          _count: { select: { documents: true } },
+          members: {
+            where: { role: 'OWNER' },
+            include: { user: true },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+  
+  return projectMemberships
+    .filter(pm => pm.project)
+    .map(pm => ({
+      id: pm.project.id,
+      name: pm.project.name,
+      workspaceId: pm.project.workspaceId,
+      documentCount: pm.project._count.documents,
+      owner: pm.project.members[0]?.user?.name || 'Unknown',
+      createdAt: pm.project.createdAt,
+    }));
+}
