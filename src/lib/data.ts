@@ -1,10 +1,10 @@
 // Data access layer. Uses Prisma if available, otherwise falls back to in-memory db.
 import { db } from "@/lib/mock-db";
-import type { PrismaClient } from "@/generated/prisma";
+import type { PrismaClient } from "@prisma/client";
 let prisma: PrismaClient | null = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { PrismaClient: PC } = require("@/generated/prisma");
+  const { PrismaClient: PC } = require("@prisma/client");
   prisma = new PC();
 } catch (_) {
   prisma = null;
