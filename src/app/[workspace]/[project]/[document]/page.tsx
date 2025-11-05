@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCreatePage, useDocumentPages, useUpdatePage } from "@/src/hooks/api";
+import { useCreatePage, useDocumentPages, useFlow, useUpdatePage } from "@/src/hooks/api";
 import { PageListItem } from "@/src/ui/page-list-item";
 import { useEditorStore } from "@/src/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import { ArtboardComponent } from "@/src/ui/artboard";
 import type { Artboard as ArtboardType } from "@/src/types/page-builder";
 import { FlowCanvas } from "@/src/ui/flow-canvas";
+import { useSession } from "next-auth/react";
+import { canEdit } from "@/src/lib/rbac";
 
 interface Params {
   params: { workspace: string; project: string; document: string };
@@ -40,6 +42,8 @@ export default function DocumentPage({ params }: Params) {
   const { data } = useDocumentPages(params.document);
   const createPage = useCreatePage(params.document);
   const updatePage = useUpdatePage(params.document, selectedPageId || undefined);
+  const { data: flow } = useFlow(params.document);
+  const { data: session } = useSession();
 
   function handleCreatePage() {
     const count = (data?.items?.length || 0) + 1;
@@ -203,6 +207,7 @@ export default function DocumentPage({ params }: Params) {
             <div className="space-y-2">
               <button
                 className="w-full rounded border border-neutral-700 px-2 py-1 text-left text-sm hover:bg-neutral-800"
+                disabled={!canEdit((session as any)?.role || 'OWNER')}
                 onClick={() => {
                   if (!selectedPage) return;
                   const el = { id: crypto.randomUUID(), type: "text", props: { content: "Sample text" }, children: [] } as any;
@@ -212,6 +217,7 @@ export default function DocumentPage({ params }: Params) {
               >Text</button>
               <button
                 className="w-full rounded border border-neutral-700 px-2 py-1 text-left text-sm hover:bg-neutral-800"
+                disabled={!canEdit((session as any)?.role || 'OWNER')}
                 onClick={() => {
                   if (!selectedPage) return;
                   const el = { id: crypto.randomUUID(), type: "button", props: { children: "Button" }, children: [] } as any;
@@ -257,6 +263,7 @@ export default function DocumentPage({ params }: Params) {
                   }}
                   onSaveEditing={(elementId, prop, value) => {
                     if (!selectedPage) return;
+                    if (!canEdit((session as any)?.role || 'OWNER')) return;
                     // immutably update element by id
                     function patch(nodes: any[]): any[] {
                       return nodes.map((n) => {
@@ -281,7 +288,7 @@ export default function DocumentPage({ params }: Params) {
             )
           ) : (
             <div className="h-full min-h-[60vh] rounded border border-neutral-800 p-2">
-              <FlowCanvas artboards={flowArtboards} />
+              <FlowCanvas artboards={flowArtboards} edges={flow?.edges || []} />
             </div>
           )}
         </main>

@@ -3,6 +3,7 @@
 import React, { useCallback, useMemo, useLayoutEffect } from 'react';
 import ReactFlow, {
   Node,
+  Edge as RFEdge,
   Background,
   useNodesState,
   NodeProps,
@@ -18,6 +19,7 @@ import { ArtboardComponent } from './artboard';
 
 interface FlowCanvasProps {
   artboards: Artboard[];
+  edges?: Array<{ id: string; source: { kind: 'page'|'element'; id: string }; targetPageId: string; label?: string }>;
   onAddArtboard?: (type: 'desktop' | 'mobile') => void;
   onSelectElement?: (element: any) => void;
   selectedElement?: any;
@@ -131,6 +133,7 @@ function CustomControls({
 // Внутренний компонент
 function FlowCanvasInner({
   artboards,
+  edges,
   onAddArtboard,
   onSelectElement,
   selectedElement,
@@ -175,6 +178,11 @@ function FlowCanvasInner({
   }, [artboards, selectedElement, onSelectElement, onDeleteElement, onMoveArtboard, onMoveComponentUp, onMoveComponentDown, editingElement, onStartEditing, onSaveEditing, onCancelEditing]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(nodeData);
+
+  const rfEdges: RFEdge[] = useMemo(() => {
+    const pageEdges = (edges || []).filter(e => e.source.kind === 'page');
+    return pageEdges.map((e) => ({ id: e.id, source: e.source.id, target: e.targetPageId }));
+  }, [edges]);
 
   // Обновляем nodes когда artboards меняются
   useLayoutEffect(() => {
@@ -227,6 +235,7 @@ function FlowCanvasInner({
       <ReactFlow
         nodes={nodes}
         onNodesChange={onNodesChange}
+        edges={rfEdges}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}

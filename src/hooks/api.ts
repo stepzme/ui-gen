@@ -49,6 +49,24 @@ export function useSearch(workspaceId?: string, q?: string, options?: UseQueryOp
   });
 }
 
+// Flow edges
+export function useFlow(documentId: string | undefined, options?: UseQueryOptions<{ documentId: string; edges: any[] }>) {
+  return useQuery({ queryKey: ["flow", documentId], queryFn: () => jsonFetch(`/api/documents/${documentId}/flow`), enabled: !!documentId, ...(options || {}) });
+}
+
+export function useAddFlowEdge(documentId: string | undefined) {
+  return useMutation({
+    mutationFn: (body: { source: { kind: "page"|"element"; id: string }; targetPageId: string; label?: string }) =>
+      jsonFetch(`/api/documents/${documentId}/flow`, { method: "POST", body: JSON.stringify(body) }),
+  });
+}
+
+export function useDeleteFlowEdge(documentId: string | undefined, edgeId: string | undefined) {
+  return useMutation({
+    mutationFn: async () => jsonFetch(`/api/documents/${documentId}/flow/${edgeId}`, { method: "DELETE" }),
+  });
+}
+
 export function useDocumentPages(documentId: string | undefined, options?: UseQueryOptions<{ documentId: string; items: any[] }>) {
   return useQuery({ queryKey: ["document-pages", documentId], queryFn: () => jsonFetch(`/api/documents/${documentId}/pages`), enabled: !!documentId, ...(options || {}) });
 }
