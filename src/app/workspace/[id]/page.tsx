@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useWorkspaces, useRecentDocuments, useWorkspaceProjects } from "@/hooks/api";
@@ -18,13 +17,26 @@ export default function WorkspaceDashboardPage() {
   
   const { data: workspaces } = useWorkspaces();
   const [recentOffset, setRecentOffset] = useState(0);
+  const [allRecent, setAllRecent] = useState<any[]>([]);
   const { data: recentData } = useRecentDocuments(workspaceId, 16, recentOffset);
   const { data: projectsData } = useWorkspaceProjects(workspaceId);
   
   const [activeSection, setActiveSection] = useState<"recent" | "projects">("recent");
   
   const currentWorkspace = workspaces?.items?.find((w: any) => w.id === workspaceId);
-  const recent = recentData?.items || [];
+  
+  // Accumulate recent documents when loading more
+  useEffect(() => {
+    if (recentData?.items) {
+      if (recentOffset === 0) {
+        setAllRecent(recentData.items);
+      } else {
+        setAllRecent(prev => [...prev, ...recentData.items]);
+      }
+    }
+  }, [recentData, recentOffset]);
+  
+  const recent = allRecent;
   const hasMoreRecent = recentData?.hasMore || false;
   const projects = projectsData?.items || [];
 
