@@ -7,6 +7,7 @@ import { useWorkspaces, useRecentDocuments, useWorkspaceProjects } from "@/hooks
 import { DocumentCard } from "@/ui/document-card";
 import { ProjectCard } from "@/ui/project-card";
 import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/button/button";
 
 export default function WorkspaceDashboardPage() {
   const params = useParams();
@@ -15,13 +16,15 @@ export default function WorkspaceDashboardPage() {
   const workspaceId = params.id as string;
   
   const { data: workspaces } = useWorkspaces();
-  const { data: recentData } = useRecentDocuments(workspaceId, 16, 0);
+  const [recentOffset, setRecentOffset] = useState(0);
+  const { data: recentData } = useRecentDocuments(workspaceId, 16, recentOffset);
   const { data: projectsData } = useWorkspaceProjects(workspaceId);
   
   const [activeSection, setActiveSection] = useState<"recent" | "projects">("recent");
   
   const currentWorkspace = workspaces?.items?.find((w: any) => w.id === workspaceId);
   const recent = recentData?.items || [];
+  const hasMoreRecent = recentData?.hasMore || false;
   const projects = projectsData?.items || [];
 
   return (
@@ -43,17 +46,30 @@ export default function WorkspaceDashboardPage() {
                   <p>No recent documents</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-4 gap-4">
-                  {recent.map((doc: any) => (
-                    <DocumentCard
-                      key={doc.id}
-                      id={doc.id}
-                      name={doc.name}
-                      projectName={doc.projectName}
-                      lastEditedAt={doc.lastEditedAt}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-4 gap-4">
+                    {recent.map((doc: any) => (
+                      <DocumentCard
+                        key={doc.id}
+                        id={doc.id}
+                        name={doc.name}
+                        projectName={doc.projectName}
+                        lastEditedAt={doc.lastEditedAt}
+                      />
+                    ))}
+                  </div>
+                  {hasMoreRecent && (
+                    <div className="mt-6 text-center">
+                      <Button
+                        onClick={() => setRecentOffset(prev => prev + 16)}
+                        variant="outline"
+                        className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                      >
+                        Show More
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
