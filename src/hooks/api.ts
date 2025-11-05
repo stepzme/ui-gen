@@ -77,7 +77,11 @@ export function useAddFlowEdge(documentId: string | undefined) {
 
 export function useDeleteFlowEdge(documentId: string | undefined, edgeId: string | undefined) {
   return useMutation({
-    mutationFn: async () => jsonFetch(`/api/documents/${documentId}/flow/${edgeId}`, { method: "DELETE" }),
+    mutationFn: async (id?: string) => {
+      const targetId = id || edgeId;
+      if (!targetId) throw new Error("Edge ID required");
+      return jsonFetch(`/api/documents/${documentId}/flow/${targetId}`, { method: "DELETE" });
+    },
   });
 }
 

@@ -51,7 +51,10 @@ export default function DocumentPage({ params }: Params) {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   const addEdge = useAddFlowEdge(params.document);
-  const deleteEdge = (edgeId: string) => useDeleteFlowEdge(params.document, edgeId).mutate();
+  const deleteEdgeMutation = useDeleteFlowEdge(params.document, undefined);
+  const deleteEdge = useCallback((edgeId: string) => {
+    deleteEdgeMutation.mutate(edgeId);
+  }, [deleteEdgeMutation]);
 
   function handleCreatePage() {
     const count = (data?.items?.length || 0) + 1;
