@@ -449,7 +449,7 @@ export default function DocumentPage({ params }: Params) {
                   }}
                 >Add edge</button>
               </div>
-              <div className={artboardTheme}>
+              <div className={`${artboardTheme} h-[60vh] rounded border border-neutral-800 overflow-hidden`}>
                 <FlowCanvas 
                   artboards={flowArtboards} 
                   edges={flow?.edges || []} 

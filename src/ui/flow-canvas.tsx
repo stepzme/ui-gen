@@ -317,8 +317,7 @@ function FlowCanvasInner({
   );
 
   return (
-    <div className={`w-full h-full bg-background-secondary dark:bg-background-secondary/20 ${theme}`}>
-
+    <div className={`w-full h-full ${theme === 'light' ? 'bg-neutral-100' : 'bg-neutral-950'}`} style={{ height: '100%', minHeight: '400px' }}>
       <ReactFlow
         nodes={nodes}
         onNodesChange={onNodesChange}
