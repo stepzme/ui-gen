@@ -274,6 +274,18 @@ db.deleteFlowEdge = function(...args) {
   return result;
 };
 
+// Override getUserOrCreateByEmail to auto-save when new user is created
+const originalGetUserOrCreateByEmail = db.getUserOrCreateByEmail.bind(db);
+db.getUserOrCreateByEmail = function(...args) {
+  const beforeSize = (db as any).users.size;
+  const result = originalGetUserOrCreateByEmail(...args);
+  const afterSize = (db as any).users.size;
+  if (afterSize > beforeSize) {
+    scheduleSave();
+  }
+  return result;
+};
+
 // Load on init (only in Node.js runtime)
 if (typeof window === 'undefined') {
   db.load().catch(console.error);
