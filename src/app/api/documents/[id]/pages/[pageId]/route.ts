@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import * as data from "@/lib/data";
 import { requireSession, canWriteFromSession, getSessionUserId } from "@/lib/auth-util";
 import { canEdit } from "@/lib/rbac";
-import { updatePageBody } from "@/types/document";
+import * as documentTypes from "@/types/document";
 
 type Params = { params: Promise<{ id: string; pageId: string }> };
 
@@ -20,7 +20,10 @@ export async function PATCH(request: Request, { params }: Params) {
   if (!json || typeof json !== 'object') {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
-  const parsed = updatePageBody.safeParse(json);
+  if (!documentTypes.updatePageBody) {
+    return NextResponse.json({ error: "Schema not loaded" }, { status: 500 });
+  }
+  const parsed = documentTypes.updatePageBody.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
