@@ -12,6 +12,7 @@ import type { Artboard as ArtboardType } from "@/src/types/page-builder";
 import { FlowCanvas } from "@/src/ui/flow-canvas";
 import { useSession } from "next-auth/react";
 import { canEdit } from "@/src/lib/rbac";
+import { ElementList } from "@/src/ui/element-list";
 
 interface Params {
   params: { workspace: string; project: string; document: string };
@@ -235,6 +236,20 @@ export default function DocumentPage({ params }: Params) {
               >Button</button>
             </div>
           </div>
+          {selectedPage && (
+            <div className="mt-6 border-t border-neutral-800 pt-3">
+              <div className="mb-2 text-xs uppercase text-neutral-400">Elements</div>
+              <ElementList
+                elements={(selectedPage.elements || []).map((n: any) => ({ id: n.id, type: n.type }))}
+                onReorder={(ids) => {
+                  if (!selectedPage?.elements) return;
+                  const byId = new Map(selectedPage.elements.map((n: any) => [n.id, n]));
+                  const next = ids.map((id) => byId.get(id)).filter(Boolean) as any[];
+                  updatePage.mutate({ elements: next });
+                }}
+              />
+            </div>
+          )}
           </div>
         </aside>
         <main className="flex-1 p-4" aria-live="polite">
