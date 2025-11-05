@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as data from "@/src/lib/data";
-import { requireSession, getSessionUserId } from "@/src/lib/auth-util";
+import * as data from "@/lib/data";
+import { requireSession, getSessionUserId } from "@/lib/auth-util";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession();

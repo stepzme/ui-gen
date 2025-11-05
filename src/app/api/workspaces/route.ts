@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { createWorkspaceBody } from "@/src/types/document";
-import * as data from "@/src/lib/data";
-import { canEdit } from "@/src/lib/rbac";
-import { canWriteFromSession, requireSession, getSessionUserId } from "@/src/lib/auth-util";
+import { createWorkspaceBody } from "@/types/document";
+import * as data from "@/lib/data";
+import { canEdit } from "@/lib/rbac";
+import { canWriteFromSession, requireSession, getSessionUserId } from "@/lib/auth-util";
 
 export async function GET() {
   const session = await requireSession();

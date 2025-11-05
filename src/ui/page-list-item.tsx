@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useDeletePage, useUpdatePage } from "@/src/hooks/api";
+import { useDeletePage, useUpdatePage } from "@/hooks/api";
 
 interface PageListItemProps {
   documentId: string;

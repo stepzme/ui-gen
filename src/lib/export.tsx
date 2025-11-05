@@ -1,10 +1,10 @@
-import { PageData, DocumentData } from "@/src/types/document";
+import { PageData, DocumentData } from "@/types/document";
 
 export function generatePageTSX(page: PageData, documentData: DocumentData): string {
   const componentName = page.name.replace(/[^a-zA-Z0-9]/g, "") || "Page";
   const elementsTSX = page.elements.map((el) => renderElement(el)).join("\n");
 
-  return `import { ${getComponentImports(page.elements).join(", ")} } from "@/src/components";
+  return `import { ${getComponentImports(page.elements).join(", ")} } from "@/components";
 
 export default function ${componentName}() {
   return (

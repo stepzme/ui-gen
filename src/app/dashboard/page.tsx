@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, useProjects, useSearch, useWorkspaces } from "@/src/hooks/api";
+import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, useProjects, useSearch, useWorkspaces } from "@/hooks/api";
 
 export default function DashboardPage() {
   const router = useRouter();

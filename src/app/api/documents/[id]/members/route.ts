@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import * as data from "@/src/lib/data";
-import { requireSession, canWriteFromSession, getSessionUserId } from "@/src/lib/auth-util";
-import { getDocumentRole } from "@/src/lib/data";
+import * as data from "@/lib/data";
+import { requireSession, canWriteFromSession, getSessionUserId } from "@/lib/auth-util";
+import { getDocumentRole } from "@/lib/data";
 
 type Params = { params: { id: string } };
 

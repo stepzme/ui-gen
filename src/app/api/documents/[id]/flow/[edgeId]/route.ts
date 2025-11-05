@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import * as data from "@/src/lib/data";
-import { canWriteFromSession, requireSession } from "@/src/lib/auth-util";
+import * as data from "@/lib/data";
+import { canWriteFromSession, requireSession } from "@/lib/auth-util";
 
 type Params = { params: { id: string; edgeId: string } };
 

@@ -2,17 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/src/hooks/api";
-import { PageListItem } from "@/src/ui/page-list-item";
-import { useEditorStore } from "@/src/store/editor";
-import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
+import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/hooks/api";
+import { PageListItem } from "@/ui/page-list-item";
+import { useEditorStore } from "@/store/editor";
+import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/hooks/locks";
 import { useEffect } from "react";
-import { ArtboardComponent } from "@/src/ui/artboard";
-import type { Artboard as ArtboardType } from "@/src/types/page-builder";
-import { FlowCanvas } from "@/src/ui/flow-canvas";
+import { ArtboardComponent } from "@/ui/artboard";
+import type { Artboard as ArtboardType } from "@/types/page-builder";
+import { FlowCanvas } from "@/ui/flow-canvas";
 import { useSession } from "next-auth/react";
-import { canEdit } from "@/src/lib/rbac";
-import { ElementList } from "@/src/ui/element-list";
+import { canEdit } from "@/lib/rbac";
+import { ElementList } from "@/ui/element-list";
 
 interface Params {
   params: { workspace: string; project: string; document: string };

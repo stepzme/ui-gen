@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { createPageBody } from "@/src/types/document";
-import * as data from "@/src/lib/data";
-import { canWriteFromSession, getSessionUserId, requireSession } from "@/src/lib/auth-util";
-import { getDocumentRole } from "@/src/lib/data";
+import { createPageBody } from "@/types/document";
+import * as data from "@/lib/data";
+import { canWriteFromSession, getSessionUserId, requireSession } from "@/lib/auth-util";
+import { getDocumentRole } from "@/lib/data";
 
 type Params = { params: { id: string } };
 
