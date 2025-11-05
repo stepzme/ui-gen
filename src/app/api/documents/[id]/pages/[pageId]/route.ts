@@ -4,21 +4,22 @@ import * as data from "@/lib/data";
 import { requireSession, canWriteFromSession, getSessionUserId } from "@/lib/auth-util";
 import { canEdit } from "@/lib/rbac";
 
-type Params = { params: { id: string; pageId: string } };
+type Params = { params: Promise<{ id: string; pageId: string }> };
 
 export async function PATCH(request: Request, { params }: Params) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canWriteFromSession(session)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { pageId } = await params;
   const json = await request.json().catch(() => null);
   const parsed = updatePageBody.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const updated = await data.updatePage(params.pageId, parsed.data);
+  const updated = await data.updatePage(pageId, parsed.data);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const userId = getSessionUserId(session);
-  await data.addAudit({ actorId: userId, entityType: 'PAGE', entityId: params.pageId, action: 'UPDATE', diff: parsed.data });
+  await data.addAudit({ actorId: userId, entityType: 'PAGE', entityId: pageId, action: 'UPDATE', diff: parsed.data });
   return NextResponse.json(updated);
 }
 
@@ -26,10 +27,11 @@ export async function DELETE(_: Request, { params }: Params) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canWriteFromSession(session)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  await data.deletePage(params.pageId);
+  const { id, pageId } = await params;
+  await data.deletePage(pageId);
   const userId = getSessionUserId(session);
-  await data.addAudit({ actorId: userId, entityType: 'PAGE', entityId: params.pageId, action: 'DELETE' });
-  return NextResponse.json({ id: params.pageId, documentId: params.id, deleted: true });
+  await data.addAudit({ actorId: userId, entityType: 'PAGE', entityId: pageId, action: 'DELETE' });
+  return NextResponse.json({ id: pageId, documentId: id, deleted: true });
 }
 
 

@@ -4,25 +4,26 @@ import * as data from "@/lib/data";
 import { canWriteFromSession, getSessionUserId, requireSession } from "@/lib/auth-util";
 import { getDocumentRole } from "@/lib/data";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_: Request, { params }: Params) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
   const userId = getSessionUserId(session);
-  const role = await getDocumentRole(params.id, userId);
+  const role = await getDocumentRole(id, userId);
   if (!role) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  return NextResponse.json({ documentId: params.id, items: await data.listPages(params.id) });
+  return NextResponse.json({ documentId: id, items: await data.listPages(id) });
 }
 
 export async function POST(request: Request, { params }: Params) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canWriteFromSession(session)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { id } = await params;
   const userId = getSessionUserId(session);
-  const docRole = await getDocumentRole(params.id, userId);
+  const docRole = await getDocumentRole(id, userId);
   if (!docRole || docRole === 'VIEWER') return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const { id } = params;
   const json = await request.json().catch(() => null);
   const parsed = createPageBody.safeParse(json);
   if (!parsed.success) {

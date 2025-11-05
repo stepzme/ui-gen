@@ -15,8 +15,12 @@ export function useWorkspaces(options?: UseQueryOptions<{ items: any[] }>) {
 }
 
 export function useCreateWorkspace() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { name: string }) => jsonFetch(`/api/workspaces`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["workspaces"] });
+    },
   });
 }
 
@@ -25,8 +29,13 @@ export function useProjects(options?: UseQueryOptions<{ items: any[] }>) {
 }
 
 export function useCreateProject() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { workspaceId: string; name: string }) => jsonFetch(`/api/projects`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["projects"] });
+      await qc.invalidateQueries({ queryKey: ["workspaces"] });
+    },
   });
 }
 
@@ -35,8 +44,13 @@ export function useDocuments(options?: UseQueryOptions<{ items: any[] }>) {
 }
 
 export function useCreateDocument() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { projectId: string; name: string; slug: string }) => jsonFetch(`/api/documents`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      await qc.invalidateQueries({ queryKey: ["projects"] });
+    },
   });
 }
 
