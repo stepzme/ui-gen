@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, startTransition } from "react";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor } from "@dnd-kit/core";
 import { Artboard, ComponentDefinition, SelectedElement, ComponentNode } from "@/types/page-builder";
 import { ComponentsPanel } from "./components-panel";
@@ -119,58 +119,66 @@ export default function PageBuilder() {
     }
   };
 
-  const handleUpdateArtboard = (artboardId: string, updates: Partial<Artboard>) => {
-    // Если меняется тип артборда, обновляем его размеры
-    if (updates.type) {
-      const isMobile = updates.type === 'mobile';
-      updates.width = isMobile ? 375 : 1440;
-      updates.height = isMobile ? 800 : 900;
-      // Если меняем на desktop, удаляем navbarVariant
-      if (updates.type === 'desktop') {
-        updates.navbarVariant = undefined;
-      } else if (updates.type === 'mobile') {
-        // При переключении на mobile, устанавливаем ios по умолчанию, если navbarVariant не задан
-        const currentArtboard = artboards.find(ab => ab.id === artboardId);
-        if (!updates.navbarVariant && (!currentArtboard?.navbarVariant || currentArtboard?.type === 'desktop')) {
+  const handleUpdateArtboard = useCallback((artboardId: string, updates: Partial<Artboard>) => {
+    setArtboards(prev => {
+      const currentArtboard = prev.find(ab => ab.id === artboardId);
+      if (!currentArtboard) return prev;
+
+      // Если меняется тип артборда, обновляем его размеры
+      if (updates.type) {
+        const isMobile = updates.type === 'mobile';
+        updates.width = isMobile ? 375 : 1440;
+        updates.height = isMobile ? 800 : 900;
+        if (updates.type === 'desktop') {
+          updates.navbarVariant = undefined;
+        } else if (!updates.navbarVariant && (!currentArtboard.navbarVariant || currentArtboard.type === 'desktop')) {
           updates.navbarVariant = 'ios';
         }
       }
-    }
-    
-    setArtboards(prev => prev.map(artboard => 
-      artboard.id === artboardId ? { ...artboard, ...updates } : artboard
-    ));
-    
-    // Update selectedElement if it's the current artboard
-    if (selectedElement?.type === 'artboard' && selectedElement.id === artboardId) {
-      let updatedNavbarVariant: 'ios' | 'android' | undefined;
-      if (updates.type === 'desktop') {
-        updatedNavbarVariant = undefined;
-      } else if (updates.type === 'mobile') {
-        updatedNavbarVariant = updates.navbarVariant ?? 'ios';
-      } else {
-        updatedNavbarVariant = updates.navbarVariant ?? selectedElement.navbarVariant;
+
+      const updated = prev.map(artboard => 
+        artboard.id === artboardId ? { ...artboard, ...updates } : artboard
+      );
+
+      // Обновляем selectedElement неблокирующим обновлением
+      if (selectedElement?.type === 'artboard' && selectedElement.id === artboardId) {
+        startTransition(() => {
+          setSelectedElement(prev => {
+            if (!prev) return null;
+            const result = { ...prev };
+            
+            // Обновляем только измененные поля (не undefined если поле отсутствовало)
+            if (updates.name !== undefined) result.name = updates.name;
+            if (updates.status !== undefined) result.status = updates.status;
+            if (updates.type !== undefined) result.artboardType = updates.type;
+            if (updates.width !== undefined) result.width = updates.width;
+            if (updates.height !== undefined) result.height = updates.height;
+            if (updates.autoHeight !== undefined) result.autoHeight = updates.autoHeight;
+            if (updates.navbarTitle !== undefined) result.navbarTitle = updates.navbarTitle;
+            if (updates.navbarDescription !== undefined) result.navbarDescription = updates.navbarDescription;
+            if (updates.navbarRightIcon !== undefined) result.navbarRightIcon = updates.navbarRightIcon;
+            if (updates.navbarShowNavigation !== undefined) result.navbarShowNavigation = updates.navbarShowNavigation;
+            if (updates.navbarShowTitle !== undefined) result.navbarShowTitle = updates.navbarShowTitle;
+            if (updates.navbarShowDescription !== undefined) result.navbarShowDescription = updates.navbarShowDescription;
+            if (updates.navbarShowRightButton !== undefined) result.navbarShowRightButton = updates.navbarShowRightButton;
+            
+            // Специальная логика для navbarVariant
+            if (updates.type === 'desktop') {
+              result.navbarVariant = undefined;
+            } else if (updates.type === 'mobile') {
+              result.navbarVariant = updates.navbarVariant ?? 'ios';
+            } else if (updates.navbarVariant !== undefined) {
+              result.navbarVariant = updates.navbarVariant;
+            }
+            
+            return result;
+          });
+        });
       }
-      
-      setSelectedElement(prev => prev ? { 
-        ...prev, 
-        name: updates.name ?? prev.name,
-        status: updates.status ?? prev.status,
-        artboardType: updates.type ?? prev.artboardType,
-        width: updates.width ?? prev.width,
-        height: updates.height ?? prev.height,
-        autoHeight: updates.autoHeight ?? prev.autoHeight,
-        navbarVariant: updatedNavbarVariant,
-        navbarTitle: updates.navbarTitle !== undefined ? updates.navbarTitle : prev.navbarTitle,
-        navbarDescription: updates.navbarDescription !== undefined ? updates.navbarDescription : prev.navbarDescription,
-        navbarRightIcon: updates.navbarRightIcon !== undefined ? updates.navbarRightIcon : prev.navbarRightIcon,
-        navbarShowNavigation: updates.navbarShowNavigation !== undefined ? updates.navbarShowNavigation : prev.navbarShowNavigation,
-        navbarShowTitle: updates.navbarShowTitle !== undefined ? updates.navbarShowTitle : prev.navbarShowTitle,
-        navbarShowDescription: updates.navbarShowDescription !== undefined ? updates.navbarShowDescription : prev.navbarShowDescription,
-        navbarShowRightButton: updates.navbarShowRightButton !== undefined ? updates.navbarShowRightButton : prev.navbarShowRightButton
-      } : null);
-    }
-  };
+
+      return updated;
+    });
+  }, [selectedElement]);
 
   const handleDeleteElement = (elementId: string) => {
     // Check if it's an artboard

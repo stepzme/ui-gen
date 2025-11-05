@@ -137,7 +137,10 @@ function getDefaultPropsById(id: string): Record<string, any> {
     dialog: {},
     collapsible: {},
     sheet: {},
-    cell: {},
+    cell: {
+      title: 'Cell Title',
+      description: 'Cell description'
+    },
     image: {
       src: '',
       alt: 'Image',

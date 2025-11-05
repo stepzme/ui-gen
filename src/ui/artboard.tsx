@@ -79,25 +79,14 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
 
   const handleArtboardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    const { type, ...artboardData } = artboard;
     onSelectElement({
       type: 'artboard',
       id: artboard.id,
-      name: artboard.name,
-      status: artboard.status,
-      artboardType: artboard.type,
-      width: artboard.width,
-      height: artboard.height,
-      autoHeight: artboard.autoHeight,
-      navbarVariant: artboard.navbarVariant,
-      navbarTitle: artboard.navbarTitle,
-      navbarDescription: artboard.navbarDescription,
-      navbarRightIcon: artboard.navbarRightIcon,
-      navbarShowNavigation: artboard.navbarShowNavigation,
-      navbarShowTitle: artboard.navbarShowTitle,
-      navbarShowDescription: artboard.navbarShowDescription,
-      navbarShowRightButton: artboard.navbarShowRightButton
+      ...artboardData,
+      artboardType: type,
     });
-  }, [artboard.id, artboard.name, artboard.status, artboard.type, artboard.width, artboard.height, artboard.autoHeight, artboard.navbarVariant, artboard.navbarTitle, artboard.navbarDescription, artboard.navbarRightIcon, artboard.navbarShowNavigation, artboard.navbarShowTitle, artboard.navbarShowDescription, artboard.navbarShowRightButton, onSelectElement]);
+  }, [artboard, onSelectElement]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('[data-artboard-header]')) {

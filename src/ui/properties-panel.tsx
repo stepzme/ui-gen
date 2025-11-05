@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useCallback } from "react";
 import { Settings, Monitor, Smartphone, Dice1 } from "lucide-react";
 import { Label } from "@/components/label";
 import { Input } from "@/components/input";
@@ -103,9 +104,9 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
     }
   };
 
-  const handleArtboardPropChange = (key: string, value: any) => {
+  const handleArtboardPropChange = useCallback((key: string, value: any) => {
     onUpdateArtboard(selectedElement.id, { [key]: value });
-  };
+  }, [selectedElement.id, onUpdateArtboard]);
 
   return (
     <div className="flex w-80 flex-col flex-1 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg">
@@ -138,29 +139,29 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
   );
 }
 
-function ArtboardProperties({ selectedElement, onPropChange }: { selectedElement: SelectedElement; onPropChange: (key: string, value: any) => void }) {
+const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { selectedElement: SelectedElement; onPropChange: (key: string, value: any) => void }) => {
   return (
     <div className="space-y-4">
       
       <div className="flex items-center gap-2">
         <Text size="caption" weight="medium" className="w-2/3">Статус</Text>
-        <Select
+          <Select
           value={selectedElement.status || 'draft'}
           onValueChange={(value) => onPropChange('status', value)}
-        >
-          <SelectTrigger>
+          >
+            <SelectTrigger>
             <SelectValue placeholder="Выберите статус" />
-          </SelectTrigger>
-          <SelectContent>
+            </SelectTrigger>
+            <SelectContent>
             <SelectItem value="draft"><Badge semantic="default" active={false}>В работе</Badge></SelectItem>
             <SelectItem value="review"><Badge semantic="warning" active={false}>На ревью</Badge></SelectItem>
             <SelectItem value="approved"><Badge semantic="success" active={false}>Ревью пройдено</Badge></SelectItem>
             <SelectItem value="published"><Badge semantic="accent" active={false}>Готово</Badge></SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
         <Text size="caption" weight="medium" className="w-2/3">Высота</Text>
         <div className="flex w-full items-center gap-2">
           
@@ -207,7 +208,7 @@ function ArtboardProperties({ selectedElement, onPropChange }: { selectedElement
             size="sm"
             className="flex-1"
             onClick={() => onPropChange('type', 'desktop')}
-          >
+        >
             Desktop
           </Button>
           <Button
@@ -334,7 +335,7 @@ function ArtboardProperties({ selectedElement, onPropChange }: { selectedElement
       )}
     </div>
   );
-}
+});
 
 function ComponentProperties({ 
   selectedElement, 
@@ -525,10 +526,10 @@ function ComponentProperties({
           return true;
         })
         .map(([propName, propValue]) => (
-          <div key={propName}>
-            {renderPropControl(propName, propValue)}
+        <div key={propName}>
+          {renderPropControl(propName, propValue)}
           </div>
-        ))}
+      ))}
     </div>
   );
 }
