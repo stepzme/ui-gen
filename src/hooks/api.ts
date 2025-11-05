@@ -30,6 +30,14 @@ export function useWorkspaceProjects(workspaceId: string | undefined) {
   });
 }
 
+export function useProjectDocuments(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ["project-documents", projectId],
+    queryFn: () => jsonFetch(`/api/projects/${projectId}/documents`),
+    enabled: !!projectId,
+  });
+}
+
 export function useCreateWorkspace() {
   const qc = useQueryClient();
   return useMutation({
@@ -69,10 +77,15 @@ export function useDocuments(options?: UseQueryOptions<{ items: any[] }>) {
 export function useCreateDocument() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { projectId: string; name: string; slug: string }) => jsonFetch(`/api/documents`, { method: "POST", body: JSON.stringify(body) }),
-    onSuccess: async () => {
+    mutationFn: async (body: { projectId: string; name: string; slug: string }) => {
+      const res = await jsonFetch(`/api/documents`, { method: "POST", body: JSON.stringify(body) });
+      return res;
+    },
+    onSuccess: async (data, variables) => {
       await qc.invalidateQueries({ queryKey: ["documents"] });
       await qc.invalidateQueries({ queryKey: ["projects"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents", variables.projectId] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
     },
   });
 }

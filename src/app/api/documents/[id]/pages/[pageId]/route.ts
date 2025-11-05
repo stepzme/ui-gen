@@ -30,6 +30,8 @@ export async function PATCH(request: Request, { params }: Params) {
   const updated = await data.updatePage(pageId, parsed.data);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const userId = getSessionUserId(session);
+  // Track document edit for recent documents
+  await data.trackDocumentEdit(userId, id);
   await data.addAudit({ actorId: userId, entityType: 'PAGE', entityId: pageId, action: 'UPDATE', diff: parsed.data });
   return NextResponse.json(updated);
 }

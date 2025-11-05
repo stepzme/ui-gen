@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useWorkspaceProjects, useCreateDocument } from "@/hooks/api";
+import { useWorkspaceProjects, useCreateDocument, useProjectDocuments } from "@/hooks/api";
 import { DocumentCard } from "@/ui/document-card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/dialog/dialog";
 import { Button } from "@/components/button/button";
@@ -15,14 +15,14 @@ export default function ProjectPage() {
   const projectId = params.projectId as string;
   
   const { data: projectsData } = useWorkspaceProjects(workspaceId);
+  const { data: documentsData } = useProjectDocuments(projectId);
   const createDocument = useCreateDocument();
   
   const [documentName, setDocumentName] = useState("");
   const [showCreateDocument, setShowCreateDocument] = useState(false);
   
   const project = projectsData?.items?.find((p: any) => p.id === projectId);
-  // TODO: Fetch documents for this project
-  const documents: any[] = [];
+  const documents = documentsData?.items || [];
   
   const handleCreateDocument = async () => {
     if (!documentName.trim() || !projectId) return;

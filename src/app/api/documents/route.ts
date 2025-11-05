@@ -24,6 +24,8 @@ export async function POST(request: Request) {
   }
   const userId = getSessionUserId(session);
   const doc = await data.createDocument(parsed.data.projectId, parsed.data.name, parsed.data.slug, userId);
+  // Track document view/edit for recent documents
+  await data.trackDocumentEdit(userId, doc.id);
   await data.addAudit({ actorId: userId, entityType: 'DOCUMENT', entityId: doc.id, action: 'CREATE' });
   return NextResponse.json(doc, { status: 201 });
 }

@@ -1,27 +1,50 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useDocumentPages } from "@/hooks/api";
 import * as data from "@/lib/data";
 
-// This is a placeholder - redirect to the actual editor page
+// Reuse the existing editor component by redirecting to old route structure
 export default function DocumentPage() {
   const params = useParams();
+  const router = useRouter();
   const { data: session } = useSession();
   const documentId = params.id as string;
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     // Track document view
     if (session?.user?.id && documentId) {
       data.trackDocumentView((session.user as any).id, documentId).catch(console.error);
     }
-  }, [session, documentId]);
+    
+    // Fetch document to get workspace/project IDs for redirect
+    fetch(`/api/documents/${documentId}`)
+      .then(res => res.json())
+      .then((doc: any) => {
+        if (doc.workspaceId && doc.projectId) {
+          // Redirect to old route structure that has the editor
+          router.replace(`/${doc.workspaceId}/${doc.projectId}/${documentId}`);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(() => setLoading(false));
+  }, [session, documentId, router]);
   
-  // TODO: Load document and redirect to editor or show editor inline
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-50">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-50">
-      <div>Document Editor - {documentId}</div>
+      <div>Document not found or access denied</div>
     </div>
   );
 }
