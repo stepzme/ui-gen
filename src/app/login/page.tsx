@@ -24,27 +24,55 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm p-6 text-neutral-50">
-      <h1 className="mb-4 text-lg font-semibold">Log in</h1>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-sky-500"
-          aria-label="Email"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-sky-500"
-          aria-label="Password"
-        />
-        {error && <div className="text-sm text-red-400" role="alert">{error}</div>}
-        <button type="submit" className="w-full rounded border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-sky-500">Sign in</button>
-      </form>
+    <div className="flex min-h-screen items-center justify-center bg-neutral-950">
+      <div className="w-full max-w-sm space-y-6 rounded-lg border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold text-neutral-50">Log in</h1>
+          <p className="mt-2 text-sm text-neutral-400">Enter your credentials to continue</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-300">
+              Email
+            </label>
+            <input
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-50 placeholder-neutral-500 outline-none transition-colors focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700"
+              aria-label="Email"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-neutral-300">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-50 placeholder-neutral-500 outline-none transition-colors focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700"
+              aria-label="Password"
+              required
+            />
+          </div>
+          {error && (
+            <div className="rounded-md bg-red-950/50 border border-red-900/50 px-3 py-2 text-sm text-red-400" role="alert">
+              {error}
+            </div>
+          )}
+          <button
+            type="submit"
+            className="w-full rounded-md bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+          >
+            Sign in
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
