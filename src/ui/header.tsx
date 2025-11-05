@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/button";
 import { Text } from "@/components/text";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, LogOut } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import { signOut } from "next-auth/react";
 
 interface HeaderProps {
   activeTab: 'builder' | 'sandbox';
@@ -59,18 +60,31 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           </nav>
         </div>
 
-        {/* Right side - Theme Toggle */}
-        <Button
-          onClick={toggleTheme}
-          variant="secondary"
-          semantic="default"
-          size="sm"
-          className="flex items-center gap-2"
-          aria-label="Toggle theme"
-          title="Toggle theme"
-        >
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
+        {/* Right side - Theme Toggle and Logout */}
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={toggleTheme}
+            variant="secondary"
+            semantic="default"
+            size="sm"
+            className="flex items-center gap-2"
+            aria-label="Toggle theme"
+            title="Toggle theme"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            variant="secondary"
+            semantic="default"
+            size="sm"
+            className="flex items-center gap-2"
+            aria-label="Log out"
+            title="Log out"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </header>
   );
