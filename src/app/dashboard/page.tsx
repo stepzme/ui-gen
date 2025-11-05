@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useCreateDocument, useCreateProject, useCreateWorkspace, useDocuments, useProjects, useSearch, useWorkspaces } from "@/hooks/api";
 
 export default function DashboardPage() {
@@ -62,7 +62,16 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-6 text-neutral-50">
-      <h1 className="mb-6 text-xl font-semibold">Dashboard</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Dashboard</h1>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="rounded border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-sky-500"
+          aria-label="Sign out"
+        >
+          Sign out
+        </button>
+      </div>
       <div className="mb-6 flex items-center gap-2">
         <input
           value={query}
