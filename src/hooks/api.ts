@@ -17,7 +17,10 @@ export function useWorkspaces(options?: UseQueryOptions<{ items: any[] }>) {
 export function useCreateWorkspace() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { name: string }) => jsonFetch(`/api/workspaces`, { method: "POST", body: JSON.stringify(body) }),
+    mutationFn: async (body: { name: string }) => {
+      const res = await jsonFetch(`/api/workspaces`, { method: "POST", body: JSON.stringify(body) });
+      return res;
+    },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["workspaces"] });
     },
