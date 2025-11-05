@@ -13,7 +13,7 @@ export default function WorkspaceDashboardPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const workspaceId = params.id as string;
+  const workspaceId = params.workspaceId as string;
   
   const { data: workspaces } = useWorkspaces();
   const [recentOffset, setRecentOffset] = useState(0);
