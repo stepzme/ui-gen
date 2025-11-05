@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocument, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/hooks/api";
+import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocument, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage, useUpdatePagePosition } from "@/hooks/api";
 import { PageListItem } from "@/ui/page-list-item";
 import { useEditorStore } from "@/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/hooks/locks";
@@ -45,6 +45,7 @@ export default function DocumentPage({ params }: Params) {
   const { data } = useDocumentPages(resolvedParams.document);
   const createPage = useCreatePage(resolvedParams.document);
   const updatePage = useUpdatePage(resolvedParams.document, selectedPageId || undefined);
+  const updatePagePosition = useUpdatePagePosition(resolvedParams.document);
   const { data: flow } = useFlow(resolvedParams.document);
   const { data: locks } = useLocks(resolvedParams.document);
   const { data: session } = useSession();
@@ -456,9 +457,8 @@ export default function DocumentPage({ params }: Params) {
                   theme={artboardTheme}
                   onMoveArtboard={(pageId, x, y) => {
                     // Сохраняем позицию страницы при перетаскивании
-                    const page = data?.items?.find((p: any) => p.id === pageId);
-                    if (page) {
-                      updatePage.mutate({ position: { x, y } });
+                    if (pageId) {
+                      updatePagePosition.mutate({ pageId, position: { x, y } });
                     }
                   }}
                 />

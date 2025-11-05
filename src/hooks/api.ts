@@ -155,13 +155,28 @@ export function useCreatePage(documentId: string | undefined) {
 export function useUpdatePage(documentId: string | undefined, pageId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { name?: string; device?: "mobile" | "desktop"; index?: number; elements?: any[] }) =>
+    mutationFn: async (body: { name?: string; device?: "mobile" | "desktop"; index?: number; elements?: any[]; position?: { x: number; y: number } }) =>
       jsonFetch(`/api/documents/${documentId}/pages/${pageId}`, { method: "PATCH", body: JSON.stringify(body) }),
     onSuccess: (updated) => {
       if (!documentId) return;
       qc.setQueryData<{ documentId: string; items: any[] }>(["document-pages", documentId], (prev) => {
         if (!prev) return prev;
         return { ...prev, items: prev.items.map((p) => (p.id === pageId ? { ...p, ...updated } : p)) } as any;
+      });
+    },
+  });
+}
+
+export function useUpdatePagePosition(documentId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ pageId, position }: { pageId: string; position: { x: number; y: number } }) =>
+      jsonFetch(`/api/documents/${documentId}/pages/${pageId}`, { method: "PATCH", body: JSON.stringify({ position }) }),
+    onSuccess: (updated, variables) => {
+      if (!documentId) return;
+      qc.setQueryData<{ documentId: string; items: any[] }>(["document-pages", documentId], (prev) => {
+        if (!prev) return prev;
+        return { ...prev, items: prev.items.map((p) => (p.id === variables.pageId ? { ...p, data: { ...(p.data as any || {}), position: variables.position } } : p)) } as any;
       });
     },
   });
