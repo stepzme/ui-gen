@@ -15,6 +15,14 @@ export default function DashboardPage() {
   const createPr = useCreateProject();
   const createDoc = useCreateDocument();
   
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceId, setWorkspaceId] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>("");
+  const [query, setQuery] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [documentName, setDocumentName] = useState("");
+  const { data: search } = useSearch(workspaceId, query);
+  
   useEffect(() => {
     if (status === "unauthenticated") {
       router.replace("/login?redirect=/dashboard");
@@ -28,14 +36,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const [workspaceName, setWorkspaceName] = useState("");
-  const [workspaceId, setWorkspaceId] = useState<string>("");
-  const [projectId, setProjectId] = useState<string>("");
-  const [query, setQuery] = useState("");
-  const [projectName, setProjectName] = useState("");
-  const [documentName, setDocumentName] = useState("");
-  const { data: search } = useSearch(workspaceId, query);
 
   function handleCreateWorkspace() {
     if (!workspaceName.trim()) return;
