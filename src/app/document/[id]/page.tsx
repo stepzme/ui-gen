@@ -3,8 +3,6 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useDocumentPages } from "@/hooks/api";
-import * as data from "@/lib/data";
 
 // Reuse the existing editor component by redirecting to old route structure
 export default function DocumentPage() {
@@ -15,9 +13,9 @@ export default function DocumentPage() {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Track document view
+    // Track document view via API
     if (session?.user?.id && documentId) {
-      data.trackDocumentView((session.user as any).id, documentId).catch(console.error);
+      fetch(`/api/documents/${documentId}/track-view`, { method: "POST" }).catch(console.error);
     }
     
     // Fetch document to get workspace/project IDs for redirect
