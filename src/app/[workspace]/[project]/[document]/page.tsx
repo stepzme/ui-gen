@@ -264,7 +264,7 @@ export default function DocumentPage({ params }: Params) {
             {(data?.items || []).map((p: any) => (
               <PageListItem
                 key={p.id}
-                documentId={params.document}
+                documentId={resolvedParams.document}
                 page={p}
                 isSelected={selectedPageId === p.id}
                 onSelect={selectPage}
