@@ -74,6 +74,14 @@ export function useDocuments(options?: UseQueryOptions<{ items: any[] }>) {
   return useQuery({ queryKey: ["documents"], queryFn: () => jsonFetch("/api/documents"), ...(options || {}) });
 }
 
+export function useDocument(documentId: string | undefined) {
+  return useQuery({
+    queryKey: ["document", documentId],
+    queryFn: () => jsonFetch(`/api/documents/${documentId}`),
+    enabled: !!documentId,
+  });
+}
+
 export function useCreateDocument() {
   const qc = useQueryClient();
   return useMutation({

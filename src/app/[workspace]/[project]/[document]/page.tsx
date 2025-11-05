@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/hooks/api";
+import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocument, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage } from "@/hooks/api";
 import { PageListItem } from "@/ui/page-list-item";
 import { useEditorStore } from "@/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/hooks/locks";
@@ -39,7 +39,8 @@ export default function DocumentPage({ params }: Params) {
     router.replace(`/${params.workspace}/${params.project}/${params.document}?${sp.toString()}`);
   }
 
-  const headerTitle = useMemo(() => `${params.document}`, [params.document]);
+  const { data: documentData } = useDocument(params.document);
+  const headerTitle = useMemo(() => documentData?.name || params.document, [documentData?.name, params.document]);
   const { data } = useDocumentPages(params.document);
   const createPage = useCreatePage(params.document);
   const updatePage = useUpdatePage(params.document, selectedPageId || undefined);
