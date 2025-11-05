@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createProjectBody } from "@/src/types/document";
-import { db } from "@/src/lib/mock-db";
+import * as data from "@/src/lib/data";
 import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
 import { canEdit } from "@/src/lib/rbac";
 
@@ -8,7 +8,7 @@ export async function GET() {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = (session as any).user?.id || (session as any).user?.email || '';
-  const items = db.listProjects().filter((p) => db.getProjectRole(p.id, userId));
+  const items = await data.listProjectsForUser(userId);
   return NextResponse.json({ items });
 }
 
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
-  const pr = db.createProject(parsed.data.workspaceId, parsed.data.name, (session as any).user?.id || 'admin');
+  const pr = await data.createProject(parsed.data.workspaceId, parsed.data.name, (session as any).user?.id || (session as any).user?.email || 'admin');
   return NextResponse.json(pr, { status: 201 });
 }
 

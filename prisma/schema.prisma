@@ -112,6 +112,7 @@ model Document {
   updatedAt   DateTime @updatedAt
 
   pages DocumentPage[]
+  locks Lock[]
 
   @@unique([projectId, slug])
 }

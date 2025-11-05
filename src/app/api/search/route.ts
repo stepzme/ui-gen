@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/src/lib/mock-db";
+import * as data from "@/src/lib/data";
+import { requireSession } from "@/src/app/api/_util/auth";
 
 export async function GET(request: NextRequest) {
+  const session = await requireSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const q = (request.nextUrl.searchParams.get("q") || "").toLowerCase();
-  const workspaceId = request.nextUrl.searchParams.get("workspaceId");
-  const projects = db.listProjects().filter((p: any) => (!workspaceId || p.workspaceId === workspaceId) && p.name.toLowerCase().includes(q));
-  const documents = db.listDocuments().filter((d: any) => d.name.toLowerCase().includes(q));
+  const workspaceId = request.nextUrl.searchParams.get("workspaceId") || undefined;
+  const userId = (session as any).user?.id || (session as any).user?.email || '';
+  const projectsAll = await data.listProjectsForUser(userId);
+  const documentsAll = await data.listDocumentsForUser(userId);
+  const projects = projectsAll.filter((p: any) => (!workspaceId || p.workspaceId === workspaceId) && p.name.toLowerCase().includes(q));
+  const documents = documentsAll.filter((d: any) => d.name.toLowerCase().includes(q));
   return NextResponse.json({ projects, documents });
 }
 

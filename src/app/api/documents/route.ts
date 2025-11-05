@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createDocumentBody } from "@/src/types/document";
-import { db } from "@/src/lib/mock-db";
+import * as data from "@/src/lib/data";
 import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
 import { canEdit } from "@/src/lib/rbac";
 
@@ -8,7 +8,7 @@ export async function GET() {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = (session as any).user?.id || (session as any).user?.email || '';
-  const items = db.listDocuments().filter((d) => db.getDocumentRole(d.id, userId));
+  const items = await data.listDocumentsForUser(userId);
   return NextResponse.json({ items });
 }
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid body", issues: parsed.error.issues }, { status: 400 });
   }
   const ownerId = (session as any).user?.id || (session as any).user?.email || 'admin';
-  const doc = db.createDocument(parsed.data.projectId, parsed.data.name, parsed.data.slug, ownerId);
+  const doc = await data.createDocument(parsed.data.projectId, parsed.data.name, parsed.data.slug, ownerId);
   return NextResponse.json(doc, { status: 201 });
 }
 
