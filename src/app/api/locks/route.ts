@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lockAcquireBody, lockRefreshBody, lockReleaseBody } from "@/src/types/document";
 import { db } from "@/src/lib/mock-db";
-import { requireSession } from "@/src/app/api/_util/auth";
+import { canWriteFromSession, requireSession } from "@/src/app/api/_util/auth";
 
 export async function GET(request: NextRequest) {
   const documentId = request.nextUrl.searchParams.get("documentId");
@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canWriteFromSession(session)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   // acquire
   const json = await request.json().catch(() => null);
   const parsed = lockAcquireBody.safeParse(json);
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canWriteFromSession(session)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   // refresh
   const json = await request.json().catch(() => null);
   const parsed = lockRefreshBody.safeParse(json);
@@ -38,6 +40,7 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   const session = await requireSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canWriteFromSession(session)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   // release
   const json = await request.json().catch(() => null);
   const parsed = lockReleaseBody.safeParse(json);

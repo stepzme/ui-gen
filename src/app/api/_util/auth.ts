@@ -9,4 +9,9 @@ export async function requireSession() {
   return session as any;
 }
 
+export function canWriteFromSession(session: any): boolean {
+  const role = (session as any)?.role || "VIEWER";
+  return role === "OWNER" || role === "ADMIN" || role === "EDITOR";
+}
+
 
