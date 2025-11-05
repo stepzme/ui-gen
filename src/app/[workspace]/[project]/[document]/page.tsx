@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCreatePage, useDocumentPages } from "@/src/hooks/api";
+import { useCreatePage, useDocumentPages, useUpdatePage } from "@/src/hooks/api";
 import { PageListItem } from "@/src/ui/page-list-item";
 import { useEditorStore } from "@/src/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/src/hooks/locks";
@@ -38,6 +38,7 @@ export default function DocumentPage({ params }: Params) {
   const headerTitle = useMemo(() => `${params.document}`, [params.document]);
   const { data } = useDocumentPages(params.document);
   const createPage = useCreatePage(params.document);
+  const updatePage = useUpdatePage(params.document, selectedPageId || undefined);
 
   function handleCreatePage() {
     const count = (data?.items?.length || 0) + 1;
@@ -188,6 +189,23 @@ export default function DocumentPage({ params }: Params) {
                   disablePositioning
                   onSelectElement={() => {}}
                   selectedElement={null}
+                  onSaveEditing={(elementId, prop, value) => {
+                    if (!selectedPage) return;
+                    // immutably update element by id
+                    function patch(nodes: any[]): any[] {
+                      return nodes.map((n) => {
+                        if (n.id === elementId) {
+                          const nextProps = { ...(n.props || {}) };
+                          nextProps[prop] = value;
+                          return { ...n, props: nextProps };
+                        }
+                        if (n.children?.length) return { ...n, children: patch(n.children) };
+                        return n;
+                      });
+                    }
+                    const nextElements = patch(selectedPage.elements || []);
+                    updatePage.mutate({ elements: nextElements });
+                  }}
                 />
               </div>
             ) : (
