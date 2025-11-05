@@ -198,6 +198,29 @@ export default function DocumentPage({ params }: Params) {
             >
               + New page
             </button>
+          <div className="mt-6 border-t border-neutral-800 pt-3">
+            <div className="mb-2 text-xs uppercase text-neutral-400">Insert</div>
+            <div className="space-y-2">
+              <button
+                className="w-full rounded border border-neutral-700 px-2 py-1 text-left text-sm hover:bg-neutral-800"
+                onClick={() => {
+                  if (!selectedPage) return;
+                  const el = { id: crypto.randomUUID(), type: "text", props: { content: "Sample text" }, children: [] } as any;
+                  const next = [...(selectedPage.elements || []), el];
+                  updatePage.mutate({ elements: next });
+                }}
+              >Text</button>
+              <button
+                className="w-full rounded border border-neutral-700 px-2 py-1 text-left text-sm hover:bg-neutral-800"
+                onClick={() => {
+                  if (!selectedPage) return;
+                  const el = { id: crypto.randomUUID(), type: "button", props: { children: "Button" }, children: [] } as any;
+                  const next = [...(selectedPage.elements || []), el];
+                  updatePage.mutate({ elements: next });
+                }}
+              >Button</button>
+            </div>
+          </div>
           </div>
         </aside>
         <main className="flex-1 p-4" aria-live="polite">
@@ -209,6 +232,29 @@ export default function DocumentPage({ params }: Params) {
                   disablePositioning
                   onSelectElement={() => {}}
                   selectedElement={null}
+                  onMoveComponentUp={(elementId) => {
+                    if (!selectedPage?.elements) return;
+                    const idx = selectedPage.elements.findIndex((n: any) => n.id === elementId);
+                    if (idx <= 0) return;
+                    const next = [...selectedPage.elements];
+                    const [m] = next.splice(idx, 1);
+                    next.splice(idx - 1, 0, m);
+                    updatePage.mutate({ elements: next });
+                  }}
+                  onMoveComponentDown={(elementId) => {
+                    if (!selectedPage?.elements) return;
+                    const idx = selectedPage.elements.findIndex((n: any) => n.id === elementId);
+                    if (idx < 0 || idx >= selectedPage.elements.length - 1) return;
+                    const next = [...selectedPage.elements];
+                    const [m] = next.splice(idx, 1);
+                    next.splice(idx + 1, 0, m);
+                    updatePage.mutate({ elements: next });
+                  }}
+                  onDeleteElement={(elementId) => {
+                    if (!selectedPage?.elements) return;
+                    const next = selectedPage.elements.filter((n: any) => n.id !== elementId);
+                    updatePage.mutate({ elements: next });
+                  }}
                   onSaveEditing={(elementId, prop, value) => {
                     if (!selectedPage) return;
                     // immutably update element by id
