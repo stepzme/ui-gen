@@ -1,527 +1,185 @@
-import * as React from 'react'
-import { Slot } from '@radix-ui/react-slot'
-import { styled, type VariantProps, config } from '@/styles/stitches.config'
-import { typography } from '@/styles/typography'
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { motion, HTMLMotionProps } from "motion/react"
 
-/**
- * Button.Container - базовый компонент для layout, typography и spacing
- * Отвечает за структуру кнопки без цветов и вариантов
- */
-const ButtonContainer = styled('button', {
-  position: 'relative',
-  display: 'inline-flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  columnGap: '$sizes.x300', // 12px - gap между элементами
-  justifyContent: 'center',
-  background: 'none',
-  border: 'none',
-  outlineOffset: 2,
-  cursor: 'pointer',
-  width: '100%',
-  WebkitTapHighlightColor: 'transparent',
-  userSelect: 'none',
+import { cn } from "@/lib/utils"
 
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-x2 whitespace-nowrap rounded-x2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-border-primary focus-visible:ring-ring-primary/50 focus-visible:ring-[3px] aria-invalid:ring-critical/20 dark:aria-invalid:ring-critical/40 aria-invalid:border-border-critical",
+  {
     variants: {
-    typography: {
-      bodyS: {
-        borderRadius: '$radii.x200', // 8px
-        ...typography.bodyS_tight_medium,
-        '& svg': {
-          fontSize: '$sizes.x400', // 16px
-        },
+      variant: {
+        primary: "",
+        secondary: "",
+        tertiary: "",
+        text: "",
       },
-      bodyM: {
-        borderRadius: '$radii.x300', // 12px
-        ...typography.bodyM_tight_medium,
-        '& svg': {
-          fontSize: '$sizes.x500', // 20px
-        },
+      semantic: {
+        default: "",
+        accent: "",
+        success: "",
+        warning: "",
+        info: "",
+        critical: "",
       },
-      bodyL: {
-        borderRadius: '$radii.x400', // 16px
-        ...typography.bodyL_tight_medium,
-        '& svg': {
-          fontSize: '$sizes.x600', // 24px
-        },
-      },
-    },
-
-    fullWidth: {
-      adaptive: {
-        '@sm': {
-          width: 'auto',
-        },
-      },
-      enable: {},
-      disable: {
-        width: 'auto',
+      size: {
+        default: "h-9 px-x4 py-x2 has-[>svg]:px-x3",
+        sm: "h-8 rounded-x2 gap-x1 px-x3 has-[>svg]:px-x2",
+        lg: "h-10 rounded-x2 px-x6 has-[>svg]:px-x4",
+        icon: "size-9",
+        "icon-sm": "size-8",
+        "icon-lg": "size-10",
       },
     },
-
-    extraPadding: {
-      true: {},
-    },
-
-    paddingSize: {
-      medium: {},
-      small: {},
-      tiny: {},
-    },
-
-    rounded: {
-      true: {},
-    },
-  },
-
     compoundVariants: [
-    // Typography + PaddingSize combinations
-    {
-      typography: 'bodyS',
-      paddingSize: 'medium',
-      css: {
-        padding: '$sizes.x300', // 12px
+      // Primary variant combinations
+      {
+        variant: "primary",
+        semantic: "default",
+        class: ["bg-button-filled-primary-bodyNormal border border-button-filled-primary-bodyNormal text-button-filled-primary-text", "hover:bg-button-filled-primary-bodyHover hover:border-button-filled-primary-bodyHover", "active:bg-button-filled-primary-bodyClick active:border-button-filled-primary-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyS',
-      paddingSize: 'small',
-      css: {
-        padding: '$sizes.x200', // 8px
+      {
+        variant: "primary",
+        semantic: "accent",
+        class: ["bg-button-filled-brand-bodyNormal border border-button-filled-brand-bodyNormal text-button-filled-text", "hover:bg-button-filled-brand-bodyHover hover:border-button-filled-brand-bodyHover", "active:bg-button-filled-brand-bodyClick active:border-button-filled-brand-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyS',
-      paddingSize: 'tiny',
-      css: {
-        padding: '$sizes.x100', // 4px
-        borderRadius: '$radii.x100', // 4px
+      {
+        variant: "primary",
+        semantic: "success",
+        class: ["bg-button-filled-success-bodyNormal border border-button-filled-success-bodyNormal text-button-filled-text", "hover:bg-button-filled-success-bodyHover hover:border-button-filled-success-bodyHover", "active:bg-button-filled-success-bodyClick active:border-button-filled-success-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyM',
-      paddingSize: 'medium',
-      css: {
-        padding: '$sizes.x400', // 16px
+      {
+        variant: "primary",
+        semantic: "warning",
+        class: ["bg-button-filled-warning-bodyNormal border border-button-filled-warning-bodyNormal text-button-filled-text", "hover:bg-button-filled-warning-bodyHover hover:border-button-filled-warning-bodyHover", "active:bg-button-filled-warning-bodyClick active:border-button-filled-warning-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyM',
-      paddingSize: 'small',
-      css: {
-        padding: '$sizes.x300', // 12px
+      {
+        variant: "primary",
+        semantic: "info",
+        class: ["bg-button-filled-info-bodyNormal border border-button-filled-info-bodyNormal text-button-filled-text", "hover:bg-button-filled-info-bodyHover hover:border-button-filled-info-bodyHover", "active:bg-button-filled-info-bodyClick active:border-button-filled-info-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyM',
-      paddingSize: 'tiny',
-      css: {
-        padding: '$sizes.x200', // 8px
-        borderRadius: '$radii.x200', // 8px
+      {
+        variant: "primary",
+        semantic: "critical",
+        class: ["bg-button-filled-critical-bodyNormal border border-button-filled-critical-bodyNormal text-button-filled-text", "hover:bg-button-filled-critical-bodyHover hover:border-button-filled-critical-bodyHover", "active:bg-button-filled-critical-bodyClick active:border-button-filled-critical-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyL',
-      paddingSize: 'medium',
-      css: {
-        padding: '$sizes.x500', // 20px
+      // Secondary variant combinations
+      {
+        variant: "secondary",
+        semantic: "default",
+        class: ["bg-transparent border border-button-outlined-primary-borderNormal text-button-outlined-primary-text", "hover:bg-button-outlined-primary-bodyHover hover:border-button-outlined-primary-borderHover", "active:bg-button-outlined-primary-bodyClick active:border-button-outlined-primary-borderClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyL',
-      paddingSize: 'small',
-      css: {
-        padding: '$sizes.x400', // 16px
+      {
+        variant: "secondary",
+        semantic: "accent",
+        class: ["bg-transparent border border-button-outlined-brand-borderNormal text-button-outlined-brand-text", "hover:bg-button-outlined-brand-bodyHover hover:border-button-outlined-brand-borderHover", "active:bg-button-outlined-brand-bodyClick active:border-button-outlined-brand-borderClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyL',
-      paddingSize: 'tiny',
-      css: {
-        padding: '$sizes.x300', // 12px
-        borderRadius: '$radii.x200', // 8px
+      {
+        variant: "secondary",
+        semantic: "success",
+        class: ["bg-transparent border border-button-outlined-success-borderNormal text-button-outlined-success-text", "hover:bg-button-outlined-success-bodyHover hover:border-button-outlined-success-borderHover", "active:bg-button-outlined-success-bodyClick active:border-button-outlined-success-borderClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-
-    // ExtraPadding adjustments
-    {
-      typography: 'bodyS',
-      paddingSize: 'medium',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x500', // 20px
-        paddingRight: '$sizes.x500', // 20px
+      {
+        variant: "secondary",
+        semantic: "warning",
+        class: ["bg-transparent border border-button-outlined-warning-borderNormal text-button-outlined-warning-text", "hover:bg-button-outlined-warning-bodyHover hover:border-button-outlined-warning-borderHover", "active:bg-button-outlined-warning-bodyClick active:border-button-outlined-warning-borderClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyS',
-      paddingSize: 'small',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x400', // 16px
-        paddingRight: '$sizes.x400', // 16px
+      {
+        variant: "secondary",
+        semantic: "info",
+        class: ["bg-transparent border border-button-outlined-info-borderNormal text-button-outlined-info-text", "hover:bg-button-outlined-info-bodyHover hover:border-button-outlined-info-borderHover", "active:bg-button-outlined-info-bodyClick active:border-button-outlined-info-borderClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyS',
-      paddingSize: 'tiny',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x300', // 12px
-        paddingRight: '$sizes.x300', // 12px
+      {
+        variant: "secondary",
+        semantic: "critical",
+        class: ["bg-transparent border border-button-outlined-critical-borderNormal text-button-outlined-critical-text", "hover:bg-button-outlined-critical-bodyHover hover:border-button-outlined-critical-borderHover", "active:bg-button-outlined-critical-bodyClick active:border-button-outlined-critical-borderClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyM',
-      paddingSize: 'medium',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x600', // 24px
-        paddingRight: '$sizes.x600', // 24px
+      // Text variant combinations
+      {
+        variant: "text",
+        semantic: "default",
+        class: ["bg-transparent text-button-transparent-primary-text", "hover:bg-button-transparent-primary-bodyHover", "active:bg-button-transparent-primary-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyM',
-      paddingSize: 'small',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x500', // 20px
-        paddingRight: '$sizes.x500', // 20px
+      {
+        variant: "text",
+        semantic: "accent",
+        class: ["bg-transparent text-button-transparent-brand-text", "hover:bg-button-transparent-brand-bodyHover", "active:bg-button-transparent-brand-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyM',
-      paddingSize: 'tiny',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x400', // 16px
-        paddingRight: '$sizes.x400', // 16px
+      {
+        variant: "text",
+        semantic: "success",
+        class: ["bg-transparent text-button-transparent-success-text", "hover:bg-button-transparent-success-bodyHover", "active:bg-button-transparent-success-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyL',
-      paddingSize: 'medium',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x700', // 28px
-        paddingRight: '$sizes.x700', // 28px
+      {
+        variant: "text",
+        semantic: "warning",
+        class: ["bg-transparent text-button-transparent-warning-text", "hover:bg-button-transparent-warning-bodyHover", "active:bg-button-transparent-warning-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyL',
-      paddingSize: 'small',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x600', // 24px
-        paddingRight: '$sizes.x600', // 24px
+      {
+        variant: "text",
+        semantic: "info",
+        class: ["bg-transparent text-button-transparent-info-text", "hover:bg-button-transparent-info-bodyHover", "active:bg-button-transparent-info-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-    {
-      typography: 'bodyL',
-      paddingSize: 'tiny',
-      extraPadding: true,
-      css: {
-        paddingLeft: '$sizes.x500', // 20px
-        paddingRight: '$sizes.x500', // 20px
+      {
+        variant: "text",
+        semantic: "critical",
+        class: ["bg-transparent text-button-transparent-critical-text", "hover:bg-button-transparent-critical-bodyHover", "active:bg-button-transparent-critical-bodyClick", "transition-colors duration-300 ease-in-out"].join(" "),
       },
-    },
-
-    // Rounded variant
-    {
-      typography: 'bodyS',
-      rounded: true,
-      css: {
-        borderRadius: '$radii.infinite',
-      },
-    },
-    {
-      typography: 'bodyM',
-      rounded: true,
-      css: {
-        borderRadius: '$radii.infinite',
-      },
-    },
-    {
-      typography: 'bodyL',
-      rounded: true,
-      css: {
-        borderRadius: '$radii.infinite',
-      },
-    },
-  ],
-
-  defaultVariants: {
-    typography: 'bodyM',
-    paddingSize: 'medium',
-    fullWidth: 'adaptive',
-  },
-})
-
-ButtonContainer.displayName = 'Button.Container'
-
-/**
- * Button - расширяет Container, добавляет variant и colorScheme
- * Отвечает за цвета и стили вариантов кнопки
- */
-const ButtonStyled = styled(ButtonContainer, {
-  '&:disabled': {
-    cursor: 'not-allowed',
-  },
-
-  '&:focus-visible': {
-    outline: '2px solid',
-    outlineColor: '$colors["brand-primary"]',
-    outlineOffset: '1px',
-  },
-
-  variants: {
-    isLoading: {
-      true: {
-        color: '$colors["transparent-primary"] !important',
-        '& svg': {
-          fill: '$colors["transparent-primary"] !important',
-        },
-      },
-    },
-
-    $disabled: {
-      true: {
-        cursor: 'not-allowed',
-      },
-    },
-
-    variant: {
-      filled: {
-        color: '$colors["button-filled-text"]',
-        '& svg': {
-          fill: '$colors["button-filled-icon"]',
-        },
-      },
-      outlined: {},
-      tonned: {},
-      transparent: {},
-    },
-
-    colorScheme: {
-      brand: {},
-      success: {},
-      info: {},
-      warning: {},
-      critical: {},
-      draft: {},
-      constant: {},
-      primary: {},
-    },
-  },
-
-  compoundVariants: [
-    // Filled variant combinations
-    {
-      variant: 'filled',
-      colorScheme: 'brand',
-      css: {
-        background: '$colors["button-filled-brand-body-normal"]',
-        color: '$colors["brand-text-primary"]',
-        '& svg': {
-          fill: '$colors["brand-icon-primary"]',
-        },
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-brand-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-brand-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'success',
-      css: {
-        background: '$colors["button-filled-success-body-normal"]',
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-success-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-success-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'info',
-      css: {
-        background: '$colors["button-filled-info-body-normal"]',
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-info-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-info-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'warning',
-      css: {
-        background: '$colors["button-filled-warning-body-normal"]',
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-warning-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-warning-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'critical',
-      css: {
-        background: '$colors["button-filled-critical-body-normal"]',
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-critical-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-critical-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'draft',
-      css: {
-        background: '$colors["button-filled-neutral-body-normal"]',
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-neutral-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-neutral-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'constant',
-      css: {
-        color: '$colors["button-filled-constant-text"]',
-        background: '$colors["button-filled-constant-body-normal"]',
-        '& svg': {
-          fill: '$colors["button-filled-constant-icon"]',
-        },
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-constant-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-constant-body-click"]',
-        },
-      },
-    },
-    {
-      variant: 'filled',
-      colorScheme: 'primary',
-      css: {
-        color: '$colors["button-filled-primary-text"]',
-        background: '$colors["button-filled-primary-body-normal"]',
-        '& svg': {
-          fill: '$colors["button-filled-primary-icon"]',
-        },
-        '@media (hover: hover)': {
-          '&:hover': {
-            background: '$colors["button-filled-primary-body-hover"]',
-          },
-        },
-        '&:active': {
-          background: '$colors["button-filled-primary-body-click"]',
-        },
-      },
-    },
-
-    // Disabled states
-    {
-      $disabled: true,
-      variant: 'filled',
-      css: {
-        '&&, &&:active, &&:hover': {
-          background: '$colors["neutral-32"]',
-          color: '$colors["constant-70"]',
-          '& svg': {
-            fill: '$colors["constant-70"]',
-          },
-        },
-      },
-    },
-    {
-      $disabled: true,
-      variant: 'filled',
-      colorScheme: 'constant',
-      css: {
-        '&&, &&:active, &&:hover': {
-          background: '$colors["constant-32"]',
-          color: '$colors["primary-70"]',
-          '& svg': {
-            fill: '$colors["primary-70"]',
-          },
-        },
-      },
-    },
-  ],
-
+    ],
     defaultVariants: {
-    variant: 'filled',
-    colorScheme: 'brand',
-    isLoading: false,
-    $disabled: false,
-  },
-})
+      variant: "primary",
+      semantic: "default",
+      size: "default",
+    },
+  }
+)
 
-export interface ButtonProps
-  extends React.ComponentPropsWithoutRef<typeof ButtonStyled>,
-    VariantProps<typeof ButtonStyled> {
-  asChild?: boolean
+interface ButtonProps extends 
+  Omit<HTMLMotionProps<"button">, "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart" | "onAnimationEnd">,
+  VariantProps<typeof buttonVariants> {
+asChild?: boolean
+  label?: string
 }
 
-const Button = React.forwardRef<
-  React.ElementRef<typeof ButtonStyled>,
-  ButtonProps
->(({ asChild, children, disabled, isLoading, ...props }, ref) => {
+function Button({
+  className,
+  variant,
+  semantic,
+  size,
+  asChild = false,
+  label = "Button",
+  children,
+  ...props
+}: ButtonProps) {
   if (asChild) {
     return (
-      <Slot ref={ref}>
-        <ButtonStyled {...props} $disabled={disabled} isLoading={isLoading}>
-          {children}
-        </ButtonStyled>
-      </Slot>
+      <Slot
+        data-slot="button"
+        className={cn(buttonVariants({ variant, semantic, size }), className)}
+        {...(props as React.ComponentProps<typeof Slot>)}
+      />
     )
   }
 
   return (
-    <ButtonStyled
-      ref={ref}
+    <motion.button
+      data-slot="button"
+      className={cn(buttonVariants({ variant, semantic, size }), className)}
+      whileTap={{ 
+        scale: 0.96,
+        transition: { duration: 0.1, ease: "easeIn" }
+      }}
+      initial={{ scale: 1 }}
+      transition={{ 
+        duration: 0.2,
+        ease: "easeInOut"
+      }}
       {...props}
-      disabled={disabled}
-      $disabled={disabled}
-      isLoading={isLoading}
-      onClick={isLoading ? undefined : props.onClick}
     >
-      {children}
-    </ButtonStyled>
+      {children || label}
+    </motion.button>
   )
-})
+}
 
-Button.displayName = 'Button'
-
-export { Button, ButtonContainer, ButtonStyled }
-export type { ButtonProps }
+export { Button, buttonVariants }
