@@ -3,16 +3,16 @@
 import { useMemo, useState, useCallback, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAddFlowEdge, useCreatePage, useDeleteFlowEdge, useDocument, useDocumentPages, useFlow, useLocks, useSearch, useUpdatePage, useUpdatePagePosition } from "@/hooks/api";
-import { PageListItem } from "@/ui/page-list-item";
-import { useEditorStore } from "@/store/editor";
+import { PageListItem } from "@/features/documents/components/page-list-item";
+import { useEditorStore } from "@/features/editor/store/editor";
 import { useAcquireLock, useLockHeartbeat, useReleaseLock } from "@/hooks/locks";
 import { useEffect } from "react";
-import { ArtboardComponent } from "@/ui/artboard";
+import { ArtboardComponent } from "@/features/editor/components/artboard";
 import type { Artboard as ArtboardType } from "@/types/page-builder";
-import { FlowCanvas } from "@/ui/flow-canvas";
+import { FlowCanvas } from "@/features/editor/components/flow-canvas";
 import { useSession } from "next-auth/react";
 import { canEdit } from "@/lib/rbac";
-import { ElementList } from "@/ui/element-list";
+import { ElementList } from "@/features/editor/components/element-list";
 
 interface Params {
   params: Promise<{ workspace: string; project: string; document: string }>;

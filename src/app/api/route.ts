@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ComponentDocsGenerator } from '@/lib/component-docs/generator';
+import { ComponentDocsGenerator } from '@/lib/components/component-docs/generator';
 
 export async function GET() {
   try {

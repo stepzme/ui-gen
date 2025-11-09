@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import * as data from "@/lib/data";
-import { requireSession, canWriteFromSession, getSessionUserId } from "@/lib/auth-util";
+import { requireSession, canWriteFromSession, getSessionUserId } from "@/lib/auth/auth-util";
 import { canEdit } from "@/lib/rbac";
 import * as documentTypes from "@/types/document";
 

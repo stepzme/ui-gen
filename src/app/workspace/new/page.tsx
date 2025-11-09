@@ -28,17 +28,17 @@ export default function NewWorkspacePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-950 px-4">
-      <div className="w-full max-w-md space-y-6 rounded-lg border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
+    <div className="flex min-h-screen items-center justify-center bg-background-primary px-4">
+      <div className="w-full max-w-md space-y-6 rounded-lg border border-border-secondary bg-background-primary p-8 shadow-xl">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-neutral-50">Create Workspace</h1>
-          <p className="mt-2 text-sm text-neutral-400">
+          <h1 className="text-2xl font-semibold text-foreground-primary">Create Workspace</h1>
+          <p className="mt-2 text-sm text-foreground-secondary">
             Get started by creating your first workspace
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="workspace-name" className="mb-1 block text-sm font-medium text-neutral-300">
+            <label htmlFor="workspace-name" className="mb-1 block text-sm font-medium text-foreground-secondary">
               Workspace Name
             </label>
             <input
@@ -46,21 +46,21 @@ export default function NewWorkspacePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Workspace"
-              className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-50 placeholder-neutral-500 outline-none transition-colors focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700"
+              className="w-full rounded-md border border-border-primary bg-background-secondary px-3 py-2 text-sm text-foreground-primary placeholder-foreground-secondary outline-none transition-colors focus:border-border-primary focus:ring-2 focus:ring-ring-secondary"
               aria-label="Workspace Name"
               required
               autoFocus
             />
           </div>
           {error && (
-            <div className="rounded-md bg-red-950/50 border border-red-900/50 px-3 py-2 text-sm text-red-400" role="alert">
+            <div className="rounded-md bg-background-critical/50 border border-border-critical px-3 py-2 text-sm text-foreground-critical" role="alert">
               {error}
             </div>
           )}
           <button
             type="submit"
             disabled={createWorkspace.isPending}
-            className="w-full rounded-md bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-md bg-foreground-inverted px-4 py-2 text-sm font-medium text-background-inverted transition-colors hover:bg-background-secondary hover:text-foreground-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {createWorkspace.isPending ? "Creating..." : "Create Workspace"}
           </button>

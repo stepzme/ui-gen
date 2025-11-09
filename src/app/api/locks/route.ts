@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lockAcquireBody, lockRefreshBody, lockReleaseBody } from "@/types/document";
 import * as data from "@/lib/data";
-import { canWriteFromSession, getSessionUserId, requireSession } from "@/lib/auth-util";
+import { canWriteFromSession, getSessionUserId, requireSession } from "@/lib/auth/auth-util";
 import { getDocumentRole } from "@/lib/data";
 
 export async function GET(request: NextRequest) {

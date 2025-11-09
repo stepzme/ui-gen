@@ -31,8 +31,20 @@ export async function getDocumentRole(documentId: string, userId: string): Promi
 export async function listWorkspacesForUser(userId: string) {
   const memberships = await prisma.workspaceMember.findMany({ where: { userId: userId } });
   const ids = memberships.map((m) => m.workspaceId);
-  const items = await prisma.workspace.findMany({ where: { id: { in: ids } }, orderBy: { createdAt: "asc" } });
-  return items;
+  const items = await prisma.workspace.findMany({ 
+    where: { id: { in: ids } }, 
+    orderBy: { createdAt: "asc" },
+    include: {
+      _count: { select: { projects: true } }
+    }
+  });
+  return items.map((ws) => ({
+    id: ws.id,
+    name: ws.name,
+    createdAt: ws.createdAt,
+    updatedAt: ws.updatedAt,
+    projectCount: ws._count.projects
+  }));
 }
 
 export async function createWorkspace(name: string, ownerId: string) {

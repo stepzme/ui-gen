@@ -1,8 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { ButtonIcon } from "@/components/buttonIcon"
-import { Icon } from "@/components/icon"
-import { Text } from "@/components/text"
+import { ButtonIcon } from "@/components/ui/buttonIcon"
+import { Icon } from "@/components/ui/icon"
+import { Text } from "@/components/ui/text"
 
 export interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'ios' | 'android'

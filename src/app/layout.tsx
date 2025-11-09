@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import "./styles/globals.css";
+import "@/styles/globals.css";
 import { Providers } from "@/components/providers";
+import { getCssText } from "@/styles/stitches.config";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,9 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
+      <head>
+        <style id="stitches" dangerouslySetInnerHTML={{ __html: getCssText() }} />
+      </head>
       <body
-        className="antialiased bg-neutral-950 text-neutral-50"
+        className="antialiased"
       >
         <Providers>{children}</Providers>
       </body>

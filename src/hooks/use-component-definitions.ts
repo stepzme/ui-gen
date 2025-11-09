@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ComponentDefinition } from '@/types/page-builder';
-import { getAllComponents } from '@/lib/component-registry';
+import { getAllComponents } from '@/lib/components/component-registry';
 import { useComponentMetadata, ComponentMetadata } from '@/hooks/use-component-metadata';
 
 interface UseComponentDefinitionsReturn {

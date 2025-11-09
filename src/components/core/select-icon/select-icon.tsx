@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { CheckIcon, ChevronDownIcon, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Input } from "@/components/input"
-import { Icon, getRegisteredIcons } from "@/components/icon"
+import { Input } from "@/components/ui/input"
+import { Icon, getRegisteredIcons } from "@/components/ui/icon"
 
 interface SelectIconProps {
   value?: string
@@ -86,7 +85,7 @@ function SelectIcon({
           )}
         </div>
         <SelectPrimitive.Icon asChild>
-          <ChevronDownIcon className="size-4 opacity-50" />
+          <Icon variant="chevron_down" className="size-4 opacity-50" />
         </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
 
@@ -103,7 +102,7 @@ function SelectIcon({
           {/* Поиск */}
           <div className="p-2 border-b border-border-secondary">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-foreground-muted pointer-events-none" />
+              <Icon variant="magnifier" className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-foreground-secondary pointer-events-none" />
               <Input
                 ref={searchInputRef}
                 type="text"
@@ -168,7 +167,7 @@ function SelectIcon({
                   <SelectPrimitive.ItemText className="flex-1">{iconName}</SelectPrimitive.ItemText>
                   <div className="absolute right-2 flex size-3.5 items-center justify-center">
                     <SelectPrimitive.ItemIndicator>
-                      <CheckIcon className="size-4" />
+                      <Icon variant="circle_checkmark" className="size-4" />
                     </SelectPrimitive.ItemIndicator>
                   </div>
                 </SelectPrimitive.Item>

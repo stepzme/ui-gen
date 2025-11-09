@@ -34,14 +34,14 @@ export default function DocumentPage() {
   
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-50">
+      <div className="flex h-screen items-center justify-center bg-background-primary text-foreground-primary">
         <div>Loading...</div>
       </div>
     );
   }
   
   return (
-    <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-50">
+    <div className="flex h-screen items-center justify-center bg-background-primary text-foreground-primary">
       <div>Document not found or access denied</div>
     </div>
   );

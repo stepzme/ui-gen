@@ -1,7 +1,7 @@
 "use client";
 
 import { useComponentData } from './use-component-data';
-import { ComponentDocsConfig } from '@/lib/component-docs/types';
+import { ComponentDocsConfig } from '@/lib/components/component-docs/types';
 
 interface UseComponentDocsReturn {
   docsConfig: ComponentDocsConfig;

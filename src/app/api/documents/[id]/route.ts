@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import * as data from "@/lib/data";
-import { requireSession, getSessionUserId } from "@/lib/auth-util";
+import { requireSession, getSessionUserId } from "@/lib/auth/auth-util";
 import { PrismaClient } from "../../../../generated/prisma/client";
 
 type Params = { params: Promise<{ id: string }> };

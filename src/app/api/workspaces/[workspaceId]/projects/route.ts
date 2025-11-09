@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import * as data from "@/lib/data";
-import { requireSession, getSessionUserId } from "@/lib/auth-util";
+import { requireSession, getSessionUserId } from "@/lib/auth/auth-util";
 
 type Params = { params: Promise<{ workspaceId: string }> };
 

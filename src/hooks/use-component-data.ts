@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ComponentMetadata } from '@/hooks/use-component-metadata';
-import { ComponentDocsConfig } from '@/lib/component-docs/types';
+import { ComponentDocsConfig } from '@/lib/components/component-docs/types';
 
 interface ComponentDataResponse {
   componentMetadata: ComponentMetadata[];
