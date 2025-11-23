@@ -1,0 +1,13 @@
+/**
+ * Imported UI Styles
+ * 
+ * Стили для Imported UI компонентов (src/app/imported/components/ui/)
+ * Используются компонентами на базе Stitches
+ * 
+ * Этот файл должен быть подключен отдельно от globals.css
+ * для возможности независимого использования Imported UI
+ */
+
+/* Токены из Figma для Imported UI */
+@import "./tokens.css";
+

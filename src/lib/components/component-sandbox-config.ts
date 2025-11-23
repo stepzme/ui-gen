@@ -1,5 +1,5 @@
 import type { ComponentDefinition } from "@/types/page-builder";
-import { buttonIconSandboxConfig } from "@/components/ui/buttonIcon/sandbox.config";
+import { buttonIconSandboxConfig } from "@/imported/components/buttonIcon/sandbox.config";
 
 export interface SandboxVariant {
   label: string;

@@ -46,11 +46,14 @@ model Project {
   id          String          @id @default(uuid())
   workspaceId String
   name        String
+  isPersonal  Boolean         @default(false)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   documents   Document[]
   workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   members     ProjectMember[]
+
+  @@index([workspaceId, isPersonal])
 }
 
 model ProjectMember {

@@ -1,17 +1,12 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { Icon } from "@/components/ui/icon";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Text } from "@/components/ui/text";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SelectIcon } from "@/components/core/select-icon";
-import { ComponentDocs } from "@/features/component-library/components/component-docs";
+import { Settings, Monitor, Smartphone, Dice1 } from "lucide-react";
+import { Button } from "@/imported/components/ui/button";
+import { Badge } from "@/imported/components/ui/badge";
+import { Typography } from "@/imported/components/meta/typography";
+import { SelectIcon } from "./select-icon";
+import { ComponentDocs } from "./component-docs";
 import { useComponentDocs } from "@/hooks/use-component-docs";
 import { SelectedElement, ComponentNode, Artboard } from "@/types/page-builder";
 import { getSandboxConfig } from "@/lib/components/component-sandbox-config";
@@ -32,19 +27,19 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
     return (
       <div className="flex flex-col w-[calc(100vw-24rem)] h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg">
         <div className="p-4 border-b border-border-secondary">
-          <Text size="h5" weight="semibold" className="flex items-center gap-2">
+          <Typography typography="headlineS" className="flex items-center gap-2">
             Документация
-          </Text>
+          </Typography>
         </div>
         <div className="flex-1 overflow-y-auto px-80 py-24 scrollbar-hide">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <Text size="body" textColor="muted">Загрузка документации...</Text>
+              <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>Загрузка документации...</Typography>
             </div>
           ) : error ? (
             <div className="space-y-4">
-              <Text size="h6" weight="semibold" className="text-foreground-critical">Ошибка загрузки</Text>
-              <Text size="body" textColor="muted">{error}</Text>
+              <Typography typography="headlineXXS" style={{ color: 'var(--semantic-text-critical)' }}>Ошибка загрузки</Typography>
+              <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>{error}</Typography>
             </div>
           ) : selectedSandboxComponent ? (
             (() => {
@@ -53,19 +48,19 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
                 <ComponentDocs documentation={documentation} componentId={selectedSandboxComponent} />
               ) : (
                 <div className="space-y-4">
-                  <Text size="h6" weight="semibold">Компонент не найден</Text>
-                  <Text size="body" textColor="muted">
+                  <Typography typography="headlineXXS">Компонент не найден</Typography>
+                  <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>
                     Документация для компонента "{selectedSandboxComponent}" не найдена.
-                  </Text>
+                  </Typography>
                 </div>
               );
             })()
           ) : (
             <div className="space-y-4">
-              <Text size="h6" weight="semibold">Выберите компонент</Text>
-              <Text size="body" textColor="muted">
+              <Typography typography="headlineXXS">Выберите компонент</Typography>
+              <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>
                 Выберите компонент из списка слева, чтобы просмотреть его документацию.
-              </Text>
+              </Typography>
             </div>
           )}
         </div>
@@ -78,15 +73,15 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
     return (
       <div className="flex w-80 flex-col flex-1 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg">
         <div className="p-4 border-b border-border-primary">
-          <Text size="h5" weight="medium" className="flex items-center gap-2">
+          <Typography typography="headlineS" className="flex items-center gap-2">
             Свойства
-          </Text>
+          </Typography>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-2">
-            <Text size="body" textColor="muted">
+            <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>
               Выберите элемент для редактирования
-            </Text>
+            </Typography>
           </div>
         </div>
       </div>
@@ -111,9 +106,9 @@ export function PropertiesPanel({ selectedElement, onUpdateElement, onUpdateArtb
   return (
     <div className="flex w-80 flex-col flex-1 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg">
       <div className="p-4 border-b border-border-primary">
-        <Text size="h5" weight="medium" className="flex items-center gap-2">
+        <Typography typography="headlineS" className="flex items-center gap-2">
           Свойства
-        </Text>
+        </Typography>
         {selectedElement.type === 'component' && (
           <Badge semantic="info" active={false} className="mt-2">
             {selectedElement.node?.type || 'Component'}
@@ -144,7 +139,7 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
     <div className="space-y-4">
       
       <div className="flex items-center gap-2">
-        <Text size="caption" weight="medium" className="w-2/3">Статус</Text>
+        <Typography typography="bodyS_tight_medium" className="w-2/3">Статус</Typography>
           <Select
           value={selectedElement.status || 'draft'}
           onValueChange={(value) => onPropChange('status', value)}
@@ -162,7 +157,7 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
         </div>
 
         <div className="flex items-center gap-2">
-        <Text size="caption" weight="medium" className="w-2/3">Высота</Text>
+        <Typography typography="bodyS_tight_medium" className="w-2/3">Высота</Typography>
         <div className="flex w-full items-center gap-2">
           
           <Input
@@ -200,7 +195,7 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
       </div>
 
       <div className="flex items-center gap-2">
-        <Text size="caption" weight="medium" className="w-2/3">Устройство</Text>
+        <Typography typography="bodyS_tight_medium" className="w-2/3">Устройство</Typography>
         <div className="flex items-center w-full gap-2">
           <Button
             variant={selectedElement.artboardType === 'desktop' ? 'primary' : 'secondary'}
@@ -228,11 +223,11 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
         <>
           <Separator />
           <div>
-            <Text size="h5" weight="medium" className="mb-3">Навбар</Text>
+            <Typography typography="headlineS" className="mb-3">Навбар</Typography>
           </div>
           
           <div className="flex items-center gap-2">
-            <Text size="caption" weight="medium" className="w-2/3">Платформа</Text>
+            <Typography typography="bodyS_tight_medium" className="w-2/3">Платформа</Typography>
             <div className="flex items-center w-full gap-2">
               <Button
                 variant={selectedElement.navbarVariant === 'ios' ? 'primary' : 'secondary'}
@@ -257,9 +252,9 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
 
           <div>
             <div className="flex items-center justify-between mt-2">
-              <Text size="caption" weight="medium" className="w-2/3">
+              <Typography typography="bodyS_tight_medium" className="w-2/3">
                 Навбар
-              </Text>
+              </Typography>
               <Switch
                 id="navbarShowNavigation"
                 checked={selectedElement.navbarShowNavigation ?? true}
@@ -273,7 +268,7 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <Text size="caption" weight="medium" className="w-2/3">Тайтл</Text>
+                  <Typography typography="bodyS_tight_medium" className="w-2/3">Тайтл</Typography>
                   <Switch
                     id="navbarShowTitle"
                     checked={selectedElement.navbarShowTitle ?? true}
@@ -293,7 +288,7 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <Text size="caption" weight="medium" className="w-2/3">Описание</Text>
+                  <Typography typography="bodyS_tight_medium" className="w-2/3">Описание</Typography>
                   <Switch
                     id="navbarShowDescription"
                     checked={selectedElement.navbarShowDescription ?? true}
@@ -313,7 +308,7 @@ const ArtboardProperties = React.memo(({ selectedElement, onPropChange }: { sele
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <Text size="caption" weight="medium" className="w-2/3">Правая кнопка</Text>
+                  <Typography typography="bodyS_tight_medium" className="w-2/3">Правая кнопка</Typography>
                   <Switch
                     id="navbarShowRightButton"
                     checked={selectedElement.navbarShowRightButton ?? true}

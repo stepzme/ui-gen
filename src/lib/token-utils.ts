@@ -9,7 +9,7 @@ import {
   getXBaseMode,
   getSemanticMode,
   initializeTokenModes,
-} from '@/styles/tokens'
+} from '@/imported/styles/tokens'
 
 // Реэкспортируем функции из tokens.ts
 export {

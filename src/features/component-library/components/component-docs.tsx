@@ -1,54 +1,26 @@
 "use client"
 
 import { ComponentDocumentation } from "@/lib/components/component-docs/types"
-import { Icon } from "@/components/ui/icon"
+import { ChevronDown, ChevronRight } from "lucide-react"
 import React, { useState } from "react"
 import { useComponentDefinitions } from "@/hooks/use-component-definitions"
 import { generateComponentSandbox } from "@/lib/components/component-sandbox-config"
 import { getCategoryBadgeColor } from "@/lib/components/component-docs/categories"
 
 // Импортируем компоненты статически
-import { Button } from '@/components/ui/button';
-import { ButtonIcon } from '@/components/ui/buttonIcon';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Text } from '@/components/ui/text';
-import { Avatar } from '@/components/ui/avatar';
-import { Cell } from '@/components/ui/cell';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Dialog } from '@/components/ui/dialog';
-import { DropdownMenu } from '@/components/ui/dropdown-menu';
-import { Image } from '@/components/ui/image';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Sheet } from '@/components/ui/sheet';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Button } from '@/imported/components/ui/button';
+import { ButtonIcon } from '@/imported/components/ui/buttonIcon';
+import { Badge } from '@/imported/components/ui/badge';
+import { Typography } from '@/imported/components/meta/typography';
+import { Avatar } from '@/imported/components/ui/avatar';
 
 // Маппинг компонентов
 const componentMap: Record<string, React.ComponentType<any>> = {
   button: Button,
   buttonIcon: ButtonIcon,
-  input: Input,
   badge: Badge,
-  text: Text,
+  text: Typography,
   avatar: Avatar,
-  cell: Cell,
-  collapsible: Collapsible,
-  dialog: Dialog,
-  'dropdown-menu': DropdownMenu,
-  image: Image,
-  label: Label,
-  select: Select,
-  separator: Separator,
-  sheet: Sheet,
-  skeleton: Skeleton,
-  switch: Switch,
-  textarea: Textarea,
-  tooltip: Tooltip,
 };
 
 interface ComponentDocsProps {
@@ -93,10 +65,10 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-4">
-          <Text size="h2" weight="semibold">{documentation.title}</Text>
+          <Typography typography="headlineL">{documentation.title}</Typography>
           <Badge semantic={getCategoryBadgeColor(documentation.category)} active={false}>{documentation.category}</Badge>
         </div>
-        <Text size="body" textColor="muted">{documentation.description}</Text>
+        <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>{documentation.description}</Typography>
       </div>
 
       <Separator />
@@ -104,8 +76,8 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
       {/* API Reference */}
       <Collapsible open={openSections.has('props')} onOpenChange={() => toggleSection('props')}>
         <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-          <Text size="h5" weight="medium">API Reference</Text>
-          {openSections.has('props') ? <Icon variant="chevron_down" className="size-4" /> : <Icon variant="chevron_right" className="size-4" />}
+          <Typography typography="headlineS">API Reference</Typography>
+          {openSections.has('props') ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
           <div className="overflow-x-auto">
@@ -131,7 +103,7 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
                   <tr key={index} className="border-b border-border-secondary/50 hover:bg-background-secondary/50">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <Text size="body" weight="medium" className="font-mono">{prop.name}</Text>
+                        <Typography typography="bodyM_tight_medium" className="font-mono">{prop.name}</Typography>
                         {prop.required && (
                           <Badge semantic="critical" active={false}>
                             required
@@ -140,17 +112,17 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
                       </div>
                     </td>
                     <td className="p-3">
-                      <Text size="body" className="font-mono text-foreground-secondary">{prop.type}</Text>
+                      <Typography typography="bodyM_paragraph_normal" className="font-mono" style={{ color: 'var(--semantic-text-secondary)' }}>{prop.type}</Typography>
                     </td>
                     <td className="p-3">
                       {prop.defaultValue ? (
-                        <Text size="body" className="font-mono text-foreground-secondary">{prop.defaultValue}</Text>
+                        <Typography typography="bodyM_paragraph_normal" className="font-mono" style={{ color: 'var(--semantic-text-secondary)' }}>{prop.defaultValue}</Typography>
                       ) : (
-                        <Text size="body" textColor="muted">-</Text>
+                        <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>-</Typography>
                       )}
                     </td>
                     <td className="p-3">
-                      <Text size="body" textColor="muted">{prop.description}</Text>
+                      <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>{prop.description}</Typography>
                       {prop.example && (
                         <div className="mt-2">
                           {renderCodeBlock(prop.example, "tsx")}
@@ -170,15 +142,15 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
       {/* Examples */}
       <Collapsible open={openSections.has('examples')} onOpenChange={() => toggleSection('examples')}>
         <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-          <Text size="h5" weight="medium">Примеры</Text>
+          <Typography typography="headlineS">Примеры</Typography>
           {openSections.has('examples') ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
           <div className="space-y-4">
             {documentation.examples.map((example, index) => (
               <div key={index} className="space-y-2">
-                <Text size="body" weight="medium">{example.title}</Text>
-                <Text size="caption" textColor="muted">{example.description}</Text>
+                <Typography typography="bodyM_tight_medium">{example.title}</Typography>
+                <Typography typography="bodyS_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>{example.description}</Typography>
                 {renderCodeBlock(example.code, example.language)}
               </div>
             ))}
@@ -191,7 +163,7 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
       {/* Variants */}
       <Collapsible open={openSections.has('variants')} onOpenChange={() => toggleSection('variants')}>
         <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-          <Text size="h5" weight="medium">Варианты</Text>
+          <Typography typography="headlineS">Варианты</Typography>
           {openSections.has('variants') ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
@@ -199,14 +171,14 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
             {/* Default State */}
             {selectedComponentDef && (
               <div>
-                <Text size="h6" weight="medium" className="mb-3">Default</Text>
+                <Typography typography="headlineXXS" className="mb-3">Default</Typography>
                 <div className="p-4 bg-background-secondary/30 rounded-lg border border-border-secondary/50">
                   {selectedComponent ? (
                     React.createElement(selectedComponent, selectedComponentDef?.defaultProps || {})
                   ) : (
-                    <Text size="body" textColor="muted">
+                    <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>
                       Компонент недоступен для предварительного просмотра
-                    </Text>
+                    </Typography>
                   )}
                 </div>
               </div>
@@ -215,7 +187,7 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
             {/* Auto-generated Sandbox Sections */}
             {sandboxSections && sandboxSections.map((section, idx) => (
               <div key={idx}>
-                <Text size="h6" weight="medium" className="mb-3 text-foreground-secondary">{section.title}</Text>
+                <Typography typography="headlineXXS" className="mb-3" style={{ color: 'var(--semantic-text-secondary)' }}>{section.title}</Typography>
                 <div className={
                   section.title === 'Sizes' 
                     ? "flex flex-wrap gap-4 items-center"
@@ -223,16 +195,16 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
                 }>
                   {section.variants.map((variant, vIdx) => (
                     <div key={vIdx}>
-                      <Text size="caption" weight="medium" className="mb-2">
+                      <Typography typography="bodyS_tight_medium" className="mb-2">
                         {variant.label}
-                      </Text>
+                      </Typography>
                       <div className="p-3 bg-background-secondary/30 rounded-lg border border-border-secondary/50">
                         {selectedComponent ? (
                           React.createElement(selectedComponent, variant.props)
                         ) : (
-                          <Text size="body" textColor="muted">
+                          <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>
                             Компонент недоступен
-                          </Text>
+                          </Typography>
                         )}
                       </div>
                     </div>
@@ -244,13 +216,13 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
             {/* Fallback - Documentation Variants */}
             {!sandboxSections && documentation.variants.map((variant, index) => (
               <div key={index}>
-                <Text size="h6" weight="medium" className="mb-3">{variant.name}</Text>
-                <Text size="caption" textColor="muted" className="mb-3">{variant.description}</Text>
+                <Typography typography="headlineXXS" className="mb-3">{variant.name}</Typography>
+                <Typography typography="bodyS_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }} className="mb-3">{variant.description}</Typography>
                 
                 {/* Code Example */}
                 {variant.example && (
                   <div>
-                    <Text size="caption" weight="medium" className="mb-2">Код:</Text>
+                    <Typography typography="bodyS_tight_medium" className="mb-2">Код:</Typography>
                     {renderCodeBlock(variant.example, "tsx")}
                   </div>
                 )}
@@ -258,8 +230,8 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
                 {/* Usage Guidelines */}
                 {variant.usage && (
                   <div className="mt-2">
-                    <Text size="caption" weight="medium" className="mb-1">Использование:</Text>
-                    <Text size="caption" textColor="muted">{variant.usage}</Text>
+                    <Typography typography="bodyS_tight_medium" className="mb-1">Использование:</Typography>
+                    <Typography typography="bodyS_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>{variant.usage}</Typography>
                   </div>
                 )}
               </div>
@@ -268,9 +240,9 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
             {/* No variants available */}
             {!sandboxSections && documentation.variants.length === 0 && (
               <div className="text-center text-foreground-secondary">
-                <Text size="body" textColor="muted">
+                <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>
                   Варианты для этого компонента пока не доступны
-                </Text>
+                </Typography>
               </div>
             )}
           </div>
@@ -282,17 +254,17 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
       {/* Accessibility */}
       <Collapsible open={openSections.has('accessibility')} onOpenChange={() => toggleSection('accessibility')}>
         <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-          <Text size="h5" weight="medium">Accessibility</Text>
+          <Typography typography="headlineS">Accessibility</Typography>
           {openSections.has('accessibility') ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
           <div className="space-y-3">
             {documentation.accessibility.map((note, index) => (
               <div key={index} className="border border-border-secondary/50 rounded-md p-3">
-                <Text size="body" weight="medium" className="mb-1">{note.title}</Text>
-                <Text size="caption" textColor="muted" className="mb-2">{note.description}</Text>
+                <Typography typography="bodyM_tight_medium" className="mb-1">{note.title}</Typography>
+                <Typography typography="bodyS_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }} className="mb-2">{note.description}</Typography>
                 {note.implementation && (
-                  <Text size="caption">{note.implementation}</Text>
+                  <Typography typography="bodyS_paragraph_normal">{note.implementation}</Typography>
                 )}
               </div>
             ))}
@@ -305,34 +277,34 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
       {/* Best Practices */}
       <Collapsible open={openSections.has('bestPractices')} onOpenChange={() => toggleSection('bestPractices')}>
         <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-          <Text size="h5" weight="medium">Best Practices</Text>
+          <Typography typography="headlineS">Best Practices</Typography>
           {openSections.has('bestPractices') ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
           <div className="space-y-4">
             {documentation.bestPractices.map((practice, index) => (
               <div key={index} className="border border-border-secondary/50 rounded-md p-3">
-                <Text size="body" weight="medium" className="mb-1">{practice.title}</Text>
-                <Text size="caption" textColor="muted" className="mb-3">{practice.description}</Text>
+                <Typography typography="bodyM_tight_medium" className="mb-1">{practice.title}</Typography>
+                <Typography typography="bodyS_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }} className="mb-3">{practice.description}</Typography>
                 
                 <div className="space-y-2">
                   <div>
-                    <Text size="caption" weight="medium" className="text-foreground-success mb-1">✓ Do:</Text>
+                    <Typography typography="bodyS_tight_medium" style={{ color: 'var(--semantic-text-success)' }} className="mb-1">✓ Do:</Typography>
                     <ul className="list-disc list-inside space-y-1">
                       {practice.do.map((item, i) => (
                         <li key={i}>
-                          <Text size="caption">{item}</Text>
+                          <Typography typography="bodyS_paragraph_normal">{item}</Typography>
                         </li>
                       ))}
                     </ul>
                   </div>
                   
                   <div>
-                    <Text size="caption" weight="medium" className="text-foreground-critical mb-1">✗ Don't:</Text>
+                    <Typography typography="bodyS_tight_medium" style={{ color: 'var(--semantic-text-critical)' }} className="mb-1">✗ Don't:</Typography>
                     <ul className="list-disc list-inside space-y-1">
                       {practice.dont.map((item, i) => (
                         <li key={i}>
-                          <Text size="caption">{item}</Text>
+                          <Typography typography="bodyS_paragraph_normal">{item}</Typography>
                         </li>
                       ))}
                     </ul>
@@ -349,8 +321,8 @@ export function ComponentDocs({ documentation, componentId }: ComponentDocsProps
         <>
           <Separator />
           <div className="bg-background-info/10 border border-border-info/50 rounded-md p-3">
-            <Text size="caption" weight="medium" className="text-foreground-info mb-1">💡 Note</Text>
-            <Text size="caption" textColor="muted">{documentation.notes.join(' ')}</Text>
+            <Typography typography="bodyS_tight_medium" style={{ color: 'var(--semantic-text-info)' }} className="mb-1">💡 Note</Typography>
+            <Typography typography="bodyS_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>{documentation.notes.join(' ')}</Typography>
           </div>
         </>
       )}

@@ -8,8 +8,8 @@ import { FlowCanvas } from "./flow-canvas";
 import { PropertiesPanel } from "./properties-panel";
 import { Header } from "./header";
 import { useComponentDefinitions } from "@/hooks/use-component-definitions";
-import { Icon } from "@/components/ui/icon";
-import { Text } from "@/components/ui/text";
+import { DiamondPlus } from "lucide-react";
+import { Typography } from "@/imported/components/meta/typography";
 export default function PageBuilder() {
   // Настройка сенсора для dnd-kit - не блокируем wheel события
   const sensor = useSensor(PointerSensor, {
@@ -344,10 +344,10 @@ export default function PageBuilder() {
         <DragOverlay>
           {activeComponent ? (
             <div className="flex items-center gap-2 p-2 h-auto bg-background-secondary/50 text-foreground-primary rounded-lg">
-              <Icon variant="diamond" className="h-4 w-4 text-foreground-info" />
-              <Text size="caption" weight="medium" className="text-foreground-primary">
+              <DiamondPlus className="h-4 w-4 text-foreground-info" />
+              <Typography typography="bodyS_tight_medium" className="text-foreground-primary">
                 {activeComponent.name}
-              </Text>
+              </Typography>
             </div>
           ) : null}
         </DragOverlay>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import "@/styles/globals.css";
-import { Providers } from "@/components/providers";
-import { getCssText } from "@/styles/stitches.config";
+import "@/app/ui/styles/globals.css";
+import "@/imported/styles/imported-ui.css";
+import { Providers } from "@/imported/components/providers";
+import { getCssText } from "@/imported/styles/stitches.config";
 
 export const metadata: Metadata = {
   title: "Create Next App",

@@ -1,25 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useWorkspaces, useRecentDocuments, useWorkspaceProjects, useCreateProject } from "@/hooks/api";
-import { useTheme } from "@/hooks/use-theme";
 import { DocumentCard } from "@/features/documents/components/document-card";
 import { ProjectCard } from "@/features/workspace/components/project-card";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Button } from "@/components/ui/button/button";
-import { ButtonIcon } from "@/components/ui/buttonIcon/buttonIcon";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog/dialog";
-import { Input } from "@/components/ui/input/input";
+import { Header } from "@/features/workspace/components/header";
+import { Sidebar } from "@/app/ui/sidebar";
+import { Button } from "@/app/ui/components/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/app/ui/components/dialog";
+import { Input } from "@/app/ui/components/input";
 
 export default function WorkspaceDashboardPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const workspaceId = params.workspaceId as string;
-  const { isDark, toggleTheme } = useTheme();
   
   const { data: workspaces } = useWorkspaces();
   const createProject = useCreateProject();
@@ -28,7 +24,21 @@ export default function WorkspaceDashboardPage() {
   const { data: recentData } = useRecentDocuments(workspaceId, 16, recentOffset);
   const { data: projectsData } = useWorkspaceProjects(workspaceId);
   
-  const [activeSection, setActiveSection] = useState<"recent" | "projects">("recent");
+  // Initialize activeSection from URL query param or default to "recent"
+  const sectionParam = searchParams.get("section");
+  const [activeSection, setActiveSection] = useState<"recent" | "projects">(
+    sectionParam === "projects" ? "projects" : "recent"
+  );
+  
+  // Update activeSection when URL changes
+  useEffect(() => {
+    const section = searchParams.get("section");
+    if (section === "projects") {
+      setActiveSection("projects");
+    } else if (section === "recent" || !section) {
+      setActiveSection("recent");
+    }
+  }, [searchParams]);
   const [projectName, setProjectName] = useState("");
   const [showCreateProject, setShowCreateProject] = useState(false);
   
@@ -36,23 +46,26 @@ export default function WorkspaceDashboardPage() {
   
   // Accumulate recent documents when loading more
   useEffect(() => {
-    if (recentData?.items) {
+    const data = recentData as { items?: any[] } | undefined;
+    if (data?.items) {
       if (recentOffset === 0) {
-        setAllRecent(recentData.items);
+        setAllRecent(data.items);
       } else {
-        setAllRecent(prev => [...prev, ...recentData.items]);
+        setAllRecent(prev => [...prev, ...data.items!]);
       }
     }
   }, [recentData, recentOffset]);
   
   const recent = allRecent;
-  const hasMoreRecent = recentData?.hasMore || false;
-  const projects = projectsData?.items || [];
+  const recentDataTyped = recentData as { hasMore?: boolean } | undefined;
+  const hasMoreRecent = recentDataTyped?.hasMore || false;
+  const projectsDataTyped = projectsData as { items?: any[] } | undefined;
+  const projects = projectsDataTyped?.items || [];
 
   const handleCreateProject = async () => {
     if (!projectName.trim() || !workspaceId) return;
     try {
-      const project = await createProject.mutateAsync({ name: projectName.trim(), workspaceId });
+      const project = await createProject.mutateAsync({ name: projectName.trim(), workspaceId }) as { id: string };
       setProjectName("");
       setShowCreateProject(false);
       router.push(`/workspace/${workspaceId}/project/${project.id}`);
@@ -61,106 +74,101 @@ export default function WorkspaceDashboardPage() {
     }
   };
 
+  const handleSectionChange = (section: "recent" | "projects" | "drafts") => {
+    if (section === "drafts") {
+      // Drafts navigation is handled by Sidebar component itself
+      return;
+    }
+    setActiveSection(section);
+    // Update URL without page reload
+    const newUrl = section === "projects" 
+      ? `/workspace/${workspaceId}?section=projects`
+      : `/workspace/${workspaceId}`;
+    router.push(newUrl);
+  };
+
   return (
-    <div className="flex h-screen bg-background-primary">
-      <Sidebar workspaceId={workspaceId} activeSection={activeSection} onSectionChange={setActiveSection} />
+    <div className="flex h-screen">
+      <Sidebar workspaceId={workspaceId} activeSection={activeSection} onSectionChange={handleSectionChange} />
 
       {/* Main Content */}
-      <main className="flex-1 bg-background0-primary overflow-auto">
-        <div className="w-full mx-auto p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-x4">
-              <h1 className="text-2xl font-semibold text-foreground-primary">
-                {activeSection === "recent" ? "Recent Documents" : "Projects"}
-              </h1>
-              {activeSection === "projects" && (
-                <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
-                  <DialogTrigger asChild>
-                    <Button>Create Project</Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-background-primary border-border-secondary">
-                    <DialogHeader>
-                      <DialogTitle className="text-foreground-primary">Create Project</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-foreground-secondary">
-                          Project Name
-                        </label>
-                        <Input
-                          value={projectName}
-                          onChange={(e) => setProjectName(e.target.value)}
-                          placeholder="My Project"
-                          className="bg-background-secondary border-border-primary text-foreground-primary"
-                          autoFocus
-                        />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header workspaceId={workspaceId} />
+        <main className="flex-1 bg-muted/30 overflow-auto">
+          <div className="w-full max-w-[1600px] mx-auto p-8">
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-2xl font-semibold text-foreground">
+                  {activeSection === "recent" ? "Recent Documents" : "Projects"}
+                </h1>
+                {activeSection === "projects" && (
+                  <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
+                    <DialogTrigger asChild>
+                      <Button>Create Project</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create Project</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-muted-foreground">
+                            Project Name
+                          </label>
+                          <Input
+                            value={projectName}
+                            onChange={(e) => setProjectName(e.target.value)}
+                            placeholder="My Project"
+                            className="w-full"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowCreateProject(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleCreateProject}
+                            disabled={!projectName.trim() || createProject.isPending}
+                          >
+                            {createProject.isPending ? "Creating..." : "Create"}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="secondary"
-                          onClick={() => setShowCreateProject(false)}
-                          className="border-border-primary text-foreground-secondary hover:bg-background-secondary"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleCreateProject}
-                          disabled={!projectName.trim() || createProject.isPending}
-                          className="bg-foreground-inverted text-background-inverted hover:bg-background-secondary hover:text-foreground-primary"
-                        >
-                          {createProject.isPending ? "Creating..." : "Create"}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
+                    </DialogContent>
+                  </Dialog>
+                )}
             </div>
-            <div className="flex items-center gap-x2">
-              <ButtonIcon
-                icon={isDark ? "flashlight_on" : "flashlight_off"}
-                variant="text"
-                semantic="default"
-                onClick={toggleTheme}
-                aria-label="Toggle theme"
-                title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-              />
-              <ButtonIcon
-                icon="door_arrow_right"
-                variant="text"
-                semantic="default"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                aria-label="Log out"
-                title="Log out"
-              />
-            </div>
-          </div>
           
           {activeSection === "recent" && (
             <div>
               {recent.length === 0 ? (
-                <div className="text-center py-12 text-foreground-secondary">
+                <div className="text-center py-12 text-muted-foreground">
                   <p>No recent documents</p>
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     {recent.map((doc: any) => (
                       <DocumentCard
                         key={doc.id}
                         id={doc.id}
                         name={doc.name}
                         projectName={doc.projectName}
+                        projectId={doc.projectId}
+                        workspaceId={workspaceId}
                         lastEditedAt={doc.lastEditedAt}
+                        canMove={doc.canMove}
                       />
                     ))}
                   </div>
                   {hasMoreRecent && (
-                    <div className="mt-6 text-center">
+                    <div className="mt-8 text-center">
                       <Button
                         onClick={() => setRecentOffset(prev => prev + 16)}
-                        variant="secondary"
-                        className="border-border-primary text-foreground-secondary hover:bg-background-secondary"
+                        variant="outline"
                       >
                         Show More
                       </Button>
@@ -174,12 +182,12 @@ export default function WorkspaceDashboardPage() {
           {activeSection === "projects" && (
             <div>
               {projects.length === 0 ? (
-                <div className="text-center py-12 text-foreground-secondary">
-                  <p className="mb-4">No projects yet</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <p className="mb-2 text-base">No projects yet</p>
                   <p className="text-sm">Use the button above to create your first project</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                   {projects.map((project: any) => (
                     <ProjectCard
                       key={project.id}
@@ -194,8 +202,9 @@ export default function WorkspaceDashboardPage() {
               )}
             </div>
           )}
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

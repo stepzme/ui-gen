@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
-import { Icon } from "@/components/ui/icon";
+import { Button } from "@/imported/components/ui/button";
+import { Typography } from "@/imported/components/meta/typography";
+import { Sun, Moon, LogOut } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { signOut } from "next-auth/react";
 
@@ -71,7 +71,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
             aria-label="Toggle theme"
             title="Toggle theme"
           >
-            {isDark ? <Icon variant="flashlight_on" className="h-4 w-4" /> : <Icon variant="flashlight_off" className="h-4 w-4" />}
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           <Button
             onClick={() => signOut({ callbackUrl: "/login" })}
@@ -82,7 +82,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
             aria-label="Log out"
             title="Log out"
           >
-            <Icon variant="door_arrow_right" className="h-4 w-4" />
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>

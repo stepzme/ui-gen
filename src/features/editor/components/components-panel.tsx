@@ -2,10 +2,9 @@
 
 import React, { useState, useMemo } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { Icon } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Text } from "@/components/ui/text";
+import { Search, ChevronDown, ChevronRight, Diamond, Code } from "lucide-react";
+import { Button } from "@/imported/components/ui/button";
+import { Typography } from "@/imported/components/meta/typography";
 import { useComponentDefinitions } from "@/hooks/use-component-definitions";
 import { ComponentDefinition } from "@/types/page-builder";
 
@@ -42,10 +41,10 @@ function DraggableComponent({ component }: DraggableComponentProps) {
       className={`cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50' : ''}`}
     >
       <div className="w-full flex items-center gap-2 px-3 py-2 mt-1 rounded-lg hover:bg-background-secondary/50 transition-colors border border-transparent">
-        <Icon variant="diamond" className="h-4 w-4 text-foreground-info" />
-        <Text size="caption" weight="medium" className="text-foreground-primary">
+        <Diamond className="h-4 w-4 text-foreground-info" />
+        <Typography typography="bodyS_tight_medium" className="text-foreground-primary">
           {component.name}
-        </Text>
+        </Typography>
       </div>
     </div>
   );
@@ -68,17 +67,17 @@ function AccordionCategory({
         className="w-full flex items-center justify-between p-2 rounded-md hover:bg-background-secondary/30 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Text size="footnote" weight="medium" className="text-foreground-secondary">
+          <Typography typography="bodyS_tight_medium" className="text-foreground-secondary">
             {category}
-          </Text>
-          <Text size="footnote" weight="medium" className="text-foreground-secondary/50">
+          </Typography>
+          <Typography typography="bodyS_tight_medium" className="text-foreground-secondary/50">
             {components.length}
-          </Text>
+          </Typography>
         </div>
         {isExpanded ? (
-          <Icon variant="chevron_down" className="h-4 w-4 text-foreground-secondary/50" />
+          <ChevronDown className="h-4 w-4 text-foreground-secondary/50" />
         ) : (
-          <Icon variant="chevron_right" className="h-4 w-4 text-foreground-secondary/50" />
+          <ChevronRight className="h-4 w-4 text-foreground-secondary/50" />
         )}
       </button>
 
@@ -102,10 +101,10 @@ function AccordionCategory({
                     : 'hover:bg-background-secondary/50 border border-transparent'
                 }`}
               >
-                <Icon variant="code_change" className="h-4 w-4 text-foreground-brand" />
-                <Text size="caption" weight="medium" className="text-foreground-primary">
+                <Code className="h-4 w-4 text-foreground-brand" />
+                <Typography typography="bodyS_tight_medium" className="text-foreground-primary">
                   {component.name}
-                </Text>
+                </Typography>
               </button>
             ))
           )}
@@ -168,7 +167,7 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
   if (loading) {
     return (
       <div className="w-80 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg p-4">
-        <Text size="body" textColor="muted">Загрузка компонентов...</Text>
+        <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>Загрузка компонентов...</Typography>
       </div>
     );
   }
@@ -176,7 +175,7 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
   if (error) {
     return (
       <div className="w-80 h-full bg-background-primary border border-border-secondary/50 rounded-lg shadow-lg p-4">
-        <Text size="body" textColor="critical">Ошибка загрузки: {error}</Text>
+        <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-critical)' }}>Ошибка загрузки: {error}</Typography>
       </div>
     );
   }
@@ -199,12 +198,12 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
       {/* Header */}
       <div className="p-4 border-b border-border-secondary/50">
         <div className="flex items-center justify-between mb-4">
-          <Text size="h5" weight="semibold">Компоненты</Text>
+          <Typography typography="headlineS">Компоненты</Typography>
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Icon variant="magnifier" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-secondary h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-secondary h-4 w-4" />
           <Input
             placeholder="Поиск"
             value={searchQuery}
@@ -277,9 +276,9 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
                        : 'hover:bg-background-secondary/50 border border-transparent'
                    }`}
                  >
-                   <Text size="body" weight="medium" className="text-foreground-primary">
+                   <Typography size="body" weight="medium" className="text-foreground-primary">
                      {component.name}
-                   </Text>
+                   </Typography>
                  </button>
                ))
              )
@@ -289,7 +288,7 @@ export function ComponentsPanel({ mode, selectedSandboxComponent, onSelectSandbo
 
       {filteredComponents.length === 0 && (
         <div className="p-4 text-center text-foreground-secondary">
-          <Text size="body" textColor="muted">No components found</Text>
+          <Typography typography="bodyM_paragraph_normal" style={{ color: 'var(--semantic-text-secondary)' }}>No components found</Typography>
         </div>
       )}
     </div>

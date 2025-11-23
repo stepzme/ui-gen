@@ -62,6 +62,7 @@ export const authOptions = {
         token.role = user.role;
         token.id = user.id;
         token.email = user.email;
+        token.name = user.name;
         token.sub = user.email; // Use email as sub for consistency
       }
       return token;
@@ -71,6 +72,7 @@ export const authOptions = {
       (session as any).user = {
         id: token.id || token.sub,
         email: token.email,
+        name: token.name,
       };
       return session;
     },

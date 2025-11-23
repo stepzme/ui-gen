@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useCreateWorkspace } from "@/hooks/api";
+import { Button } from "@/app/ui/components/button";
+import { Input } from "@/app/ui/components/input";
+import { Label } from "@/app/ui/components/label";
 
 export default function NewWorkspacePage() {
   const router = useRouter();
@@ -28,42 +31,41 @@ export default function NewWorkspacePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-primary px-4">
-      <div className="w-full max-w-md space-y-6 rounded-lg border border-border-secondary bg-background-primary p-8 shadow-xl">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md space-y-6 rounded-lg border border-border bg-card p-8 shadow-xl">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-foreground-primary">Create Workspace</h1>
-          <p className="mt-2 text-sm text-foreground-secondary">
+          <h1 className="text-2xl font-semibold text-foreground">Create Workspace</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Get started by creating your first workspace
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="workspace-name" className="mb-1 block text-sm font-medium text-foreground-secondary">
+          <div className="space-y-2">
+            <Label htmlFor="workspace-name">
               Workspace Name
-            </label>
-            <input
+            </Label>
+            <Input
               id="workspace-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Workspace"
-              className="w-full rounded-md border border-border-primary bg-background-secondary px-3 py-2 text-sm text-foreground-primary placeholder-foreground-secondary outline-none transition-colors focus:border-border-primary focus:ring-2 focus:ring-ring-secondary"
               aria-label="Workspace Name"
               required
               autoFocus
             />
           </div>
           {error && (
-            <div className="rounded-md bg-background-critical/50 border border-border-critical px-3 py-2 text-sm text-foreground-critical" role="alert">
+            <div className="rounded-md bg-red-600/50 border border-red-600 px-3 py-2 text-sm text-red-200" role="alert">
               {error}
             </div>
           )}
-          <button
+          <Button
             type="submit"
             disabled={createWorkspace.isPending}
-            className="w-full rounded-md bg-foreground-inverted px-4 py-2 text-sm font-medium text-background-inverted transition-colors hover:bg-background-secondary hover:text-foreground-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full"
           >
             {createWorkspace.isPending ? "Creating..." : "Create Workspace"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

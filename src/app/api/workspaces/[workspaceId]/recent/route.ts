@@ -16,6 +16,19 @@ export async function GET(request: Request, { params }: Params) {
   const offset = parseInt(url.searchParams.get("offset") || "0");
   
   const recent = await data.getRecentDocuments(userId, workspaceId, limit, offset);
-  return NextResponse.json({ items: recent, hasMore: recent.length === limit });
+  
+  // Add user role for each document (canMove if OWNER)
+  const recentWithRole = await Promise.all(
+    recent.map(async (doc: any) => {
+      const docRole = await data.getProjectRole(doc.projectId, userId);
+      return {
+        ...doc,
+        userRole: docRole,
+        canMove: docRole === 'OWNER'
+      };
+    })
+  );
+  
+  return NextResponse.json({ items: recentWithRole, hasMore: recent.length === limit });
 }
 

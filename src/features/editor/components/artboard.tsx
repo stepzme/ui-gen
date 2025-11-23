@@ -4,14 +4,14 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { DndContext, PointerSensor, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Icon } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Text } from "@/components/ui/text";
+import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Button } from "@/imported/components/ui/button";
+import { Badge } from "@/imported/components/ui/badge";
+import { Typography } from "@/imported/components/meta/typography";
 import { Artboard, SelectedElement } from "@/types/page-builder";
 import { ComponentRenderer } from "@/features/component-library/components/component-renderer";
 import { useComponentDefinitions } from "@/hooks/use-component-definitions";
-import { Navbar } from "@/components/core/navbar";
+import { Navbar } from "./navbar";
 import { InlineEditor } from "./inline-editor";
 
 const getStatusLabel = (status: 'draft' | 'review' | 'approved' | 'published'): string => {
@@ -199,9 +199,8 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
               />
             </div>
           ) : (
-            <Text 
-              size="footnote" 
-              weight="medium" 
+            <Typography 
+              typography="bodyS_tight_medium" 
               className="truncate"
               onDoubleClick={(e) => {
                 e.stopPropagation();
@@ -212,7 +211,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
               style={{ cursor: 'text' }}
             >
               {artboard.name}
-            </Text>
+            </Typography>
           )}
         </div>
         <Badge 
@@ -235,7 +234,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
             }}
             className="text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
           >
-            <Icon variant="trashbox_cross" className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -311,7 +310,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                               onMoveComponentUp(child.id);
                             }}
                           >
-                            <Icon variant="chevron_top" className="h-1 w-1" />
+                            <ChevronUp className="h-1 w-1" />
                           </Button>
                         )}
 
@@ -328,7 +327,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
                               onMoveComponentDown(child.id);
                             }}
                           >
-                            <Icon variant="chevron_down" className="h-1 w-1" />
+                            <ChevronDown className="h-1 w-1" />
                           </Button>
                         )}
 
@@ -476,7 +475,7 @@ export function ArtboardComponent({ artboard, canvasTransform = { x: 0, y: 0, sc
 
         {isOver && (
           <div className="absolute inset-0 bg-primary/10 border border-border-info border-dashed rounded-lg flex items-center justify-center">
-            <Text size="body" textColor="primary" weight="medium">Drop component here</Text>
+            <Typography typography="bodyM_tight_medium" style={{ color: 'var(--semantic-primary-primary)' }}>Drop component here</Typography>
           </div>
         )}
       </div>

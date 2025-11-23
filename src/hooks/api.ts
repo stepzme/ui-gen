@@ -30,6 +30,14 @@ export function useWorkspaceProjects(workspaceId: string | undefined) {
   });
 }
 
+export function usePersonalProject(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["personal-project", workspaceId],
+    queryFn: () => jsonFetch(`/api/workspaces/${workspaceId}/personal-project`),
+    enabled: !!workspaceId,
+  });
+}
+
 export function useProjectDocuments(projectId: string | undefined) {
   return useQuery({
     queryKey: ["project-documents", projectId],
@@ -94,6 +102,26 @@ export function useCreateDocument() {
       await qc.invalidateQueries({ queryKey: ["projects"] });
       await qc.invalidateQueries({ queryKey: ["project-documents", variables.projectId] });
       await qc.invalidateQueries({ queryKey: ["recent"] });
+      await qc.invalidateQueries({ queryKey: ["personal-project"] });
+    },
+  });
+}
+
+export function useMoveDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId, projectId }: { documentId: string; projectId: string }) => {
+      const res = await jsonFetch(`/api/documents/${documentId}`, { 
+        method: "PATCH", 
+        body: JSON.stringify({ projectId }) 
+      });
+      return res;
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents"] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
+      await qc.invalidateQueries({ queryKey: ["personal-project"] });
     },
   });
 }

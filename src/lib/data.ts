@@ -50,14 +50,70 @@ export async function listWorkspacesForUser(userId: string) {
 export async function createWorkspace(name: string, ownerId: string) {
   const ws = await prisma.workspace.create({ data: { name } });
   await prisma.workspaceMember.create({ data: { workspaceId: ws.id, userId: ownerId, role: "OWNER" } });
+  // Create personal project for the owner
+  await getPersonalProject(ws.id, ownerId);
   return ws;
 }
 
 export async function listProjectsForUser(userId: string) {
   const pm = await prisma.projectMember.findMany({ where: { userId } });
   const ids = pm.map((m) => m.projectId);
-  const items = await prisma.project.findMany({ where: { id: { in: ids } } });
+  const items = await prisma.project.findMany({ 
+    where: { 
+      id: { in: ids },
+      isPersonal: false // Exclude personal projects from regular list
+    } 
+  });
   return items;
+}
+
+// Get or create personal project for a user in a workspace
+export async function getPersonalProject(workspaceId: string, userId: string) {
+  // Check if user is a member of the workspace
+  const workspaceMember = await prisma.workspaceMember.findUnique({
+    where: { workspaceId_userId: { workspaceId, userId } }
+  });
+  if (!workspaceMember) {
+    throw new Error("User is not a member of this workspace");
+  }
+
+  // Try to find existing personal project
+  const existingPersonalProjects = await prisma.project.findMany({
+    where: {
+      workspaceId,
+      isPersonal: true,
+      members: {
+        some: {
+          userId,
+          role: 'OWNER'
+        }
+      }
+    }
+  });
+
+  if (existingPersonalProjects.length > 0) {
+    return existingPersonalProjects[0];
+  }
+
+  // Create new personal project
+  const personalProject = await prisma.project.create({
+    data: {
+      workspaceId,
+      name: 'Drafts',
+      isPersonal: true
+    }
+  });
+
+  // Add user as OWNER
+  await prisma.projectMember.create({
+    data: {
+      projectId: personalProject.id,
+      userId,
+      role: 'OWNER'
+    }
+  });
+
+  return personalProject;
 }
 
 export async function createProject(workspaceId: string, name: string, ownerId: string) {
@@ -351,9 +407,12 @@ export async function getRecentDocuments(userId: string, workspaceId: string, li
 }
 
 export async function getWorkspaceProjects(workspaceId: string, userId: string) {
-  // First, get all projects in the workspace
+  // First, get all projects in the workspace (excluding personal projects)
   const workspaceProjects = await prisma.project.findMany({
-    where: { workspaceId },
+    where: { 
+      workspaceId,
+      isPersonal: false // Exclude personal projects
+    },
     include: {
       _count: { select: { documents: true } },
       members: {
@@ -387,4 +446,55 @@ export async function getWorkspaceProjects(workspaceId: string, userId: string) 
       owner: p.members[0]?.user?.name || 'Unknown',
       createdAt: p.createdAt,
     }));
+}
+
+// Move document to another project (only if user is OWNER of the document)
+export async function moveDocument(documentId: string, targetProjectId: string, userId: string) {
+  // Get document
+  const document = await prisma.document.findUnique({
+    where: { id: documentId }
+  });
+
+  if (!document) {
+    throw new Error("Document not found");
+  }
+
+  // Check if user is OWNER of the document's project
+  const userRole = await getProjectRole(document.projectId, userId);
+  if (userRole !== 'OWNER') {
+    throw new Error("Only project OWNER can move documents");
+  }
+
+  // Verify target project exists and user has access
+  const targetProject = await prisma.project.findUnique({
+    where: { id: targetProjectId },
+    include: {
+      members: {
+        where: { userId }
+      }
+    }
+  });
+
+  if (!targetProject) {
+    throw new Error("Target project not found");
+  }
+
+  // Check if user has access to target project (at least VIEWER)
+  if (targetProject.members.length === 0) {
+    // Check workspace membership
+    const workspaceMember = await prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId: targetProject.workspaceId, userId } }
+    });
+    if (!workspaceMember) {
+      throw new Error("No access to target project");
+    }
+  }
+
+  // Move document
+  const updated = await prisma.document.update({
+    where: { id: documentId },
+    data: { projectId: targetProjectId }
+  });
+
+  return updated;
 }

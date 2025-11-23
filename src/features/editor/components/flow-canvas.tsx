@@ -13,8 +13,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { Artboard, ComponentNode } from '@/types/page-builder';
-import { Icon } from '@/components/ui/icon';
-import { Button } from '@/components/ui/button';
+import { Icon } from '@/imported/components/ui/icon';
+import { Button } from '@/imported/components/ui/button';
 import { ArtboardComponent } from './artboard';
 
 interface FlowCanvasProps {
