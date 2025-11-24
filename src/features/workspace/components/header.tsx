@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -15,19 +15,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/ui/components/dropdown-menu";
-import { Sun, Moon, Search, Menu, Settings, LogOut } from "lucide-react";
+import { Sun, Moon, Search, Menu, Settings, LogOut, FileText, Folder, ChevronRight } from "lucide-react";
+import { Spinner } from "@/app/ui/spinner";
+import { Skeleton } from "@/app/ui/skeleton";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface HeaderProps {
   workspaceId: string;
+  isLoading?: boolean;
 }
 
 interface SearchResult {
-  projects: Array<{ id: string; name: string; workspaceId: string }>;
-  documents: Array<{ id: string; name: string; projectId: string }>;
+  projects: Array<{ id: string; name: string; workspaceId: string; documentCount: number }>;
+  documents: Array<{ id: string; name: string; projectId: string; projectName: string }>;
 }
 
-export function Header({ workspaceId }: HeaderProps) {
-  const { data: session } = useSession();
+function HeaderComponent({ workspaceId, isLoading }: HeaderProps) {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { isDark, toggleTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +39,7 @@ export function Header({ workspaceId }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
+  const isLoadingSession = status === "loading";
   const user = session?.user as { id?: string; email?: string; name?: string } | undefined;
   const userName = user?.name || user?.email?.split("@")[0] || "User";
   const userEmail = user?.email || "";
@@ -99,13 +104,13 @@ export function Header({ workspaceId }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-muted/30">
+    <header className="sticky top-0 z-50 w-full">
       <div className="flex items-center justify-between gap-4 p-4">
         {/* Search - Left side */}
         <div className="relative min-w-[320px] max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            type="search"
+            type="text"
             placeholder="Search projects and documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,7 +124,7 @@ export function Header({ workspaceId }: HeaderProps) {
                 setTimeout(() => setIsSearchOpen(false), 200);
               }
             }}
-            className="pl-9 pr-4"
+            className="pl-9 pr-4 [&::-webkit-search-cancel-button]:hidden"
           />
           {isSearchOpen && searchResults && (
             <div 
@@ -135,9 +140,18 @@ export function Header({ workspaceId }: HeaderProps) {
                     <button
                       key={project.id}
                       onClick={() => handleSearchResultClick("project", project.id)}
-                      className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                      className="w-full flex items-center gap-3 px-2 py-2 rounded-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
-                      {project.name}
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted [&_svg]:h-4 [&_svg]:w-4 [&_svg]:text-muted-foreground">
+                        <Folder />
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <span className="text-sm font-medium text-foreground truncate">{project.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {project.documentCount} {project.documentCount === 1 ? 'file' : 'files'}
+                        </span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </button>
                   ))}
                 </div>
@@ -154,9 +168,16 @@ export function Header({ workspaceId }: HeaderProps) {
                     <button
                       key={document.id}
                       onClick={() => handleSearchResultClick("document", document.id, document.projectId)}
-                      className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                      className="w-full flex items-center gap-3 px-2 py-2 rounded-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
-                      {document.name}
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted [&_svg]:h-4 [&_svg]:w-4 [&_svg]:text-muted-foreground">
+                        <FileText />
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <span className="text-sm font-medium text-foreground truncate">{document.name}</span>
+                        <span className="text-xs text-muted-foreground">{document.projectName}</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </button>
                   ))}
                 </div>
@@ -173,15 +194,60 @@ export function Header({ workspaceId }: HeaderProps) {
         {/* Right side - User info, Menu */}
         <div className="flex items-center gap-3">
           {/* User Info */}
-          <div className="hidden md:flex flex-col items-end">
-            <span className="text-sm font-medium text-foreground">{userName}</span>
-            <span className="text-xs text-muted-foreground">{userEmail}</span>
-          </div>
+          <AnimatePresence mode="wait">
+            {isLoadingSession ? (
+              <motion.div
+                key="user-info-skeleton"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="hidden md:flex flex-col items-end gap-1"
+              >
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="user-info"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="hidden md:flex flex-col items-end"
+              >
+                <span className="text-sm font-medium text-foreground">{userName}</span>
+                <span className="text-xs text-muted-foreground">{userEmail}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Avatar */}
-          <Avatar className="h-9 w-9">
-            <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
-          </Avatar>
+          <AnimatePresence mode="wait">
+            {isLoadingSession ? (
+              <motion.div
+                key="avatar-skeleton"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Skeleton className="h-9 w-9 rounded-full" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="avatar"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+                </Avatar>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Menu */}
           <DropdownMenu>
@@ -221,4 +287,6 @@ export function Header({ workspaceId }: HeaderProps) {
     </header>
   );
 }
+
+export const Header = memo(HeaderComponent);
 

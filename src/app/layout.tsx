@@ -3,6 +3,7 @@ import "@/app/ui/styles/globals.css";
 import "@/imported/styles/imported-ui.css";
 import { Providers } from "@/imported/components/providers";
 import { getCssText } from "@/imported/styles/stitches.config";
+import { Toaster } from "@/app/ui/components/sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,14 +16,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <style id="stitches" dangerouslySetInnerHTML={{ __html: getCssText() }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const stored = localStorage.getItem('theme');
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const shouldBeDark = stored === 'dark' || (!stored && prefersDark);
+                  if (shouldBeDark) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body
         className="antialiased"
       >
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

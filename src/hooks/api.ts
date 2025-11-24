@@ -1,4 +1,5 @@
 import { useQuery, useMutation, UseQueryOptions, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 async function jsonFetch<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, {
@@ -30,14 +31,6 @@ export function useWorkspaceProjects(workspaceId: string | undefined) {
   });
 }
 
-export function usePersonalProject(workspaceId: string | undefined) {
-  return useQuery({
-    queryKey: ["personal-project", workspaceId],
-    queryFn: () => jsonFetch(`/api/workspaces/${workspaceId}/personal-project`),
-    enabled: !!workspaceId,
-  });
-}
-
 export function useProjectDocuments(projectId: string | undefined) {
   return useQuery({
     queryKey: ["project-documents", projectId],
@@ -53,8 +46,12 @@ export function useCreateWorkspace() {
       const res = await jsonFetch(`/api/workspaces`, { method: "POST", body: JSON.stringify(body) });
       return res;
     },
-    onSuccess: async () => {
+    onSuccess: async (data, variables) => {
       await qc.invalidateQueries({ queryKey: ["workspaces"] });
+      toast.success("Workspace created", { description: `${variables.name} has been created` });
+    },
+    onError: (error) => {
+      toast.error("Failed to create workspace", { description: error.message });
     },
   });
 }
@@ -74,6 +71,10 @@ export function useCreateProject() {
       await qc.invalidateQueries({ queryKey: ["projects"] });
       await qc.invalidateQueries({ queryKey: ["workspaces"] });
       await qc.invalidateQueries({ queryKey: ["workspace-projects", variables.workspaceId] });
+      toast.success("Project created", { description: `${variables.name} has been created` });
+    },
+    onError: (error) => {
+      toast.error("Failed to create project", { description: error.message });
     },
   });
 }
@@ -102,26 +103,10 @@ export function useCreateDocument() {
       await qc.invalidateQueries({ queryKey: ["projects"] });
       await qc.invalidateQueries({ queryKey: ["project-documents", variables.projectId] });
       await qc.invalidateQueries({ queryKey: ["recent"] });
-      await qc.invalidateQueries({ queryKey: ["personal-project"] });
+      toast.success("Document created", { description: `${variables.name} has been created` });
     },
-  });
-}
-
-export function useMoveDocument() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ documentId, projectId }: { documentId: string; projectId: string }) => {
-      const res = await jsonFetch(`/api/documents/${documentId}`, { 
-        method: "PATCH", 
-        body: JSON.stringify({ projectId }) 
-      });
-      return res;
-    },
-    onSuccess: async (data, variables) => {
-      await qc.invalidateQueries({ queryKey: ["documents"] });
-      await qc.invalidateQueries({ queryKey: ["project-documents"] });
-      await qc.invalidateQueries({ queryKey: ["recent"] });
-      await qc.invalidateQueries({ queryKey: ["personal-project"] });
+    onError: (error) => {
+      toast.error("Failed to create document", { description: error.message });
     },
   });
 }
@@ -220,6 +205,159 @@ export function useDeletePage(documentId: string | undefined, pageId: string | u
         if (!prev) return prev;
         return { ...prev, items: prev.items.filter((p) => p.id !== pageId) } as any;
       });
+    },
+  });
+}
+
+export function usePersonalProject(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["personal-project", workspaceId],
+    queryFn: () => jsonFetch(`/api/workspaces/${workspaceId}/personal-project`),
+    enabled: !!workspaceId,
+  });
+}
+
+export function useToggleFavorite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { entityType: "PROJECT" | "DOCUMENT"; entityId: string; isFavorite: boolean; entityName?: string }) => {
+      if (body.isFavorite) {
+        return jsonFetch(`/api/favorites`, { method: "DELETE", body: JSON.stringify({ entityType: body.entityType, entityId: body.entityId }) });
+      } else {
+        return jsonFetch(`/api/favorites`, { method: "POST", body: JSON.stringify({ entityType: body.entityType, entityId: body.entityId }) });
+      }
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["favorites"] });
+      await qc.invalidateQueries({ queryKey: ["workspace-projects"] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents"] });
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      
+      const entityName = variables.entityName || (variables.entityType === "PROJECT" ? "Project" : "Document");
+      if (variables.isFavorite) {
+        toast.success("Removed from favorites", { description: `"${entityName}" has been removed from favorites` });
+      } else {
+        toast.success("Added to favorites", { description: `"${entityName}" has been added to favorites` });
+      }
+    },
+    onError: (error) => {
+      toast.error("Failed to update favorites", { description: error.message });
+    },
+  });
+}
+
+export function useFavoritesWithDetails() {
+  return useQuery({
+    queryKey: ["favorites"],
+    queryFn: () => jsonFetch<{ projects: any[]; documents: any[] }>(`/api/favorites`),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: true,
+    staleTime: Infinity,
+  });
+}
+
+export function useDeleteProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ projectId, projectName }: { projectId: string; projectName?: string }) => {
+      return jsonFetch(`/api/projects/${projectId}`, { method: "DELETE" });
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["projects"] });
+      await qc.invalidateQueries({ queryKey: ["workspace-projects"] });
+      await qc.invalidateQueries({ queryKey: ["workspaces"] });
+      await qc.invalidateQueries({ queryKey: ["favorites"] });
+      const projectName = variables.projectName || "Project";
+      toast.success("Project deleted", { description: `"${projectName}" has been deleted successfully` });
+    },
+    onError: (error) => {
+      toast.error("Failed to delete project", { description: error.message });
+    },
+  });
+}
+
+export function useMoveDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId, projectId, documentName, targetProjectName }: { documentId: string; projectId: string; documentName?: string; targetProjectName?: string }) => {
+      return jsonFetch(`/api/documents/${documentId}`, { method: "PATCH", body: JSON.stringify({ projectId }) });
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents"] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
+      await qc.invalidateQueries({ queryKey: ["document", variables.documentId] });
+      const documentName = variables.documentName || "Document";
+      const targetProjectName = variables.targetProjectName || "selected project";
+      toast.success("Document moved", { description: `"${documentName}" has been moved to ${targetProjectName}` });
+    },
+    onError: (error) => {
+      toast.error("Failed to move document", { description: error.message });
+    },
+  });
+}
+
+export function useUpdateDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId, name, slug, oldName }: { documentId: string; name?: string; slug?: string; oldName?: string }) => {
+      return jsonFetch(`/api/documents/${documentId}`, { method: "PATCH", body: JSON.stringify({ name, slug }) });
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents"] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
+      await qc.invalidateQueries({ queryKey: ["document", variables.documentId] });
+      if (variables.name && variables.oldName) {
+        toast.success("Document renamed", { description: `"${variables.oldName}" has been renamed to "${variables.name}"` });
+      } else if (variables.name) {
+        toast.success("Document renamed", { description: `Document has been renamed to "${variables.name}"` });
+      } else {
+        toast.success("Document updated", { description: "Document has been updated successfully" });
+      }
+    },
+    onError: (error) => {
+      toast.error("Failed to update document", { description: error.message });
+    },
+  });
+}
+
+export function useDeleteDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId, documentName }: { documentId: string; documentName?: string }) => {
+      return jsonFetch(`/api/documents/${documentId}`, { method: "DELETE" });
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents"] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
+      await qc.invalidateQueries({ queryKey: ["favorites"] });
+      const documentName = variables.documentName || "Document";
+      toast.success("Document deleted", { description: `"${documentName}" has been deleted successfully` });
+    },
+    onError: (error) => {
+      toast.error("Failed to delete document", { description: error.message });
+    },
+  });
+}
+
+export function useDuplicateDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId, name, slug }: { documentId: string; name: string; slug: string }) => {
+      return jsonFetch(`/api/documents/${documentId}/duplicate`, { method: "POST", body: JSON.stringify({ name, slug }) });
+    },
+    onSuccess: async (data, variables) => {
+      await qc.invalidateQueries({ queryKey: ["documents"] });
+      await qc.invalidateQueries({ queryKey: ["project-documents"] });
+      await qc.invalidateQueries({ queryKey: ["recent"] });
+      toast.success("Document duplicated", { description: `"${variables.name}" has been created` });
+    },
+    onError: (error) => {
+      toast.error("Failed to duplicate document", { description: error.message });
     },
   });
 }

@@ -1,6 +1,17 @@
 @import "tailwindcss";
 
 @layer base {
+  .toaster [data-sonner-toast] {
+    align-items: flex-start !important;
+  }
+  
+  .toaster [data-sonner-toast] [data-icon] {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+  }
+}
+
+@layer base {
   :root {
     --radius: 0.625rem;
     --background: oklch(1 0 0);

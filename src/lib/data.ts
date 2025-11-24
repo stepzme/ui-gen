@@ -34,86 +34,43 @@ export async function listWorkspacesForUser(userId: string) {
   const items = await prisma.workspace.findMany({ 
     where: { id: { in: ids } }, 
     orderBy: { createdAt: "asc" },
-    include: {
-      _count: { select: { projects: true } }
-    }
   });
+  
+  // Count projects excluding personal projects (drafts) for each workspace
+  const projectCounts = await Promise.all(
+    items.map(async (ws) => {
+      const count = await prisma.project.count({
+        where: {
+          workspaceId: ws.id,
+          isPersonal: false, // Exclude personal projects (Drafts)
+        },
+      });
+      return { workspaceId: ws.id, count };
+    })
+  );
+  
+  const projectCountsMap = new Map(projectCounts.map(pc => [pc.workspaceId, pc.count]));
+  
   return items.map((ws) => ({
     id: ws.id,
     name: ws.name,
     createdAt: ws.createdAt,
     updatedAt: ws.updatedAt,
-    projectCount: ws._count.projects
+    projectCount: projectCountsMap.get(ws.id) || 0
   }));
 }
 
 export async function createWorkspace(name: string, ownerId: string) {
   const ws = await prisma.workspace.create({ data: { name } });
   await prisma.workspaceMember.create({ data: { workspaceId: ws.id, userId: ownerId, role: "OWNER" } });
-  // Create personal project for the owner
-  await getPersonalProject(ws.id, ownerId);
   return ws;
 }
 
 export async function listProjectsForUser(userId: string) {
   const pm = await prisma.projectMember.findMany({ where: { userId } });
   const ids = pm.map((m) => m.projectId);
-  const items = await prisma.project.findMany({ 
-    where: { 
-      id: { in: ids },
-      isPersonal: false // Exclude personal projects from regular list
-    } 
-  });
+  const items = await prisma.project.findMany({ where: { id: { in: ids } } });
   return items;
-}
-
-// Get or create personal project for a user in a workspace
-export async function getPersonalProject(workspaceId: string, userId: string) {
-  // Check if user is a member of the workspace
-  const workspaceMember = await prisma.workspaceMember.findUnique({
-    where: { workspaceId_userId: { workspaceId, userId } }
-  });
-  if (!workspaceMember) {
-    throw new Error("User is not a member of this workspace");
-  }
-
-  // Try to find existing personal project
-  const existingPersonalProjects = await prisma.project.findMany({
-    where: {
-      workspaceId,
-      isPersonal: true,
-      members: {
-        some: {
-          userId,
-          role: 'OWNER'
-        }
-      }
-    }
-  });
-
-  if (existingPersonalProjects.length > 0) {
-    return existingPersonalProjects[0];
-  }
-
-  // Create new personal project
-  const personalProject = await prisma.project.create({
-    data: {
-      workspaceId,
-      name: 'Drafts',
-      isPersonal: true
-    }
-  });
-
-  // Add user as OWNER
-  await prisma.projectMember.create({
-    data: {
-      projectId: personalProject.id,
-      userId,
-      role: 'OWNER'
-    }
-  });
-
-  return personalProject;
 }
 
 export async function createProject(workspaceId: string, name: string, ownerId: string) {
@@ -122,18 +79,124 @@ export async function createProject(workspaceId: string, name: string, ownerId: 
   return pr;
 }
 
+export async function deleteProject(projectId: string) {
+  // Prisma will cascade delete related records (documents, members, etc.)
+  await prisma.project.delete({ where: { id: projectId } });
+  return true;
+}
+
 export async function listDocumentsForUser(userId: string) {
   // Use membership via project membership for now (document membership optional)
   const pm = await prisma.projectMember.findMany({ where: { userId } });
   const projectIds = pm.map((m) => m.projectId);
-  const items = await prisma.document.findMany({ where: { projectId: { in: projectIds } } });
-  return items;
+  const items = await prisma.document.findMany({ 
+    where: { projectId: { in: projectIds } },
+    include: {
+      project: {
+        select: {
+          id: true,
+          name: true,
+          workspaceId: true,
+        },
+      },
+    },
+  });
+  
+  // Get favorites for these documents
+  const documentIds = items.map(d => d.id);
+  const favoriteDocumentIds = documentIds.length > 0
+    ? await prisma.favorite.findMany({
+        where: {
+          userId,
+          entityType: "DOCUMENT",
+          entityId: { in: documentIds },
+        },
+        select: { entityId: true },
+      })
+    : [];
+  const favoriteDocumentIdsSet = new Set(favoriteDocumentIds.map(f => f.entityId));
+  
+  // Get user roles for projects to determine canMove
+  const projectRoles = await prisma.projectMember.findMany({
+    where: {
+      userId,
+      projectId: { in: projectIds },
+    },
+    select: { projectId: true, role: true },
+  });
+  const projectRolesMap = new Map(projectRoles.map(m => [m.projectId, m.role]));
+  
+  return items.map(doc => ({
+    id: doc.id,
+    name: doc.name,
+    slug: doc.slug,
+    projectId: doc.projectId,
+    projectName: doc.project.name,
+    workspaceId: doc.project.workspaceId,
+    updatedAt: doc.updatedAt,
+    createdAt: doc.createdAt,
+    isFavorite: favoriteDocumentIdsSet.has(doc.id),
+    canMove: projectRolesMap.get(doc.projectId) === 'OWNER',
+  }));
 }
 
 export async function createDocument(projectId: string, name: string, slug: string, ownerId: string) {
   const doc = await prisma.document.create({ data: { projectId, name, slug, data: {} } });
   // No dedicated document members table in schema; rely on project membership
   return doc;
+}
+
+export async function updateDocument(documentId: string, updates: { name?: string; slug?: string; projectId?: string }) {
+  const doc = await prisma.document.update({
+    where: { id: documentId },
+    data: {
+      ...(updates.name && { name: updates.name }),
+      ...(updates.slug && { slug: updates.slug }),
+      ...(updates.projectId && { projectId: updates.projectId }),
+    },
+  });
+  return doc;
+}
+
+export async function deleteDocument(documentId: string) {
+  // Prisma will cascade delete related records (pages, locks, views, etc.)
+  await prisma.document.delete({ where: { id: documentId } });
+  return true;
+}
+
+export async function duplicateDocument(documentId: string, newName: string, newSlug: string) {
+  const original = await prisma.document.findUnique({
+    where: { id: documentId },
+    include: { pages: true },
+  });
+  
+  if (!original) {
+    throw new Error("Document not found");
+  }
+  
+  // Create new document with same data
+  const duplicated = await prisma.document.create({
+    data: {
+      projectId: original.projectId,
+      name: newName,
+      slug: newSlug,
+      data: original.data,
+    },
+  });
+  
+  // Duplicate pages
+  if (original.pages.length > 0) {
+    await prisma.documentPage.createMany({
+      data: original.pages.map((page, index) => ({
+        documentId: duplicated.id,
+        name: page.name,
+        index: page.index,
+        data: page.data,
+      })),
+    });
+  }
+  
+  return duplicated;
 }
 
 export async function listPages(documentId: string) {
@@ -394,6 +457,31 @@ export async function getRecentDocuments(userId: string, workspaceId: string, li
     },
   });
   
+  // Get favorites for these documents
+  const viewedDocumentIds = views.map(v => v.document.id);
+  const favoriteDocumentIds = viewedDocumentIds.length > 0
+    ? await prisma.favorite.findMany({
+        where: {
+          userId,
+          entityType: "DOCUMENT",
+          entityId: { in: viewedDocumentIds },
+        },
+        select: { entityId: true },
+      })
+    : [];
+  const favoriteDocumentIdsSet = new Set(favoriteDocumentIds.map(f => f.entityId));
+  
+  // Get user roles for projects to determine canMove
+  const projectIds = [...new Set(views.map(v => v.document.projectId))];
+  const projectRoles = await prisma.projectMember.findMany({
+    where: {
+      userId,
+      projectId: { in: projectIds },
+    },
+    select: { projectId: true, role: true },
+  });
+  const projectRolesMap = new Map(projectRoles.map(m => [m.projectId, m.role]));
+  
   // Map to response format
   return views.slice(0, limit).map(v => ({
     id: v.document.id,
@@ -403,6 +491,8 @@ export async function getRecentDocuments(userId: string, workspaceId: string, li
     projectName: v.document.project.name,
     lastEditedAt: v.lastEditedAt,
     updatedAt: v.document.updatedAt,
+    isFavorite: favoriteDocumentIdsSet.has(v.document.id),
+    canMove: projectRolesMap.get(v.document.projectId) === 'OWNER',
   }));
 }
 
@@ -411,7 +501,7 @@ export async function getWorkspaceProjects(workspaceId: string, userId: string) 
   const workspaceProjects = await prisma.project.findMany({
     where: { 
       workspaceId,
-      isPersonal: false // Exclude personal projects
+      isPersonal: false, // Exclude personal projects (Drafts)
     },
     include: {
       _count: { select: { documents: true } },
@@ -435,6 +525,28 @@ export async function getWorkspaceProjects(workspaceId: string, userId: string) 
   
   const userProjectIds = new Set(userMemberships.map(m => m.projectId));
   
+  // Get user roles for projects to determine canDelete
+  const userProjectRoles = await prisma.projectMember.findMany({
+    where: {
+      userId,
+      projectId: { in: Array.from(userProjectIds) },
+    },
+    select: { projectId: true, role: true },
+  });
+  
+  const projectRolesMap = new Map(userProjectRoles.map(m => [m.projectId, m.role]));
+  
+  // Get favorites for these projects
+  const favoriteProjectIds = await prisma.favorite.findMany({
+    where: {
+      userId,
+      entityType: "PROJECT",
+      entityId: { in: Array.from(userProjectIds) },
+    },
+    select: { entityId: true },
+  });
+  const favoriteProjectIdsSet = new Set(favoriteProjectIds.map(f => f.entityId));
+  
   // Filter and map projects
   return workspaceProjects
     .filter(p => userProjectIds.has(p.id))
@@ -445,56 +557,149 @@ export async function getWorkspaceProjects(workspaceId: string, userId: string) 
       documentCount: p._count.documents,
       owner: p.members[0]?.user?.name || 'Unknown',
       createdAt: p.createdAt,
+      canDelete: projectRolesMap.get(p.id) === 'OWNER',
+      isFavorite: favoriteProjectIdsSet.has(p.id),
     }));
 }
 
-// Move document to another project (only if user is OWNER of the document)
-export async function moveDocument(documentId: string, targetProjectId: string, userId: string) {
-  // Get document
-  const document = await prisma.document.findUnique({
-    where: { id: documentId }
+export async function getPersonalProject(workspaceId: string, userId: string) {
+  // Check if user is a member of the workspace
+  const workspaceMember = await prisma.workspaceMember.findUnique({
+    where: { workspaceId_userId: { workspaceId, userId } },
   });
-
-  if (!document) {
-    throw new Error("Document not found");
+  
+  if (!workspaceMember) {
+    throw new Error("User is not a member of this workspace");
   }
-
-  // Check if user is OWNER of the document's project
-  const userRole = await getProjectRole(document.projectId, userId);
-  if (userRole !== 'OWNER') {
-    throw new Error("Only project OWNER can move documents");
-  }
-
-  // Verify target project exists and user has access
-  const targetProject = await prisma.project.findUnique({
-    where: { id: targetProjectId },
-    include: {
+  
+  // Find personal project for this user in this workspace
+  // Personal project is one where isPersonal = true and user is OWNER
+  const personalProjects = await prisma.project.findMany({
+    where: {
+      workspaceId,
+      isPersonal: true,
       members: {
-        where: { userId }
-      }
-    }
+        some: {
+          userId,
+          role: 'OWNER',
+        },
+      },
+    },
   });
-
-  if (!targetProject) {
-    throw new Error("Target project not found");
+  
+  if (personalProjects.length > 0) {
+    return personalProjects[0];
   }
-
-  // Check if user has access to target project (at least VIEWER)
-  if (targetProject.members.length === 0) {
-    // Check workspace membership
-    const workspaceMember = await prisma.workspaceMember.findUnique({
-      where: { workspaceId_userId: { workspaceId: targetProject.workspaceId, userId } }
-    });
-    if (!workspaceMember) {
-      throw new Error("No access to target project");
-    }
-  }
-
-  // Move document
-  const updated = await prisma.document.update({
-    where: { id: documentId },
-    data: { projectId: targetProjectId }
+  
+  // If no personal project exists, create one
+  const personalProject = await prisma.project.create({
+    data: {
+      workspaceId,
+      name: 'Drafts',
+      isPersonal: true,
+      members: {
+        create: {
+          userId,
+          role: 'OWNER',
+        },
+      },
+    },
   });
+  
+  return personalProject;
+}
 
-  return updated;
+export async function getProjectById(projectId: string) {
+  return await prisma.project.findUnique({ where: { id: projectId } });
+}
+
+export async function addFavorite(userId: string, entityType: string, entityId: string) {
+  // Use upsert to avoid duplicate key errors
+  await prisma.favorite.upsert({
+    where: {
+      userId_entityType_entityId: {
+        userId,
+        entityType,
+        entityId,
+      },
+    },
+    create: {
+      userId,
+      entityType,
+      entityId,
+    },
+    update: {}, // No update needed if it already exists
+  });
+  return true;
+}
+
+export async function removeFavorite(userId: string, entityType: string, entityId: string) {
+  await prisma.favorite.deleteMany({
+    where: {
+      userId,
+      entityType,
+      entityId,
+    },
+  });
+  return true;
+}
+
+export async function getFavoritesWithDetails(userId: string) {
+  const favorites = await prisma.favorite.findMany({
+    where: { userId },
+  });
+  
+  const projectIds = favorites.filter(f => f.entityType === "PROJECT").map(f => f.entityId);
+  const documentIds = favorites.filter(f => f.entityType === "DOCUMENT").map(f => f.entityId);
+  
+  // Get projects (excluding personal projects)
+  const projects = projectIds.length > 0
+    ? await prisma.project.findMany({
+        where: {
+          id: { in: projectIds },
+          isPersonal: false, // Exclude personal projects
+        },
+        include: {
+          _count: { select: { documents: true } },
+          members: {
+            where: { role: 'OWNER' },
+            include: { user: true },
+            take: 1,
+          },
+        },
+      })
+    : [];
+  
+  // Get documents
+  const documents = documentIds.length > 0
+    ? await prisma.document.findMany({
+        where: { id: { in: documentIds } },
+        include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+              workspaceId: true,
+            },
+          },
+        },
+      })
+    : [];
+  
+  return {
+    projects: projects.map(p => ({
+      id: p.id,
+      name: p.name,
+      workspaceId: p.workspaceId,
+      documentCount: p._count.documents,
+      owner: p.members[0]?.user?.name || 'Unknown',
+    })),
+    documents: documents.map(d => ({
+      id: d.id,
+      name: d.name,
+      projectId: d.projectId,
+      projectName: d.project.name,
+      workspaceId: d.project.workspaceId,
+    })),
+  };
 }
