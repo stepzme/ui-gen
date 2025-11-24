@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useWorkspaces, usePersonalProject, useCreateDocument, useFavoritesWithDetails } from "@/hooks/api";
 import { Clock, Folder, FileText, Plus } from "lucide-react";
-import { Logo } from "@/components/logo";
+import { LogoFull } from "@/components/logo";
 import { Button } from "@/app/ui/components/button";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -90,7 +90,7 @@ function SidebarComponent({ workspaceId, activeSection = "recent", onSectionChan
     <aside className="w-80 p-4 flex flex-col space-y-4">
       <nav className="flex-1 bg-background border border-border rounded-xl p-4 space-y-2 flex flex-col">
         <div className="mb-2">
-          <Logo className="h-6 mb-2 w-auto text-foreground" />
+          <LogoFull className="h-6 mb-2 w-auto text-foreground" />
         </div>
         <AnimatePresence mode="wait">
           {isLoadingWorkspaces ? (

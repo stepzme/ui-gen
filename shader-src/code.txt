@@ -1,0 +1,13 @@
+import { AccretionShaders } from "@/components/ui/shadcn-io/accretion-shaders";
+export default function AccretionShadersDemo() {
+  return (
+    <AccretionShaders
+      speed={1.0}
+      turbulence={1.2}
+      depth={1.0}
+      brightness={1.1}
+      colorShift={1.0}
+      className="h-full w-full"
+    />
+  );
+}

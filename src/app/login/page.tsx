@@ -2,7 +2,9 @@
 
 import { signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { AccretionShaders } from "@/app/ui/components/accretion-shaders";
+import { Logo } from "@/components/logo";
 
 export default function LoginPage() {
   const search = useSearchParams();
@@ -24,11 +26,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-primary">
-      <div className="w-full max-w-sm space-y-6 rounded-lg border border-border-secondary bg-background-primary p-8 shadow-xl">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
+      {/* Фоновый шейдер */}
+      <div className="absolute inset-0 z-0">
+        <Suspense fallback={<div className="h-full w-full bg-background-primary" />}>
+          <AccretionShaders
+            speed={0.4}
+            turbulence={10}
+            depth={1.0}
+            brightness={0.8}
+            colorShift={0.2}
+            hue={0.66}
+            saturation={1.0}
+            quality={10.0}
+            sharpness={5}
+            className="h-full w-full"
+          />
+        </Suspense>
+      </div>
+
+      {/* Overlay для лучшей читаемости */}
+      <div className="absolute inset-0 z-[1] bg-background-primary/60 backdrop-blur-[2px]" />
+
+      {/* Форма логина */}
+      <div className="relative z-10 w-full max-w-sm space-y-6 p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-foreground-primary">Log in</h1>
-          <p className="mt-2 text-sm text-foreground-secondary">Enter your credentials to continue</p>
+          <div className="mb-6 flex justify-center">
+            <Logo className="h-12 w-12 text-white" />
+          </div>
+          <h1 className="text-2xl font-semibold text-foreground-primary">Welcome to Pulsar</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -67,7 +93,7 @@ export default function LoginPage() {
           )}
           <button
             type="submit"
-            className="w-full rounded-md bg-foreground-inverted px-4 py-2 text-sm font-medium text-background-inverted transition-colors hover:bg-background-secondary hover:text-foreground-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-secondary"
+            className="w-full rounded-md bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
             Sign in
           </button>

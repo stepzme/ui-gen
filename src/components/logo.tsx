@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
-interface LogoProps {
+interface LogoFullProps {
   className?: string;
 }
 
-export function Logo({ className }: LogoProps) {
+export function LogoFull({ className }: LogoFullProps) {
   return (
     <svg
       width="120"
@@ -37,6 +37,30 @@ export function Logo({ className }: LogoProps) {
       />
       <path
         d="M109.691 22.375V6.048H113.316V9.151H113.345C114.418 6.483 116.651 5.816 119.29 5.816V9.093H118.855C114.882 9.093 113.316 10.572 113.316 14.139V22.375H109.691Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+interface LogoProps {
+  className?: string;
+  width?: number;
+  height?: number;
+}
+
+export function Logo({ className, width = 48, height = 48 }: LogoProps) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("h-auto w-auto", className)}
+    >
+      <path
+        d="M10.2426 1.75736C7.89949 -0.585786 4.1005 -0.585786 1.75736 1.75736C-0.0809283 3.59565 -0.477009 6.33001 0.569118 8.55443C1.18252 9.61688 3.04084 8.95916 3.95835 8.04165C5.08592 6.91408 5.08592 5.08592 3.95835 3.95835C5.08592 5.08592 6.91408 5.08592 8.04165 3.95835C6.91408 5.08592 6.91408 6.91408 8.04165 8.04165C6.91408 6.91408 5.08592 6.91408 3.95835 8.04165C3.04084 8.95916 2.35179 10.7994 3.44557 11.4309C5.66999 12.477 8.40435 12.0809 10.2426 10.2426C12.5858 7.89949 12.5858 4.1005 10.2426 1.75736Z"
         fill="currentColor"
       />
     </svg>

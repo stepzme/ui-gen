@@ -115,15 +115,15 @@ export default function WorkspaceDashboardPage() {
 
   const handleSectionChange = (section: "recent" | "projects" | "drafts") => {
     startTransition(() => {
-      setActiveSection(section);
-      // Update URL without page reload
+    setActiveSection(section);
+    // Update URL without page reload
       let newUrl = `/workspace/${workspaceId}`;
       if (section === "projects") {
         newUrl += "?section=projects";
       } else if (section === "drafts") {
         newUrl += "?section=drafts";
       }
-      router.push(newUrl);
+    router.push(newUrl);
     });
   };
 
@@ -138,9 +138,9 @@ export default function WorkspaceDashboardPage() {
           <div className="w-full mx-auto p-4">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-semibold text-foreground">
+                <h1 className="text-2xl font-semibold text-foreground">
                     {activeSection === "recent" ? "Recent Documents" : activeSection === "drafts" ? "Drafts" : "Projects"}
-                  </h1>
+                </h1>
                   <AnimatePresence>
                     {(isLoadingRecent || isLoadingProjects || isLoadingDrafts) && (
                       <motion.div
@@ -277,7 +277,7 @@ export default function WorkspaceDashboardPage() {
                       </EmptyHeader>
                     </Empty>
                   </motion.div>
-                ) : (
+              ) : (
                   <motion.div
                     key="content"
                     initial={{ opacity: 0 }}
@@ -286,32 +286,32 @@ export default function WorkspaceDashboardPage() {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-                      {recent.map((doc: any) => (
-                        <DocumentCard
-                          key={doc.id}
-                          id={doc.id}
-                          name={doc.name}
-                          projectName={doc.projectName}
-                          projectId={doc.projectId}
-                          workspaceId={workspaceId}
-                          lastEditedAt={doc.lastEditedAt}
-                          canMove={doc.canMove}
-                          isFavorite={doc.isFavorite}
-                        />
-                      ))}
+                    {recent.map((doc: any) => (
+                      <DocumentCard
+                        key={doc.id}
+                        id={doc.id}
+                        name={doc.name}
+                        projectName={doc.projectName}
+                        projectId={doc.projectId}
+                        workspaceId={workspaceId}
+                        lastEditedAt={doc.lastEditedAt}
+                        canMove={doc.canMove}
+                        isFavorite={doc.isFavorite}
+                      />
+                    ))}
+                  </div>
+                  {hasMoreRecent && (
+                    <div className="mt-8 text-center">
+                      <Button
+                        onClick={() => setRecentOffset(prev => prev + 16)}
+                        variant="outline"
+                      >
+                        Show More
+                      </Button>
                     </div>
-                    {hasMoreRecent && (
-                      <div className="mt-8 text-center">
-                        <Button
-                          onClick={() => setRecentOffset(prev => prev + 16)}
-                          variant="outline"
-                        >
-                          Show More
-                        </Button>
-                      </div>
-                    )}
+                  )}
                   </motion.div>
-                )}
+              )}
               </AnimatePresence>
             </div>
           )}
@@ -417,7 +417,7 @@ export default function WorkspaceDashboardPage() {
                       </EmptyHeader>
                     </Empty>
                   </motion.div>
-                ) : (
+              ) : (
                   <motion.div
                     key="content"
                     initial={{ opacity: 0 }}
@@ -426,20 +426,20 @@ export default function WorkspaceDashboardPage() {
                     transition={{ duration: 0.3 }}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5"
                   >
-                    {projects.map((project: any) => (
-                      <ProjectCard
-                        key={project.id}
-                        id={project.id}
-                        name={project.name}
-                        documentCount={project.documentCount}
-                        owner={project.owner}
-                        workspaceId={workspaceId}
-                        isFavorite={project.isFavorite}
+                  {projects.map((project: any) => (
+                    <ProjectCard
+                      key={project.id}
+                      id={project.id}
+                      name={project.name}
+                      documentCount={project.documentCount}
+                      owner={project.owner}
+                      workspaceId={workspaceId}
+                      isFavorite={project.isFavorite}
                         canDelete={project.canDelete}
-                      />
-                    ))}
+                    />
+                  ))}
                   </motion.div>
-                )}
+              )}
               </AnimatePresence>
             </div>
           )}
